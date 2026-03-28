@@ -38,7 +38,7 @@ function blendColor(hex: string, brightness: number): string {
 export function getNodeColor(node: StandardNode, status: NodeStatus): string {
   const domainColor = getDomainColor(node)
   switch (status) {
-    case "locked": return blendColor(domainColor, 0.15)      // very dim tint
+    case "locked": return blendColor(domainColor, 0.25)      // faint starfield
     case "available": return blendColor(domainColor, 0.7)     // bright
     case "in_progress": return blendColor(domainColor, 0.85)  // brighter
     case "unlocked": return blendColor(domainColor, 1.0)      // full color
@@ -46,12 +46,12 @@ export function getNodeColor(node: StandardNode, status: NodeStatus): string {
 }
 
 export function getNodeSize(status: NodeStatus, isHub: boolean): number {
-  const base = isHub ? 3 : 1.5
+  const base = isHub ? 1.5 : 0.8
   switch (status) {
-    case "locked": return base * 0.5
-    case "available": return base * 1.2
-    case "in_progress": return base * 1.4
-    case "unlocked": return base * 1.0
+    case "locked": return base * 0.3
+    case "available": return base * 1.0
+    case "in_progress": return base * 1.2
+    case "unlocked": return base * 0.9
   }
 }
 

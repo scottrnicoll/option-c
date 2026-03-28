@@ -41,7 +41,7 @@ export function StandardPanel({
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <SheetContent side="right" className="w-full sm:max-w-[480px] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{standard.description}</SheetTitle>
+          <SheetTitle>{standard.id.split(".").pop() || standard.id}</SheetTitle>
           <SheetDescription>{standard.id} &middot; {standard.domain}</SheetDescription>
         </SheetHeader>
 

@@ -4,6 +4,8 @@ import { useState, useCallback, useMemo } from "react"
 import type { StandardsGraph, StandardNode, NodeStatus } from "@/lib/graph-types"
 import { buildGraphData, getNodeColor, getNodeSize, getEdgeColor } from "@/lib/graph-utils"
 import { KnowledgeGraph } from "./knowledge-graph"
+import { ProgressOverlay } from "./progress-overlay"
+import { WelcomeOverlay } from "./welcome-overlay"
 import { StandardPanel } from "@/components/standard/standard-panel"
 
 interface GraphPageProps {
@@ -50,6 +52,17 @@ export function GraphPage({ data }: GraphPageProps) {
   const [selectedStandard, setSelectedStandard] = useState<StandardNode | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
   const [focusNodeId, setFocusNodeId] = useState<string | null>(null)
+  const [showWelcome, setShowWelcome] = useState(true)
+
+  // Compute counts from progressMap
+  const counts = useMemo(() => {
+    let available = 0, unlocked = 0
+    progressMap.forEach(status => {
+      if (status === "available") available++
+      if (status === "unlocked") unlocked++
+    })
+    return { total: data.nodes.length, available, unlocked }
+  }, [progressMap, data.nodes.length])
 
   // Build graph data for the 3D renderer
   const graphData = useMemo(() => buildGraphData(data, progressMap), [data, progressMap])
@@ -97,6 +110,13 @@ export function GraphPage({ data }: GraphPageProps) {
         onNodeClick={handleNodeClick}
         focusNodeId={focusNodeId}
       />
+      <ProgressOverlay total={counts.total} available={counts.available} unlocked={counts.unlocked} />
+      {showWelcome && (
+        <WelcomeOverlay
+          availableCount={counts.available}
+          onDismiss={() => setShowWelcome(false)}
+        />
+      )}
       <StandardPanel
         standard={selectedStandard}
         open={panelOpen}

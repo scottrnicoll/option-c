@@ -33,7 +33,7 @@ export function ExamplesCard({ standardDescription, onReady }: ExamplesCardProps
       </div>
 
       <Button onClick={onReady} size="lg" className="w-full">
-        I have an idea &mdash; let me prove it
+        I have a game idea →
       </Button>
     </div>
   )

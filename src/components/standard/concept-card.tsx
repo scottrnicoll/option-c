@@ -13,13 +13,9 @@ interface ConceptCardProps {
 export function ConceptCard({ standard, onReady }: ConceptCardProps) {
   return (
     <div className="flex flex-col gap-4">
-      <Badge variant="secondary" className="w-fit">
+      <Badge variant="secondary" className="w-fit text-xs">
         {standard.domain}
       </Badge>
-
-      <h2 className="text-lg font-semibold">{standard.description}</h2>
-
-      <p className="font-mono text-xs text-muted-foreground">{standard.id}</p>
 
       <Card>
         <CardHeader>
@@ -27,13 +23,13 @@ export function ConceptCard({ standard, onReady }: ConceptCardProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            {standard.description}
+            This standard is about {standard.description.charAt(0).toLowerCase() + standard.description.slice(1)}. Content coming soon — for now, think about what this means in the real world.
           </p>
         </CardContent>
       </Card>
 
       <Button onClick={onReady} size="lg" className="w-full">
-        I&apos;m ready &mdash; show me examples
+        Next →
       </Button>
     </div>
   )

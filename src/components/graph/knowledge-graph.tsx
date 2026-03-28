@@ -143,13 +143,14 @@ export function KnowledgeGraph({ graphData, onNodeClick, focusNodeId }: Knowledg
         nodeColor={(node: GraphNode) => node.color}
         nodeVal={(node: GraphNode) => node.val}
         nodeLabel={(node: GraphNode) => {
-          if (node.status === "locked") return `🔒 ${node.name}`
+          if (node.status === "locked") return ""
           return `${node.name}\n${node.id}`
         }}
         nodeOpacity={0.9}
-        nodeResolution={12}
+        nodeResolution={8}
+        nodeRelSize={4}
         linkColor={(link: any) => link.color}
-        linkWidth={0.2}
+        linkWidth={0.1}
         linkOpacity={0.6}
         linkDirectionalArrowLength={(link: any) => link.edgeType === "prerequisite" ? 2 : 0}
         linkDirectionalArrowRelPos={1}
