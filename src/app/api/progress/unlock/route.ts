@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { sql } from "@/lib/db"
+import { getDb } from "@/lib/db"
 import { unlockStandard } from "@/lib/progress"
 
 export async function POST(request: NextRequest) {
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Get or create student record
+  const sql = getDb()
   const students = await sql`
     INSERT INTO students (clerk_id)
     VALUES (${userId})

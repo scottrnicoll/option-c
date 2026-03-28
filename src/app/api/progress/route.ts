@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { sql } from "@/lib/db"
+import { getDb } from "@/lib/db"
 import { getStudentProgress } from "@/lib/progress"
 
 export async function GET() {
@@ -11,6 +11,7 @@ export async function GET() {
   }
 
   // Upsert student record by clerk_id
+  const sql = getDb()
   const students = await sql`
     INSERT INTO students (clerk_id)
     VALUES (${userId})

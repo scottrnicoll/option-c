@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { getDb } from "@/lib/db"
 import type { StandardsGraph, NodeStatus } from "@/lib/graph-types"
 import standardsData from "@/data/standards.json"
 
@@ -41,7 +41,7 @@ export async function getStudentProgress(
   studentId: string
 ): Promise<Map<string, NodeStatus>> {
   // Fetch all progress rows for this student
-  const rows = await sql`
+  const rows = await getDb()`
     SELECT standard_id, status
     FROM student_progress
     WHERE student_id = ${studentId}::uuid
@@ -82,7 +82,7 @@ export async function unlockStandard(
   standardId: string
 ): Promise<string[]> {
   // Mark the standard as unlocked
-  await sql`
+  await getDb()`
     INSERT INTO student_progress (student_id, standard_id, status, unlocked_at)
     VALUES (${studentId}::uuid, ${standardId}, 'unlocked', now())
     ON CONFLICT (student_id, standard_id)
@@ -90,7 +90,7 @@ export async function unlockStandard(
   `
 
   // Get the full set of unlocked standards for this student
-  const unlockedRows = await sql`
+  const unlockedRows = await getDb()`
     SELECT standard_id FROM student_progress
     WHERE student_id = ${studentId}::uuid AND status = 'unlocked'
   `
@@ -116,7 +116,7 @@ export async function unlockStandard(
     if (!allMet) continue
 
     // Mark as available
-    await sql`
+    await getDb()`
       INSERT INTO student_progress (student_id, standard_id, status)
       VALUES (${studentId}::uuid, ${candidateId}, 'available')
       ON CONFLICT (student_id, standard_id)
