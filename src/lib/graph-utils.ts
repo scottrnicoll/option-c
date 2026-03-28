@@ -17,7 +17,7 @@ export function buildGraph(data: StandardsGraph): Graph {
     if (!graph.hasNode(edge.source) || !graph.hasNode(edge.target)) continue
     const edgeKey = `${edge.source}->${edge.target}`
     if (graph.hasEdge(edgeKey)) continue
-    graph.addEdgeWithKey(edgeKey, edge.source, edge.target, { type: edge.type })
+    graph.addEdgeWithKey(edgeKey, edge.source, edge.target, { edgeType: edge.type })
   }
   return graph
 }

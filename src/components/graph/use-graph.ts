@@ -41,7 +41,7 @@ export function useGraph(
       graph.forEachEdge((edgeId, attrs, source, target) => {
         const sourceStatus = progressMap.get(source) ?? "locked"
         const targetStatus = progressMap.get(target) ?? "locked"
-        graph.setEdgeAttribute(edgeId, "color", getEdgeColor(sourceStatus, targetStatus, attrs.type))
+        graph.setEdgeAttribute(edgeId, "color", getEdgeColor(sourceStatus, targetStatus, attrs.edgeType))
       })
 
       if (cancelled) return
