@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sheet"
 import { ConceptCard } from "./concept-card"
 import { ExamplesCard } from "./examples-card"
+import { GenieChat } from "./genie-chat"
 
 type FlowStep = "learn" | "examples" | "earn" | "unlocked"
 
@@ -60,14 +61,13 @@ export function StandardPanel({
           )}
 
           {step === "earn" && (
-            <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                AI Chat coming soon
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Task 6 will add the interactive challenge here.
-              </p>
-            </div>
+            <GenieChat
+              standardDescription={standard.description}
+              onUnlock={() => {
+                setStep("unlocked")
+                onUnlock(standard.id)
+              }}
+            />
           )}
         </div>
       </SheetContent>
