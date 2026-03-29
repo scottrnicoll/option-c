@@ -23,12 +23,13 @@ ${interestContext}
 Target student: ${grade === "K" ? "kindergarten" : `grade ${grade}`}.
 
 Respond in EXACTLY this JSON format, no markdown, no code fences:
-{"inspos":[{"emoji":"🎯","mechanic":"Short mechanic name (3-5 words)","hook":"One exciting sentence about why this is cool","example":"1-2 sentences describing how the math concept works in this game mechanic"},{"emoji":"...","mechanic":"...","hook":"...","example":"..."},{"emoji":"...","mechanic":"...","hook":"...","example":"..."}]}
+{"inspos":[{"icon":"target","mechanic":"Short mechanic name (3-5 words)","hook":"One exciting sentence about why this is cool","example":"1-2 sentences describing how the math concept works in this game mechanic"},{"icon":"...","mechanic":"...","hook":"...","example":"..."},{"icon":"...","mechanic":"...","hook":"...","example":"..."}]}
+
+For the "icon" field, choose one of these icon names that best matches the mechanic: target, puzzle, hammer, trophy, zap, rocket, sword, shield, dice, map, compass, scale, timer, flag, crown, gem, heart, star, flame, mountain
 
 RULES:
 - Give exactly 3 ideas
 - Each mechanic should be a different TYPE of game (e.g., one puzzle, one action, one building)
-- Use fun emojis that match the mechanic
 - The "hook" should make a kid think "oh that sounds fun!"
 - The "example" should make it clear exactly how the math shows up
 - Mechanics should be things a student could actually build (simple, achievable)
@@ -43,9 +44,9 @@ RULES:
   } catch {
     return Response.json({
       inspos: [
-        { emoji: "🎯", mechanic: "Target Challenge", hook: "Hit the right number to score!", example: `Use ${description.slice(0, 40).toLowerCase()} to aim for the perfect score.` },
-        { emoji: "🏗️", mechanic: "Build & Balance", hook: "Stack it up without falling!", example: `The math helps you figure out the right amounts to keep things balanced.` },
-        { emoji: "🧩", mechanic: "Puzzle Race", hook: "Solve it faster than your friends!", example: `Each puzzle uses this math concept — the faster you solve, the more you score.` },
+        { icon: "target", mechanic: "Target Challenge", hook: "Hit the right number to score!", example: `Use ${description.slice(0, 40).toLowerCase()} to aim for the perfect score.` },
+        { icon: "hammer", mechanic: "Build & Balance", hook: "Stack it up without falling!", example: `The math helps you figure out the right amounts to keep things balanced.` },
+        { icon: "puzzle", mechanic: "Puzzle Race", hook: "Solve it faster than your friends!", example: `Each puzzle uses this math concept — the faster you solve, the more you score.` },
       ]
     })
   }

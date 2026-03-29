@@ -5,6 +5,7 @@ import type { StandardNode } from "@/lib/graph-types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Pencil } from "lucide-react"
 
 type ReadingLevel = "simpler" | "default" | "challenge"
 
@@ -211,7 +212,7 @@ export function ConceptCard({ standard, onReady, interests, readOnly }: ConceptC
           onClick={() => setShowIllustration(true)}
           className="w-full py-3 text-sm rounded-lg border border-dashed border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors flex items-center justify-center gap-2"
         >
-          <span>✏️</span> Show me what this looks like
+          <Pencil className="size-4" /> Show me what this looks like
         </button>
       ) : (
         <ConceptIllustration description={standard.description} grade={standard.grade} />

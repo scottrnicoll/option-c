@@ -1,6 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import {
+  Target, Puzzle, Hammer, Trophy, Zap, Rocket, Swords, Shield,
+  Dice5, Map, Compass, Scale, Timer, Flag, Crown, Gem, Heart, Star, Flame, Mountain,
+  type LucideIcon,
+} from "lucide-react"
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  target: Target, puzzle: Puzzle, hammer: Hammer, trophy: Trophy,
+  zap: Zap, rocket: Rocket, sword: Swords, shield: Shield,
+  dice: Dice5, map: Map, compass: Compass, scale: Scale,
+  timer: Timer, flag: Flag, crown: Crown, gem: Gem,
+  heart: Heart, star: Star, flame: Flame, mountain: Mountain,
+}
 
 interface ExamplesCardProps {
   standardId: string
@@ -11,7 +24,7 @@ interface ExamplesCardProps {
 }
 
 interface GameInspo {
-  emoji: string
+  icon: string
   mechanic: string
   hook: string
   example: string
@@ -69,7 +82,10 @@ export function ExamplesCard({ standardId, standardDescription, grade, interests
               className="group text-left bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-600 rounded-xl p-4 transition-all duration-200"
             >
               <div className="flex items-start gap-3">
-                <span className="text-2xl mt-0.5">{inspo.emoji}</span>
+                {(() => {
+                  const IconComponent = ICON_MAP[inspo.icon] || Star
+                  return <IconComponent className="size-5 mt-0.5 text-blue-400 shrink-0" />
+                })()}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-zinc-200 group-hover:text-white transition-colors">
                     {inspo.mechanic}

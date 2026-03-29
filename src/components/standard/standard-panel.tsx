@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet"
+import { Lock, CheckCircle } from "lucide-react"
 import { ConceptCard } from "./concept-card"
 import { ExamplesCard } from "./examples-card"
 import { GenieChat } from "./genie-chat"
@@ -68,7 +69,7 @@ export function StandardPanel({
           {nodeStatus === "locked" ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-amber-400 text-sm">
-                <span>🔒</span>
+                <Lock className="size-4 shrink-0" />
                 <span>This concept is locked — complete its prerequisites first.</span>
               </div>
               <ConceptCard
@@ -81,7 +82,7 @@ export function StandardPanel({
           ) : nodeStatus === "unlocked" ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-emerald-400 text-sm">
-                <span>✓</span>
+                <CheckCircle className="size-4 shrink-0" />
                 <span>You've already unlocked this concept!</span>
               </div>
               <ConceptCard

@@ -190,7 +190,7 @@ export function KnowledgeGraph({ graphData, onNodeClick, focusNodeId, initialGra
         nodeColor={(node: GraphNode) => node.color}
         nodeVal={(node: GraphNode) => node.val}
         nodeLabel={(node: GraphNode) => {
-          if (node.status === "locked") return `🔒 ${node.name}`
+          if (node.status === "locked") return `[locked] ${node.name}`
           return `${node.name}\n${node.id}`
         }}
         nodeOpacity={0.9}
