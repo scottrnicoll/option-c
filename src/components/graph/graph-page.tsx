@@ -2,10 +2,11 @@
 
 import { useState, useCallback, useMemo } from "react"
 import type { StandardsGraph, StandardNode, NodeStatus } from "@/lib/graph-types"
-import { buildGraphData, getNodeColor, getNodeSize, getEdgeColor } from "@/lib/graph-utils"
-import { KnowledgeGraph } from "./knowledge-graph"
-import { ProgressOverlay } from "./progress-overlay"
-import { TutorialHint } from "./tutorial-hint"
+import { buildPlanets, buildBridges, buildGalaxyData, buildMoonData } from "@/lib/galaxy-utils"
+import type { Planet, Bridge } from "@/lib/galaxy-utils"
+import { GalaxyView } from "./galaxy-view"
+import { PlanetView } from "./planet-view"
+import { MiniMap } from "./mini-map"
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow"
 import type { OnboardingData } from "@/components/onboarding/onboarding-flow"
 import { StandardPanel } from "@/components/standard/standard-panel"
@@ -53,12 +54,52 @@ export function GraphPage({ data }: GraphPageProps) {
   const [progressMap, setProgressMap] = useState<Map<string, NodeStatus>>(initialProgress)
   const [selectedStandard, setSelectedStandard] = useState<StandardNode | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
-  const [focusNodeId, setFocusNodeId] = useState<string | null>(null)
   const [onboardingComplete, setOnboardingComplete] = useState(false)
   const [studentData, setStudentData] = useState<OnboardingData | null>(null)
   const [tutorialStep, setTutorialStep] = useState(0)
 
-  // Compute counts from progressMap
+  // Galaxy navigation state
+  const [viewMode, setViewMode] = useState<"galaxy" | "planet">("galaxy")
+  const [currentPlanetId, setCurrentPlanetId] = useState<string | null>(null)
+
+  // Build planet/bridge data
+  const planets = useMemo(() => buildPlanets(data), [data])
+  const bridges = useMemo(() => buildBridges(data, planets), [data, planets])
+
+  // Build galaxy-level graph data
+  const galaxyData = useMemo(
+    () => buildGalaxyData(planets, bridges, progressMap),
+    [planets, bridges, progressMap]
+  )
+
+  // Planet name lookup
+  const planetNames = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const p of planets) {
+      map.set(p.id, p.domainName)
+    }
+    return map
+  }, [planets])
+
+  // Current planet object and its data
+  const currentPlanet = useMemo(
+    () => planets.find(p => p.id === currentPlanetId) ?? null,
+    [planets, currentPlanetId]
+  )
+
+  const currentMoons = useMemo(
+    () => currentPlanet ? buildMoonData(currentPlanet, progressMap) : [],
+    [currentPlanet, progressMap]
+  )
+
+  const currentBridges = useMemo(
+    () => currentPlanetId
+      ? bridges.filter(b => b.sourcePlanetId === currentPlanetId)
+      : [],
+    [bridges, currentPlanetId]
+  )
+
+  // Counts for progress
   const counts = useMemo(() => {
     let available = 0, unlocked = 0
     progressMap.forEach(status => {
@@ -68,30 +109,49 @@ export function GraphPage({ data }: GraphPageProps) {
     return { total: data.nodes.length, available, unlocked }
   }, [progressMap, data.nodes.length])
 
-  // Build graph data for the 3D renderer
-  const graphData = useMemo(() => buildGraphData(data, progressMap), [data, progressMap])
+  // Galaxy view: click planet -> enter planet view
+  const handlePlanetClick = useCallback((planetId: string) => {
+    setCurrentPlanetId(planetId)
+    setViewMode("planet")
+    if (tutorialStep === 0) setTutorialStep(1)
+  }, [tutorialStep])
 
-  const handleNodeClick = useCallback((nodeId: string, status: NodeStatus) => {
-    const node = data.nodes.find((n) => n.id === nodeId)
+  // Planet view: click moon -> open standard panel
+  const handleMoonClick = useCallback((standardId: string, status: NodeStatus) => {
+    const node = data.nodes.find(n => n.id === standardId)
     if (!node) return
-
-    if (status === "available" || status === "in_progress") {
-      setSelectedStandard(node)
-      setPanelOpen(true)
-      if (tutorialStep === 0) setTutorialStep(1)
-    } else if (status === "locked" || status === "unlocked") {
-      // Locked and unlocked nodes open in read-only mode
-      setSelectedStandard(node)
-      setPanelOpen(true)
-    }
+    setSelectedStandard(node)
+    setPanelOpen(true)
+    if (tutorialStep === 1) setTutorialStep(2)
   }, [data.nodes, tutorialStep])
 
+  // Planet view: click bridge -> fly to that planet
+  const handleBridgeClick = useCallback((targetPlanetId: string) => {
+    setCurrentPlanetId(targetPlanetId)
+  }, [])
+
+  // Mini-map: click planet
+  const handleMiniMapClick = useCallback((planetId: string) => {
+    if (viewMode === "galaxy") {
+      setCurrentPlanetId(planetId)
+    } else {
+      setCurrentPlanetId(planetId)
+    }
+  }, [viewMode])
+
+  // Back to galaxy button
+  const handleBackToGalaxy = useCallback(() => {
+    setViewMode("galaxy")
+    setCurrentPlanetId(null)
+  }, [])
+
+  // Standard panel: unlock
   const handleUnlock = useCallback((standardId: string) => {
     setPanelOpen(false)
 
     const newlyAvailable = computeNewlyAvailable(data, progressMap, standardId)
 
-    setProgressMap((prev) => {
+    setProgressMap(prev => {
       const next = new Map(prev)
       next.set(standardId, "unlocked")
       for (const id of newlyAvailable) {
@@ -107,11 +167,7 @@ export function GraphPage({ data }: GraphPageProps) {
       body: JSON.stringify({ standardId }),
     }).catch(() => {})
 
-    // Focus camera on the unlocked node
-    setFocusNodeId(standardId)
-    setTimeout(() => setFocusNodeId(null), 2000)
-
-    if (tutorialStep < 2) setTutorialStep(2)
+    if (tutorialStep < 3) setTutorialStep(3)
   }, [data, progressMap, tutorialStep])
 
   if (!onboardingComplete) {
@@ -127,18 +183,89 @@ export function GraphPage({ data }: GraphPageProps) {
 
   return (
     <div className="h-screen w-screen relative">
-      <KnowledgeGraph
-        graphData={graphData}
-        onNodeClick={handleNodeClick}
-        focusNodeId={focusNodeId}
-        initialGrade={studentData?.grade ?? null}
+      {/* Main view */}
+      {viewMode === "galaxy" ? (
+        <GalaxyView
+          galaxyData={galaxyData}
+          onPlanetClick={handlePlanetClick}
+          currentPlanetId={currentPlanetId}
+          initialGrade={studentData?.grade ?? null}
+        />
+      ) : currentPlanet ? (
+        <PlanetView
+          planet={currentPlanet}
+          moons={currentMoons}
+          onMoonClick={handleMoonClick}
+          onBridgeClick={handleBridgeClick}
+          bridges={currentBridges}
+          planetNames={planetNames}
+        />
+      ) : null}
+
+      {/* Back to Galaxy button (planet view only) */}
+      {viewMode === "planet" && (
+        <button
+          onClick={handleBackToGalaxy}
+          className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+            <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Back to Galaxy
+        </button>
+      )}
+
+      {/* Progress overlay (top-right to leave room for mini-map) */}
+      <div className="absolute top-4 right-4 z-10 bg-zinc-900/80 backdrop-blur-sm rounded-lg p-3 border border-zinc-800">
+        <div className="text-xs text-zinc-500 mb-1">Your Journey</div>
+        <div className="flex gap-3 text-sm">
+          <div>
+            <span className="text-emerald-400 font-mono font-bold">{counts.unlocked}</span>
+            <span className="text-zinc-500 ml-1">unlocked</span>
+          </div>
+          <div>
+            <span className="text-blue-400 font-mono font-bold">{counts.available}</span>
+            <span className="text-zinc-500 ml-1">available</span>
+          </div>
+          <div>
+            <span className="text-zinc-600 font-mono">{counts.total}</span>
+            <span className="text-zinc-600 ml-1">total</span>
+          </div>
+        </div>
+        <div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full transition-all duration-1000"
+            style={{ width: `${Math.max(((counts.unlocked + counts.available) / counts.total) * 100, 1)}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Tutorial hint */}
+      {tutorialStep === 0 && viewMode === "galaxy" && (
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 z-10">
+          <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-500/30 rounded-xl px-5 py-3 text-sm text-blue-200 animate-bounce-slow max-w-xs text-center">
+            Click a planet to explore its standards
+          </div>
+        </div>
+      )}
+      {tutorialStep === 1 && viewMode === "planet" && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-10">
+          <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-500/30 rounded-xl px-5 py-3 text-sm text-blue-200 animate-bounce-slow max-w-xs text-center">
+            Click a glowing moon to start learning
+          </div>
+        </div>
+      )}
+
+      {/* Mini-map (always visible) */}
+      <MiniMap
+        galaxyData={galaxyData}
+        currentPlanetId={currentPlanetId}
+        onPlanetClick={handleMiniMapClick}
+        totalStandards={counts.total}
+        unlockedCount={counts.unlocked}
       />
-      <ProgressOverlay total={counts.total} available={counts.available} unlocked={counts.unlocked} />
-      <TutorialHint
-        message="See that glowing dot? Click it to start."
-        visible={tutorialStep === 0}
-        position="center"
-      />
+
+      {/* Standard panel */}
       <StandardPanel
         standard={selectedStandard}
         open={panelOpen}
