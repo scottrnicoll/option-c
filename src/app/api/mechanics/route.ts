@@ -15,27 +15,38 @@ export async function POST(req: Request) {
 
   const { text } = await generateText({
     model: "anthropic/claude-sonnet-4.5",
-    system: `You create exactly 3 small SVG animations showing a stick figure demonstrating different game mechanics that use a specific math concept.
+    system: `You create exactly 3 small SVG animations showing a stick figure performing a GAME MECHANIC — a core action loop that makes a game fun.
+
+A game mechanic is a VERB — the thing a player DOES repeatedly:
+- "Collect & Compare" (gather items, compare which is bigger/better)
+- "Dodge & Calculate" (avoid obstacles using math to predict paths)
+- "Trade to Optimize" (swap resources to get the best deal)
+- "Aim & Estimate" (guess a value, shoot, see how close you were)
+- "Race Against the Clock" (solve before time runs out)
+- "Balance & Stack" (keep things equal/stable while adding more)
+- "Bid & Bluff" (use numbers strategically against opponents)
+
+NOT game names. NOT "Card Sort" or "Tower Build". The CORE LOOP.
 
 ${interestContext}
 
 Output EXACTLY a JSON array of 3 objects, no markdown, no code fences:
-[{"title":"short name","svg":"<svg>...</svg>"},{"title":"...","svg":"..."},{"title":"...","svg":"..."}]
+[{"title":"Verb-Driven Mechanic Name","svg":"<svg>...</svg>"},{"title":"...","svg":"..."},{"title":"...","svg":"..."}]
+
+The title must be a 2-3 word action phrase starting with a verb: "Collect & Compare", "Dodge & Measure", "Trade to Win".
 
 SVG RULES:
-- Each SVG must be exactly 180x120 with viewBox="0 0 180 120"
-- Dark background: fill="#18181b" on a rect covering the full area
-- Use stick figures: circle head (r=6), line body, line arms, line legs
-- Stroke color: #e4e4e7 for figures, #60a5fa for math elements, #f59e0b for highlights
-- stroke-width: 2 for figures, 1.5 for details
-- Include a simple CSS animation using @keyframes in a <style> tag within EACH SVG
-- Animations should show the game mechanic in action (e.g., a stick figure throwing, measuring, sorting, building)
-- Add 1-2 word labels in text elements (font-size="8", fill="#a1a1aa")
-- Keep it VERY simple: 4-8 elements per SVG max
-- Each mechanic should be a DIFFERENT type (e.g., one physical game, one card/board game, one building game)
-- The math concept should be visually obvious in the animation
-- Target audience: ${grade === "K" ? "kindergarten" : `grade ${grade}`}`,
-    prompt: `Create 3 stick-figure SVG animations showing different game mechanics that use this math concept: "${description}"`,
+- Each SVG: 180x120, viewBox="0 0 180 120"
+- Dark background: fill="#18181b" rect covering full area
+- Stick figures: circle head (r=6), line body/arms/legs, stroke="#e4e4e7", stroke-width=2
+- Math elements: stroke="#60a5fa", highlights: fill="#f59e0b"
+- Include CSS @keyframes animation in a <style> tag showing the mechanic IN ACTION
+- Show the stick figure DOING the mechanic: dodging, collecting, aiming, trading, stacking
+- The math concept must be visually embedded (numbers, shapes, measurements on screen)
+- 4-8 elements max per SVG. Keep it simple and clear.
+- Each mechanic must be a DIFFERENT type of core loop
+- Target: ${grade === "K" ? "kindergarten" : `grade ${grade}`} student`,
+    prompt: `Create 3 stick-figure SVG animations of game MECHANICS (core action loops, not game names) that use this math concept: "${description}"`,
   })
 
   try {

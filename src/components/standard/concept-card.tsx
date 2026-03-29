@@ -83,7 +83,7 @@ function GameMechanics({ description, grade, interests }: {
   if (loading) {
     return (
       <div className="space-y-2">
-        <p className="text-xs text-zinc-500 font-medium">Game ideas that use this math</p>
+        <p className="text-xs text-zinc-500 font-medium">Game mechanics that use this math</p>
         <div className="grid grid-cols-3 gap-2">
           {[1, 2, 3].map(i => (
             <div key={i} className="aspect-[3/2] bg-zinc-800/40 rounded-lg animate-pulse" />
@@ -97,7 +97,7 @@ function GameMechanics({ description, grade, interests }: {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-zinc-500 font-medium">Game ideas that use this math</p>
+      <p className="text-xs text-zinc-500 font-medium">Game mechanics that use this math</p>
       <div className="grid grid-cols-3 gap-2">
         {mechanics.map((m, i) => (
           <div key={i} className="flex flex-col items-center gap-1">
