@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react"
 import type { StandardsGraph, StandardNode, NodeStatus } from "@/lib/graph-types"
 import { buildPlanets, buildBridges, buildGalaxyData, buildMoonData } from "@/lib/galaxy-utils"
-import type { Planet, Bridge } from "@/lib/galaxy-utils"
+import type { Planet, Bridge, ColorMode } from "@/lib/galaxy-utils"
 import { GalaxyView } from "./galaxy-view"
 import { PlanetView } from "./planet-view"
 import { MiniMap } from "./mini-map"
@@ -61,6 +61,7 @@ export function GraphPage({ data }: GraphPageProps) {
   // Galaxy navigation state
   const [viewMode, setViewMode] = useState<"galaxy" | "planet">("galaxy")
   const [currentPlanetId, setCurrentPlanetId] = useState<string | null>(null)
+  const [colorMode, setColorMode] = useState<ColorMode>("domain")
 
   // Build planet/bridge data
   const planets = useMemo(() => buildPlanets(data), [data])
@@ -68,8 +69,8 @@ export function GraphPage({ data }: GraphPageProps) {
 
   // Build galaxy-level graph data
   const galaxyData = useMemo(
-    () => buildGalaxyData(planets, bridges, progressMap),
-    [planets, bridges, progressMap]
+    () => buildGalaxyData(planets, bridges, progressMap, colorMode),
+    [planets, bridges, progressMap, colorMode]
   )
 
   // Planet name lookup
@@ -228,22 +229,73 @@ export function GraphPage({ data }: GraphPageProps) {
         </button>
       )}
 
-      {/* Progress overlay (top-right) */}
-      <div className="absolute top-4 right-4 z-10 bg-zinc-900/80 backdrop-blur-sm rounded-lg px-4 py-2.5 border border-zinc-800">
-        <div className="flex items-center gap-3">
-          <div className="text-sm">
-            <span className="text-emerald-400 font-mono font-bold text-base">{counts.unlocked}</span>
-            <span className="text-zinc-500 ml-1.5 text-xs">
-              {counts.unlocked === 1 ? "skill" : "skills"} explored
-            </span>
-          </div>
-          <div className="w-20 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full transition-all duration-1000"
-              style={{ width: `${Math.max((counts.unlocked / counts.total) * 100, 2)}%` }}
-            />
+      {/* Top-right controls */}
+      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 items-end">
+        {/* Progress */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg px-4 py-2.5 border border-zinc-800">
+          <div className="flex items-center gap-3">
+            <div className="text-sm">
+              <span className="text-emerald-400 font-mono font-bold text-base">{counts.unlocked}</span>
+              <span className="text-zinc-500 ml-1.5 text-xs">
+                {counts.unlocked === 1 ? "skill" : "skills"} explored
+              </span>
+            </div>
+            <div className="w-20 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full transition-all duration-1000"
+                style={{ width: `${Math.max((counts.unlocked / counts.total) * 100, 2)}%` }}
+              />
+            </div>
           </div>
         </div>
+
+        {/* Color mode toggle */}
+        {viewMode === "galaxy" && (
+          <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg border border-zinc-800 flex overflow-hidden">
+            <button
+              onClick={() => setColorMode("domain")}
+              className={`px-3 py-1.5 text-xs transition-colors ${
+                colorMode === "domain"
+                  ? "bg-zinc-700 text-white"
+                  : "text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              By concept
+            </button>
+            <button
+              onClick={() => setColorMode("mastery")}
+              className={`px-3 py-1.5 text-xs transition-colors ${
+                colorMode === "mastery"
+                  ? "bg-zinc-700 text-white"
+                  : "text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              By progress
+            </button>
+          </div>
+        )}
+
+        {/* Mastery legend */}
+        {viewMode === "galaxy" && colorMode === "mastery" && (
+          <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-zinc-800 flex gap-3">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-[10px] text-zinc-400">Mastered</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-yellow-500" />
+              <span className="text-[10px] text-zinc-400">Working</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="text-[10px] text-zinc-400">Ready</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-zinc-500" />
+              <span className="text-[10px] text-zinc-400">Locked</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tutorial hint */}

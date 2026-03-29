@@ -142,11 +142,29 @@ export function buildBridges(data: StandardsGraph, planets: Planet[]): Bridge[] 
   })
 }
 
+export type ColorMode = "domain" | "mastery"
+
+// Mastery colors
+const MASTERY_COLORS = {
+  locked: "#555555",     // grey
+  available: "#3b82f6",  // blue
+  working: "#eab308",    // yellow
+  mastered: "#22c55e",   // green
+}
+
+function getMasteryColor(planet: { unlockedCount: number; availableCount: number; moonCount: number; isCompleted: boolean }): string {
+  if (planet.isCompleted) return MASTERY_COLORS.mastered
+  if (planet.unlockedCount > 0) return MASTERY_COLORS.working
+  if (planet.availableCount > 0) return MASTERY_COLORS.available
+  return MASTERY_COLORS.locked
+}
+
 // Build galaxy-level graph data
 export function buildGalaxyData(
   planets: Planet[],
   bridges: Bridge[],
-  progressMap: Map<string, NodeStatus>
+  progressMap: Map<string, NodeStatus>,
+  colorMode: ColorMode = "domain"
 ): GalaxyData {
   const nodes: GalaxyNode[] = planets.map(planet => {
     let unlockedCount = 0
@@ -158,16 +176,22 @@ export function buildGalaxyData(
     }
     const isCompleted = unlockedCount === planet.standards.length && planet.standards.length > 0
 
-    // Brightness based on progress
-    let brightness = 0.2  // mostly locked
-    if (availableCount > 0) brightness = 0.5
-    if (unlockedCount > 0) brightness = 0.6 + (unlockedCount / planet.standards.length) * 0.4
-    if (isCompleted) brightness = 1.0
+    let color: string
+    if (colorMode === "mastery") {
+      color = getMasteryColor({ unlockedCount, availableCount, moonCount: planet.standards.length, isCompleted })
+    } else {
+      // Domain color with brightness based on progress
+      let brightness = 0.2
+      if (availableCount > 0) brightness = 0.5
+      if (unlockedCount > 0) brightness = 0.6 + (unlockedCount / planet.standards.length) * 0.4
+      if (isCompleted) brightness = 1.0
 
-    const baseColor = planet.color
-    const r = parseInt(baseColor.slice(1, 3), 16)
-    const g = parseInt(baseColor.slice(3, 5), 16)
-    const b = parseInt(baseColor.slice(5, 7), 16)
+      const baseColor = planet.color
+      const r = parseInt(baseColor.slice(1, 3), 16)
+      const g = parseInt(baseColor.slice(3, 5), 16)
+      const b = parseInt(baseColor.slice(5, 7), 16)
+      color = `rgb(${Math.round(r * brightness)}, ${Math.round(g * brightness)}, ${Math.round(b * brightness)})`
+    }
 
     return {
       id: planet.id,
@@ -175,7 +199,7 @@ export function buildGalaxyData(
       grade: planet.grade,
       domainCode: planet.domainCode,
       gradeBand: planet.gradeBand,
-      color: `rgb(${Math.round(r * brightness)}, ${Math.round(g * brightness)}, ${Math.round(b * brightness)})`,
+      color,
       val: Math.max(planet.standards.length * 0.5, 2),
       moonCount: planet.standards.length,
       unlockedCount,
