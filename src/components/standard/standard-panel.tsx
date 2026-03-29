@@ -103,7 +103,10 @@ export function StandardPanel({
 
               {step === "examples" && (
                 <ExamplesCard
+                  standardId={standard.id}
                   standardDescription={standard.description}
+                  grade={standard.grade}
+                  interests={interests}
                   onReady={() => setStep("earn")}
                 />
               )}
