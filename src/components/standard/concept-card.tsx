@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import type { StandardNode } from "@/lib/graph-types"
+import { matchMechanics } from "@/lib/mechanic-animations"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -54,57 +55,22 @@ function ConceptIllustration({ description, grade }: { description: string; grad
   )
 }
 
-interface MechanicSvg {
-  title: string
-  svg: string
-}
-
-function GameMechanics({ description, grade, interests }: {
-  standardId: string; description: string; grade: string; interests?: string[]
+function GameMechanics({ description, domainCode }: {
+  standardId: string; description: string; grade: string; interests?: string[]; domainCode: string
 }) {
-  const [mechanics, setMechanics] = useState<MechanicSvg[]>([])
-  const [loading, setLoading] = useState(true)
+  const matched = useMemo(() => matchMechanics(description, domainCode), [description, domainCode])
 
-  useEffect(() => {
-    setLoading(true)
-    fetch("/api/mechanics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description, grade, interests }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data.mechanics)) setMechanics(data.mechanics)
-      })
-      .catch(() => setMechanics([]))
-      .finally(() => setLoading(false))
-  }, [description, grade, interests])
-
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        <p className="text-xs text-zinc-500 font-medium">Game mechanics that use this math</p>
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="aspect-[3/2] bg-zinc-800/40 rounded-lg animate-pulse" />
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (mechanics.length === 0) return null
+  if (matched.length === 0) return null
 
   return (
     <div className="space-y-2">
       <p className="text-xs text-zinc-500 font-medium">Game mechanics that use this math</p>
       <div className="grid grid-cols-3 gap-2">
-        {mechanics.map((m, i) => (
-          <div key={i} className="flex flex-col items-center gap-1">
-            <div
-              className="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 w-full"
-              dangerouslySetInnerHTML={{ __html: m.svg }}
-            />
+        {matched.map((m) => (
+          <div key={m.id} className="flex flex-col items-center gap-1">
+            <div className="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 w-full">
+              {m.svg}
+            </div>
             <p className="text-[10px] text-zinc-500 text-center leading-tight">{m.title}</p>
           </div>
         ))}
@@ -284,6 +250,7 @@ export function ConceptCard({ standard, onReady, interests, readOnly }: ConceptC
           description={standard.description}
           grade={standard.grade}
           interests={customInterest ? [customInterest] : interests}
+          domainCode={standard.domainCode}
         />
       )}
 
