@@ -99,15 +99,28 @@ export function GraphPage({ data }: GraphPageProps) {
     [bridges, currentPlanetId]
   )
 
-  // Counts for progress
+  // Counts for progress — filtered to student's grade
   const counts = useMemo(() => {
-    let available = 0, unlocked = 0
-    progressMap.forEach(status => {
+    const grade = studentData?.grade
+    let total = 0, available = 0, unlocked = 0
+    for (const node of data.nodes) {
+      // If student picked a grade, only count that grade's standards
+      if (grade && node.grade !== grade) continue
+      total++
+      const status = progressMap.get(node.id)
       if (status === "available") available++
       if (status === "unlocked") unlocked++
-    })
-    return { total: data.nodes.length, available, unlocked }
-  }, [progressMap, data.nodes.length])
+    }
+    // Fall back to all if no grade selected or no standards match
+    if (total === 0) {
+      total = data.nodes.length
+      progressMap.forEach(status => {
+        if (status === "available") available++
+        if (status === "unlocked") unlocked++
+      })
+    }
+    return { total, available, unlocked }
+  }, [progressMap, data.nodes, studentData?.grade])
 
   // Galaxy view: click planet -> enter planet view
   const handlePlanetClick = useCallback((planetId: string) => {
@@ -215,28 +228,21 @@ export function GraphPage({ data }: GraphPageProps) {
         </button>
       )}
 
-      {/* Progress overlay (top-right to leave room for mini-map) */}
-      <div className="absolute top-4 right-4 z-10 bg-zinc-900/80 backdrop-blur-sm rounded-lg p-3 border border-zinc-800">
-        <div className="text-xs text-zinc-500 mb-1">Your Journey</div>
-        <div className="flex gap-3 text-sm">
-          <div>
-            <span className="text-emerald-400 font-mono font-bold">{counts.unlocked}</span>
-            <span className="text-zinc-500 ml-1">unlocked</span>
+      {/* Progress overlay (top-right) */}
+      <div className="absolute top-4 right-4 z-10 bg-zinc-900/80 backdrop-blur-sm rounded-lg px-4 py-2.5 border border-zinc-800">
+        <div className="flex items-center gap-3">
+          <div className="text-sm">
+            <span className="text-emerald-400 font-mono font-bold text-base">{counts.unlocked}</span>
+            <span className="text-zinc-500 ml-1.5 text-xs">
+              {counts.unlocked === 1 ? "skill" : "skills"} explored
+            </span>
           </div>
-          <div>
-            <span className="text-blue-400 font-mono font-bold">{counts.available}</span>
-            <span className="text-zinc-500 ml-1">available</span>
+          <div className="w-20 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full transition-all duration-1000"
+              style={{ width: `${Math.max((counts.unlocked / counts.total) * 100, 2)}%` }}
+            />
           </div>
-          <div>
-            <span className="text-zinc-600 font-mono">{counts.total}</span>
-            <span className="text-zinc-600 ml-1">total</span>
-          </div>
-        </div>
-        <div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full transition-all duration-1000"
-            style={{ width: `${Math.max(((counts.unlocked + counts.available) / counts.total) * 100, 1)}%` }}
-          />
         </div>
       </div>
 
