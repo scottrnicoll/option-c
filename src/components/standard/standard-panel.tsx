@@ -9,12 +9,11 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet"
-import { Lock, CheckCircle } from "lucide-react"
+import { Lock, CheckCircle, ChevronLeft } from "lucide-react"
 import { ConceptCard } from "./concept-card"
-import { ExamplesCard } from "./examples-card"
 import { GenieChat } from "./genie-chat"
 
-type FlowStep = "learn" | "examples" | "earn" | "unlocked"
+type FlowStep = "learn" | "earn" | "unlocked"
 
 interface StandardPanelProps {
   standard: StandardNode | null
@@ -44,24 +43,22 @@ export function StandardPanel({
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
-      <SheetContent side="right" className="w-full sm:max-w-[480px] overflow-y-auto">
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-[640px] lg:max-w-[720px] overflow-y-auto"
+      >
         <SheetHeader>
-          <SheetTitle>{standard.id.split(".").pop() || standard.id}</SheetTitle>
-          <SheetDescription>{standard.id} &middot; {standard.domain}</SheetDescription>
+          <SheetTitle className="text-lg">{standard.description}</SheetTitle>
+          <SheetDescription>{standard.id} · {standard.domain}</SheetDescription>
         </SheetHeader>
 
         <div className="px-4 pb-4">
-          {step !== "learn" && nodeStatus !== "locked" && nodeStatus !== "unlocked" && (
+          {step === "earn" && nodeStatus !== "locked" && nodeStatus !== "unlocked" && (
             <button
-              onClick={() => {
-                if (step === "examples") setStep("learn")
-                else if (step === "earn") setStep("examples")
-              }}
+              onClick={() => setStep("learn")}
               className="flex items-center gap-1 text-sm text-zinc-400 hover:text-zinc-200 mb-3 transition-colors"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10 12L6 8l4-4" />
-              </svg>
+              <ChevronLeft className="size-4" />
               Back
             </button>
           )}
@@ -97,18 +94,8 @@ export function StandardPanel({
               {step === "learn" && (
                 <ConceptCard
                   standard={standard}
-                  onReady={() => setStep("examples")}
-                  interests={interests}
-                />
-              )}
-
-              {step === "examples" && (
-                <ExamplesCard
-                  standardId={standard.id}
-                  standardDescription={standard.description}
-                  grade={standard.grade}
-                  interests={interests}
                   onReady={() => setStep("earn")}
+                  interests={interests}
                 />
               )}
 

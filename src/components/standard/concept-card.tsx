@@ -5,7 +5,15 @@ import type { StandardNode } from "@/lib/graph-types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Pencil } from "lucide-react"
+import { Pencil, Target, Puzzle, Hammer, Trophy, Zap, Rocket, Swords, Shield, Dice5, MapIcon, Compass, Scale, Timer, Flag, Crown, Gem, Heart, Star, Flame, Mountain, type LucideIcon } from "lucide-react"
+
+const MECH_ICONS: Record<string, LucideIcon> = {
+  target: Target, puzzle: Puzzle, hammer: Hammer, trophy: Trophy,
+  zap: Zap, rocket: Rocket, sword: Swords, shield: Shield,
+  dice: Dice5, map: MapIcon, compass: Compass, scale: Scale,
+  timer: Timer, flag: Flag, crown: Crown, gem: Gem,
+  heart: Heart, star: Star, flame: Flame, mountain: Mountain,
+}
 
 type ReadingLevel = "simpler" | "default" | "challenge"
 
@@ -51,6 +59,71 @@ function ConceptIllustration({ description, grade }: { description: string; grad
       className="rounded-lg overflow-hidden border border-zinc-800"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
+  )
+}
+
+interface MechanicItem {
+  icon: string
+  mechanic: string
+  hook: string
+}
+
+function GameMechanics({ standardId, description, grade, interests }: {
+  standardId: string; description: string; grade: string; interests?: string[]
+}) {
+  const [mechanics, setMechanics] = useState<MechanicItem[] | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    fetch("/api/examples", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ standardId, description, grade, interests }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data.inspos)) {
+          setMechanics(data.inspos.map((i: any) => ({ icon: i.icon, mechanic: i.mechanic, hook: i.hook })))
+        }
+      })
+      .catch(() => setMechanics(null))
+      .finally(() => setLoading(false))
+  }, [standardId, description, grade, interests])
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 py-3 justify-center">
+        <div className="w-4 h-4 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs text-zinc-500">Finding game mechanics...</span>
+      </div>
+    )
+  }
+
+  if (!mechanics) return null
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-zinc-500 font-medium">Game mechanics that use this math</p>
+      <div className="flex flex-wrap gap-2">
+        {mechanics.map((m, i) => {
+          const Icon = MECH_ICONS[m.icon] || Star
+          return (
+            <div
+              key={i}
+              className="group relative flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs"
+            >
+              <Icon className="size-3.5 text-blue-400 shrink-0" />
+              <span className="text-zinc-300">{m.mechanic}</span>
+              {/* Hover tooltip */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-zinc-300 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity w-48 text-center z-10">
+                {m.hook}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -218,6 +291,16 @@ export function ConceptCard({ standard, onReady, interests, readOnly }: ConceptC
         <ConceptIllustration description={standard.description} grade={standard.grade} />
       )}
 
+      {/* Game mechanics that use this math */}
+      {!readOnly && (
+        <GameMechanics
+          standardId={standard.id}
+          description={standard.description}
+          grade={standard.grade}
+          interests={customInterest ? [customInterest] : interests}
+        />
+      )}
+
       {/* Reading level adjustment — contextual buttons */}
       <div className="flex flex-col items-center gap-2">
         {readingLevel === "default" && (
@@ -268,7 +351,7 @@ export function ConceptCard({ standard, onReady, interests, readOnly }: ConceptC
 
       {!readOnly && (
         <Button onClick={onReady} size="lg" className="w-full">
-          Next →
+          I have a game idea →
         </Button>
       )}
     </div>
