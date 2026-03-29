@@ -11,25 +11,29 @@ export async function POST(req: Request) {
   }
 
   const interestContext = interests && interests.length > 0
-    ? `The student is interested in: ${interests.join(", ")}. At least 1-2 examples MUST connect to these interests.`
+    ? `The student likes: ${interests.join(", ")}. At least 1 idea should connect to their interests.`
     : ""
 
   const { text } = await generateText({
     model: "anthropic/claude-sonnet-4.5",
-    system: `You give students real, specific examples of how math concepts appear in games, apps, and real life. ${interestContext}
+    system: `You suggest game design ideas that use a specific math concept. Each idea is a game MECHANIC — not a full game, just a core loop a student could build on.
 
-Target reading level: ${grade === "K" ? "kindergarten" : `grade ${grade}`}.
+${interestContext}
+
+Target student: ${grade === "K" ? "kindergarten" : `grade ${grade}`}.
 
 Respond in EXACTLY this JSON format, no markdown, no code fences:
-{"examples":[{"game":"Name of game or real-world thing","explanation":"1-2 sentences explaining how the math shows up"},{"game":"...","explanation":"..."},{"game":"...","explanation":"..."}]}
+{"inspos":[{"emoji":"🎯","mechanic":"Short mechanic name (3-5 words)","hook":"One exciting sentence about why this is cool","example":"1-2 sentences describing how the math concept works in this game mechanic"},{"emoji":"...","mechanic":"...","hook":"...","example":"..."},{"emoji":"...","mechanic":"...","hook":"...","example":"..."}]}
 
 RULES:
-- Give exactly 3 examples
-- Use REAL games, apps, sports, or activities kids know (Minecraft, Roblox, basketball, cooking, etc.)
-- Be specific — don't say "strategy games use this". Say "In Minecraft, you use [concept] when you [specific action]"
-- Keep explanations to 1-2 short sentences
-- Make it feel like a discovery: "whoa, I already use this math!"`,
-    prompt: `Give 3 real examples of this math concept in games/real life: "${description}" (Standard ${standardId}, Grade ${grade})`,
+- Give exactly 3 ideas
+- Each mechanic should be a different TYPE of game (e.g., one puzzle, one action, one building)
+- Use fun emojis that match the mechanic
+- The "hook" should make a kid think "oh that sounds fun!"
+- The "example" should make it clear exactly how the math shows up
+- Mechanics should be things a student could actually build (simple, achievable)
+- Think: card games, board games, obstacle courses, cooking challenges, building competitions, races, treasure hunts`,
+    prompt: `Suggest 3 game mechanics that use this math concept: "${description}" (Standard ${standardId}, Grade ${grade})`,
   })
 
   try {
@@ -38,10 +42,10 @@ RULES:
     return Response.json(parsed)
   } catch {
     return Response.json({
-      examples: [
-        { game: "Minecraft", explanation: `When you play Minecraft, you use this kind of math more than you think!` },
-        { game: "Cooking", explanation: `Following a recipe uses this concept — measuring and comparing amounts.` },
-        { game: "Sports", explanation: `Keeping score and figuring out who's winning uses this math.` },
+      inspos: [
+        { emoji: "🎯", mechanic: "Target Challenge", hook: "Hit the right number to score!", example: `Use ${description.slice(0, 40).toLowerCase()} to aim for the perfect score.` },
+        { emoji: "🏗️", mechanic: "Build & Balance", hook: "Stack it up without falling!", example: `The math helps you figure out the right amounts to keep things balanced.` },
+        { emoji: "🧩", mechanic: "Puzzle Race", hook: "Solve it faster than your friends!", example: `Each puzzle uses this math concept — the faster you solve, the more you score.` },
       ]
     })
   }
