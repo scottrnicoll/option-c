@@ -64,6 +64,7 @@ export function GraphPage({ data }: GraphPageProps) {
   const [colorMode, setColorMode] = useState<ColorMode>("domain")
   const [showWaveEffect, setShowWaveEffect] = useState(false)
   const [waveColor, setWaveColor] = useState("#22c55e")
+  const [lockedMessage, setLockedMessage] = useState<string | null>(null)
 
   // Build planet/bridge data
   const planets = useMemo(() => buildPlanets(data), [data])
@@ -71,8 +72,8 @@ export function GraphPage({ data }: GraphPageProps) {
 
   // Build galaxy-level graph data
   const galaxyData = useMemo(
-    () => buildGalaxyData(planets, bridges, progressMap, colorMode),
-    [planets, bridges, progressMap, colorMode]
+    () => buildGalaxyData(planets, bridges, progressMap, colorMode, studentData?.grade ?? null),
+    [planets, bridges, progressMap, colorMode, studentData?.grade]
   )
 
   // Planet name lookup
@@ -131,6 +132,24 @@ export function GraphPage({ data }: GraphPageProps) {
     setViewMode("planet")
     if (tutorialStep === 0) setTutorialStep(1)
   }, [tutorialStep])
+
+  // Galaxy view: click locked planet -> show message
+  const handleLockedPlanetClick = useCallback((planetId: string) => {
+    const planet = planets.find(p => p.id === planetId)
+    if (!planet) return
+    // Find which bridge planets lead to this one
+    const prereqPlanets = bridges
+      .filter(b => b.targetPlanetId === planetId)
+      .map(b => planets.find(p => p.id === b.sourcePlanetId))
+      .filter(Boolean)
+      .slice(0, 3)
+    const prereqNames = prereqPlanets.map(p => `${p!.domainName} (Grade ${p!.grade})`).join(", ")
+    const msg = prereqNames
+      ? `Keep exploring to reach ${planet.domainName}. Try: ${prereqNames}`
+      : `Keep exploring to reach ${planet.domainName} (Grade ${planet.grade}).`
+    setLockedMessage(msg)
+    setTimeout(() => setLockedMessage(null), 4000)
+  }, [planets, bridges])
 
   // Planet view: click moon -> open standard panel
   const handleMoonClick = useCallback((standardId: string, status: NodeStatus) => {
@@ -213,6 +232,7 @@ export function GraphPage({ data }: GraphPageProps) {
         <GalaxyView
           galaxyData={galaxyData}
           onPlanetClick={handlePlanetClick}
+          onLockedPlanetClick={handleLockedPlanetClick}
           currentPlanetId={currentPlanetId}
           initialGrade={studentData?.grade ?? null}
         />
@@ -333,6 +353,13 @@ export function GraphPage({ data }: GraphPageProps) {
         totalStandards={counts.total}
         unlockedCount={counts.unlocked}
       />
+
+      {/* Locked planet message */}
+      {lockedMessage && (
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 bg-zinc-900/90 backdrop-blur-sm border border-zinc-700 rounded-xl px-5 py-3 text-sm text-zinc-300 max-w-md text-center animate-fade-in">
+          {lockedMessage}
+        </div>
+      )}
 
       {/* Wave effect on unlock */}
       {showWaveEffect && (

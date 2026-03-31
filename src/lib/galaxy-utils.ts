@@ -18,6 +18,12 @@ export interface Bridge {
   edgeCount: number    // how many standard-level edges cross this bridge
 }
 
+export type PlanetAccess = "home" | "explorable" | "earned" | "locked"
+// home = student's grade, fully open
+// explorable = below student's grade or 1 grade above with bridge earned
+// earned = 1 grade above, earned via bridge demonstration
+// locked = 2+ grades above, not yet reachable
+
 // Planet-level graph data for react-force-graph-3d
 export interface GalaxyNode {
   id: string
@@ -31,6 +37,7 @@ export interface GalaxyNode {
   unlockedCount: number
   availableCount: number
   isCompleted: boolean
+  access: PlanetAccess
 }
 
 export interface GalaxyLink {
@@ -80,6 +87,13 @@ const DOMAIN_COLORS: Record<string, string> = {
 
 function getDomainColor(domainCode: string): string {
   return DOMAIN_COLORS[domainCode] || DOMAIN_COLORS[domainCode.split("-")[0]] || "#888888"
+}
+
+function gradeToNumber(grade: string): number {
+  if (grade === "K") return 0
+  const n = parseInt(grade)
+  if (!isNaN(n)) return n
+  return 13 // HS
 }
 
 function getGradeBand(grade: string): "K-2" | "3-5" | "6-8" | "HS" {
@@ -161,13 +175,57 @@ function getMasteryColor(planet: { unlockedCount: number; availableCount: number
   return MASTERY_COLORS.locked
 }
 
+// Compute planet access based on student grade and bridge connections
+function computePlanetAccess(
+  planet: Planet,
+  studentGrade: string | null,
+  bridges: Bridge[],
+  planetHasUnlocked: Map<string, boolean>
+): PlanetAccess {
+  if (!studentGrade) return "explorable" // no grade = everything open
+
+  const studentNum = gradeToNumber(studentGrade)
+  const planetNum = gradeToNumber(planet.grade)
+  const diff = planetNum - studentNum
+
+  // Student's own grade = home
+  if (diff === 0) return "home"
+
+  // Below student's grade = explorable (can go back to fill gaps)
+  if (diff < 0) return "explorable"
+
+  // One grade above = earned if they've demonstrated a standard that bridges into this planet
+  if (diff === 1) {
+    // Check if any bridge FROM a planet with unlocked standards leads TO this planet
+    const hasBridgeIn = bridges.some(b =>
+      b.targetPlanetId === planet.id && (planetHasUnlocked.get(b.sourcePlanetId) ?? false)
+    )
+    return hasBridgeIn ? "earned" : "locked"
+  }
+
+  // 2+ grades above = locked unless earned via bridges
+  // Check if there's a chain of earned bridges leading here
+  const hasBridgeIn = bridges.some(b =>
+    b.targetPlanetId === planet.id && (planetHasUnlocked.get(b.sourcePlanetId) ?? false)
+  )
+  return hasBridgeIn ? "earned" : "locked"
+}
+
 // Build galaxy-level graph data
 export function buildGalaxyData(
   planets: Planet[],
   bridges: Bridge[],
   progressMap: Map<string, NodeStatus>,
-  colorMode: ColorMode = "domain"
+  colorMode: ColorMode = "domain",
+  studentGrade: string | null = null
 ): GalaxyData {
+  // Pre-compute which planets have unlocked standards
+  const planetHasUnlocked = new Map<string, boolean>()
+  for (const planet of planets) {
+    const hasUnlocked = planet.standards.some(s => progressMap.get(s.id) === "unlocked")
+    planetHasUnlocked.set(planet.id, hasUnlocked)
+  }
+
   const nodes: GalaxyNode[] = planets.map(planet => {
     let unlockedCount = 0
     let availableCount = 0
@@ -177,16 +235,23 @@ export function buildGalaxyData(
       if (status === "available") availableCount++
     }
     const isCompleted = unlockedCount === planet.standards.length && planet.standards.length > 0
+    const access = computePlanetAccess(planet, studentGrade, bridges, planetHasUnlocked)
 
     let color: string
     if (colorMode === "mastery") {
       color = getMasteryColor({ unlockedCount, availableCount, moonCount: planet.standards.length, isCompleted })
+      // Dim locked planets in mastery mode too
+      if (access === "locked") color = "#333333"
     } else {
-      // Domain color with brightness based on progress
+      // Domain color with brightness based on progress + access
       let brightness = 0.2
-      if (availableCount > 0) brightness = 0.5
-      if (unlockedCount > 0) brightness = 0.6 + (unlockedCount / planet.standards.length) * 0.4
-      if (isCompleted) brightness = 1.0
+      if (access === "locked") {
+        brightness = 0.08 // very dim for inaccessible planets
+      } else if (access === "explorable" || access === "earned" || access === "home") {
+        if (availableCount > 0) brightness = 0.5
+        if (unlockedCount > 0) brightness = 0.6 + (unlockedCount / planet.standards.length) * 0.4
+        if (isCompleted) brightness = 1.0
+      }
 
       const baseColor = planet.color
       const r = parseInt(baseColor.slice(1, 3), 16)
@@ -195,6 +260,9 @@ export function buildGalaxyData(
       color = `rgb(${Math.round(r * brightness)}, ${Math.round(g * brightness)}, ${Math.round(b * brightness)})`
     }
 
+    // Locked planets are smaller
+    const sizeMultiplier = access === "locked" ? 0.5 : 1
+
     return {
       id: planet.id,
       name: planet.domainName,
@@ -202,20 +270,14 @@ export function buildGalaxyData(
       domainCode: planet.domainCode,
       gradeBand: planet.gradeBand,
       color,
-      val: Math.max(planet.standards.length * 0.5, 2),
+      val: Math.max(planet.standards.length * 0.5, 2) * sizeMultiplier,
       moonCount: planet.standards.length,
       unlockedCount,
       availableCount,
       isCompleted,
+      access,
     }
   })
-
-  // Build links
-  const planetHasUnlocked = new Map<string, boolean>()
-  for (const planet of planets) {
-    const hasUnlocked = planet.standards.some(s => progressMap.get(s.id) === "unlocked")
-    planetHasUnlocked.set(planet.id, hasUnlocked)
-  }
 
   const links: GalaxyLink[] = bridges.map(bridge => {
     const isLit = (planetHasUnlocked.get(bridge.sourcePlanetId) ?? false) &&

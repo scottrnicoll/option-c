@@ -6,6 +6,7 @@ import type { GalaxyData, GalaxyNode, GalaxyLink } from "@/lib/galaxy-utils"
 interface GalaxyViewProps {
   galaxyData: GalaxyData
   onPlanetClick: (planetId: string) => void
+  onLockedPlanetClick?: (planetId: string) => void
   currentPlanetId: string | null
   initialGrade: string | null
 }
@@ -18,7 +19,7 @@ function getGradeBandForGrade(grade: string | null): string | null {
   return "HS"
 }
 
-export function GalaxyView({ galaxyData, onPlanetClick, currentPlanetId, initialGrade }: GalaxyViewProps) {
+export function GalaxyView({ galaxyData, onPlanetClick, onLockedPlanetClick, currentPlanetId, initialGrade }: GalaxyViewProps) {
   const fgRef = useRef<any>(null)
   const [ForceGraph3D, setForceGraph3D] = useState<any>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
@@ -156,9 +157,25 @@ export function GalaxyView({ galaxyData, onPlanetClick, currentPlanetId, initial
 
   const handleNodeClick = useCallback((node: GalaxyNode) => {
     orbitingRef.current = false
+
+    if (node.access === "locked") {
+      onLockedPlanetClick?.(node.id)
+      // Still fly camera to it so they can see it
+      if (fgRef.current) {
+        const n = node as any
+        if (n.x !== undefined) {
+          fgRef.current.cameraPosition(
+            { x: n.x, y: n.y, z: n.z + 120 },
+            { x: n.x, y: n.y, z: n.z },
+            800
+          )
+        }
+      }
+      return
+    }
+
     onPlanetClick(node.id)
 
-    // Fly camera to clicked planet
     if (fgRef.current) {
       const n = node as any
       if (n.x !== undefined) {
@@ -169,7 +186,7 @@ export function GalaxyView({ galaxyData, onPlanetClick, currentPlanetId, initial
         )
       }
     }
-  }, [onPlanetClick])
+  }, [onPlanetClick, onLockedPlanetClick])
 
   // Custom node rendering for pulse effect on completed planets
   const nodeThreeObject = useCallback((node: GalaxyNode) => {
@@ -294,9 +311,10 @@ export function GalaxyView({ galaxyData, onPlanetClick, currentPlanetId, initial
         backgroundColor="#09090b"
         nodeThreeObject={nodeThreeObject}
         nodeThreeObjectExtend={false}
-        nodeLabel={(node: GalaxyNode) =>
-          `${node.name} (Grade ${node.grade})\n${node.unlockedCount}/${node.moonCount} unlocked`
-        }
+        nodeLabel={(node: GalaxyNode) => {
+          if (node.access === "locked") return `${node.name} (Grade ${node.grade})\nKeep exploring to reach here`
+          return `${node.name} (Grade ${node.grade})\n${node.unlockedCount}/${node.moonCount} demonstrated`
+        }}
         nodeResolution={16}
         linkColor={(link: GalaxyLink) => link.color}
         linkWidth={(link: GalaxyLink) => Math.max(0.5, Math.min(link.edgeCount * 0.5, 4))}
