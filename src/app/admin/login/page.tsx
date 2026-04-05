@@ -1,15 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from "firebase/auth"
+import { signInWithEmailAndPassword } from "firebase/auth"
 import { doc, getDoc } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
 
 export default function AdminLoginPage() {
-  const { profile, loading } = useAuth()
+  const { profile, loading, signInGuideWithGoogle } = useAuth()
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -17,18 +17,11 @@ export default function AdminLoginPage() {
   const [signingIn, setSigningIn] = useState(false)
 
   // Redirect if already logged in as admin
-  if (profile?.role === "admin") {
-    router.replace("/admin")
-    return null
-  }
-
-  const verifyAdmin = async (uid: string): Promise<boolean> => {
-    const snap = await getDoc(doc(db, "users", uid))
-    if (!snap.exists() || snap.data().role !== "admin") {
-      return false
+  useEffect(() => {
+    if (!loading && profile?.role === "admin") {
+      router.replace("/admin")
     }
-    return true
-  }
+  }, [profile, loading, router])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,8 +29,8 @@ export default function AdminLoginPage() {
     setError(null)
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password)
-      const isAdmin = await verifyAdmin(cred.user.uid)
-      if (!isAdmin) {
+      const snap = await getDoc(doc(db, "users", cred.user.uid))
+      if (!snap.exists() || snap.data().role !== "admin") {
         await auth.signOut()
         setError("This account does not have admin access.")
         return
@@ -51,22 +44,9 @@ export default function AdminLoginPage() {
   }
 
   const handleGoogleLogin = async () => {
-    setSigningIn(true)
-    setError(null)
-    try {
-      const cred = await signInWithPopup(auth, new GoogleAuthProvider())
-      const isAdmin = await verifyAdmin(cred.user.uid)
-      if (!isAdmin) {
-        await auth.signOut()
-        setError("This account does not have admin access. If this is your first time, call POST /api/admin/setup after signing in.")
-        return
-      }
-      router.push("/admin")
-    } catch (err: any) {
-      setError(err.message || "Google login failed.")
-    } finally {
-      setSigningIn(false)
-    }
+    // This will redirect to Google, then back to this page
+    // The AuthProvider handles the redirect result and loads the profile
+    await signInGuideWithGoogle()
   }
 
   if (loading) {

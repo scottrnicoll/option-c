@@ -11,9 +11,10 @@ import {
 import {
   signInAnonymously,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
-  linkWithPopup,
+  linkWithRedirect,
   onAuthStateChanged,
   signOut as firebaseSignOut,
   type User,
@@ -63,6 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setProfile(null)
     }
+  }, [])
+
+  // Handle Google redirect result on page load
+  useEffect(() => {
+    getRedirectResult(auth).catch(() => {
+      // No redirect result — that's fine
+    })
   }, [])
 
   // Listen for auth state changes
@@ -139,24 +147,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadProfile])
 
   const signInGuideWithGoogle = useCallback(async () => {
-    const cred = await signInWithPopup(auth, googleProvider)
-    // Verify user doc exists with guide role
-    const snap = await getDoc(doc(db, "users", cred.user.uid))
-    if (!snap.exists() || snap.data().role !== "guide") {
-      await firebaseSignOut(auth)
-      throw new Error("No guide account found. Contact your administrator.")
-    }
-    await loadProfile(cred.user.uid)
-  }, [loadProfile])
+    // Redirect-based — page will reload after Google auth
+    await signInWithRedirect(auth, googleProvider)
+  }, [])
 
   const linkGoogleAccount = useCallback(async () => {
     if (!user) throw new Error("Must be signed in to link accounts.")
-    const cred = await linkWithPopup(user, googleProvider)
-    await updateDoc(doc(db, "users", user.uid), {
-      linkedGoogleUid: cred.user.uid,
-    })
-    await loadProfile(user.uid)
-  }, [user, loadProfile])
+    await linkWithRedirect(user, googleProvider)
+  }, [user])
 
   const handleSignOut = useCallback(async () => {
     await firebaseSignOut(auth)

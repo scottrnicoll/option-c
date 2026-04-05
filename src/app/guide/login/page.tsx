@@ -34,11 +34,10 @@ export default function GuideLoginPage() {
   }
 
   const handleGoogleLogin = async () => {
-    setSigningIn(true)
     setError(null)
     try {
       await signInGuideWithGoogle()
-      router.push("/guide")
+      // Will redirect to Google — no need to push route
     } catch (err: any) {
       setError(err.message || "Google login failed.")
     } finally {
