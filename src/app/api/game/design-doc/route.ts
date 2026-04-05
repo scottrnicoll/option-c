@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: "claude-sonnet-4-5-20250514",
       max_tokens: 400,
       system: `Extract a structured game design document from this conversation between a student and a game design mentor. The student was designing a game that uses a math concept.
 

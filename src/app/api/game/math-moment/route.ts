@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     : ""
 
   const message = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: "claude-sonnet-4-5-20250514",
     max_tokens: 400,
     system: `You help students understand math after they lose a game. Give a short, encouraging worked example using DIFFERENT numbers than the game would have used. Keep it simple, warm, and brief.${interestHint}
 

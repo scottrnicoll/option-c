@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: "claude-sonnet-4-5-20250514",
       max_tokens: 600,
       system: `You explain math concepts to students. ${levelInstruction} Be warm and calm. Never use the word "standard". At most one exclamation mark total.
 
