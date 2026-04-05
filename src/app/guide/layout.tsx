@@ -10,7 +10,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
 
   useEffect(() => {
-    if (!loading && pathname !== "/guide/login") {
+    if (!loading && pathname !== "/guide/login" && !pathname.startsWith("/guide/signup")) {
       if (!profile || profile.role !== "guide") {
         router.replace("/guide/login")
       }
