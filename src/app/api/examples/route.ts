@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 600,
       system: `You suggest game design ideas that use a specific math concept. Each idea is a game MECHANIC — not a full game, just a core loop a student could build on.
 

@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const { currentHtml, feedback, designDoc } = await req.json()
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-5-20250514",
+    model: "claude-sonnet-4-6",
     max_tokens: 8000,
     system: "You modify existing HTML games based on student feedback. Output ONLY the complete updated HTML file. No markdown. No code fences. Start with <!DOCTYPE html>.",
     messages: [{

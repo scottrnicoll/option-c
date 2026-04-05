@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   const characterInstructions = designChoices?.characters ? `Characters/style: ${designChoices.characters}.` : ""
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-5-20250514",
+    model: "claude-sonnet-4-6",
     max_tokens: 8000,
     system: "You generate complete, self-contained HTML files for playable browser games. Output ONLY the HTML. No markdown. No code fences. Start with <!DOCTYPE html>.",
     messages: [{

@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 600,
       system: `You explain math concepts to students. ${levelInstruction} Be warm and calm. Never use the word "standard". At most one exclamation mark total.
 
@@ -62,7 +62,7 @@ Example of correct format:
     }
     return Response.json(parsed)
   } catch (e) {
-    console.error("[explain] Error:", e)
+    console.error("[explain] Error:", String(e))
     return fallback(description)
   }
 }

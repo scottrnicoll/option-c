@@ -23,7 +23,7 @@ export async function POST(
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 200,
       system: `You are a game reviewer for a student-created math game. Analyze the HTML game code and determine if it meets quality standards.
 
