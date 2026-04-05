@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import type { GalaxyData, GalaxyNode } from "@/lib/galaxy-utils"
 
 interface MiniMapProps {
@@ -28,8 +28,29 @@ export function MiniMap({
   unlockedCount,
   masteredCount,
 }: MiniMapProps) {
+  const [expanded, setExpanded] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
   const width = 200
   const height = 140
+
+  // Close on click outside (mobile)
+  useEffect(() => {
+    if (!expanded) return
+
+    function handleClickOutside(e: MouseEvent | TouchEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setExpanded(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("touchstart", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("touchstart", handleClickOutside)
+    }
+  }, [expanded])
 
   // Compute positions for each planet
   const positions = useMemo(() => {
@@ -66,90 +87,140 @@ export function MiniMap({
     return posMap
   }, [galaxyData.nodes, width, height])
 
-  const progressPct = totalStandards > 0
-    ? Math.round((unlockedCount / totalStandards) * 100)
-    : 0
+  // Pick up to 8 sample nodes for the collapsed thumbnail
+  const sampleNodes = useMemo(() => {
+    const nodes = galaxyData.nodes
+    if (nodes.length <= 8) return nodes
+    const step = Math.floor(nodes.length / 8)
+    const sampled: GalaxyNode[] = []
+    for (let i = 0; i < nodes.length && sampled.length < 8; i += step) {
+      sampled.push(nodes[i])
+    }
+    return sampled
+  }, [galaxyData.nodes])
 
   return (
-    <div className="absolute bottom-4 left-4 z-20">
-      <div className="bg-zinc-900/85 backdrop-blur-sm border border-zinc-800 rounded-lg overflow-hidden">
-        {/* SVG mini-map */}
-        <svg
-          width={width}
-          height={height}
-          viewBox={`0 0 ${width} ${height}`}
-          className="block"
+    <div className="absolute bottom-4 left-4 z-20" ref={containerRef}>
+      <div
+        className="transition-all duration-300 ease-in-out overflow-hidden bg-zinc-900/85 backdrop-blur-sm border border-zinc-800 rounded-lg"
+        style={{
+          width: expanded ? width : 40,
+          height: expanded ? height + 44 : 40,
+        }}
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
+        onClick={() => setExpanded((prev) => !prev)}
+      >
+        {/* Collapsed: tiny dot preview */}
+        <div
+          className="transition-opacity duration-300"
+          style={{
+            opacity: expanded ? 0 : 1,
+            pointerEvents: expanded ? "none" : "auto",
+            position: expanded ? "absolute" : "relative",
+          }}
         >
-          {/* Background */}
-          <rect width={width} height={height} fill="transparent" />
+          <svg width={40} height={40} viewBox="0 0 40 40" className="block">
+            {sampleNodes.map((node, i) => {
+              // Spread sample dots in a small grid pattern
+              const col = i % 3
+              const row = Math.floor(i / 3)
+              const cx = 10 + col * 10
+              const cy = 10 + row * 10
+              return (
+                <circle
+                  key={node.id}
+                  cx={cx}
+                  cy={cy}
+                  r={2}
+                  fill={node.color}
+                  opacity={0.85}
+                />
+              )
+            })}
+          </svg>
+        </div>
 
-          {/* Bridges as lines */}
-          {galaxyData.links.map((link, i) => {
-            const sourceId = typeof link.source === "string" ? link.source : (link.source as any).id
-            const targetId = typeof link.target === "string" ? link.target : (link.target as any).id
-            const sp = positions.get(sourceId)
-            const tp = positions.get(targetId)
-            if (!sp || !tp) return null
-            return (
-              <line
-                key={i}
-                x1={sp.x}
-                y1={sp.y}
-                x2={tp.x}
-                y2={tp.y}
-                stroke={link.isLit ? "rgba(96,165,250,0.25)" : "rgba(255,255,255,0.04)"}
-                strokeWidth={link.isLit ? 0.8 : 0.3}
-              />
-            )
-          })}
+        {/* Expanded: full mini-map */}
+        <div
+          className="transition-opacity duration-300"
+          style={{
+            opacity: expanded ? 1 : 0,
+            pointerEvents: expanded ? "auto" : "none",
+          }}
+        >
+          <svg
+            width={width}
+            height={height}
+            viewBox={`0 0 ${width} ${height}`}
+            className="block"
+          >
+            <rect width={width} height={height} fill="transparent" />
 
-          {/* Planet dots */}
-          {galaxyData.nodes.map(node => {
-            const pos = positions.get(node.id)
-            if (!pos) return null
-            const isCurrent = node.id === currentPlanetId
-            const r = Math.max(Math.sqrt(node.val) * 0.8, 1.5)
-            return (
-              <g key={node.id}>
-                {/* Current planet ring */}
-                {isCurrent && (
+            {/* Bridges as lines */}
+            {galaxyData.links.map((link, i) => {
+              const sourceId = typeof link.source === "string" ? link.source : (link.source as any).id
+              const targetId = typeof link.target === "string" ? link.target : (link.target as any).id
+              const sp = positions.get(sourceId)
+              const tp = positions.get(targetId)
+              if (!sp || !tp) return null
+              return (
+                <line
+                  key={i}
+                  x1={sp.x}
+                  y1={sp.y}
+                  x2={tp.x}
+                  y2={tp.y}
+                  stroke={link.isLit ? "rgba(96,165,250,0.25)" : "rgba(255,255,255,0.04)"}
+                  strokeWidth={link.isLit ? 0.8 : 0.3}
+                />
+              )
+            })}
+
+            {/* Planet dots */}
+            {galaxyData.nodes.map(node => {
+              const pos = positions.get(node.id)
+              if (!pos) return null
+              const isCurrent = node.id === currentPlanetId
+              const r = Math.max(Math.sqrt(node.val) * 0.8, 1.5)
+              return (
+                <g key={node.id}>
+                  {isCurrent && (
+                    <circle
+                      cx={pos.x}
+                      cy={pos.y}
+                      r={r + 3}
+                      fill="none"
+                      stroke="white"
+                      strokeWidth={1}
+                      opacity={0.8}
+                    />
+                  )}
                   <circle
                     cx={pos.x}
                     cy={pos.y}
-                    r={r + 3}
-                    fill="none"
-                    stroke="white"
-                    strokeWidth={1}
-                    opacity={0.8}
+                    r={r}
+                    fill={node.color}
+                    opacity={0.9}
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onPlanetClick(node.id)
+                    }}
                   />
-                )}
-                <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r={r}
-                  fill={node.color}
-                  opacity={0.9}
-                  className="cursor-pointer"
-                  onClick={() => onPlanetClick(node.id)}
-                />
-              </g>
-            )
-          })}
-        </svg>
+                </g>
+              )
+            })}
+          </svg>
 
-        {/* Progress bar */}
-        <div className="px-2 pb-2 pt-1 flex flex-col gap-1">
-          <div className="flex items-center justify-between text-xs text-zinc-400">
-            <span><span className="text-blue-400 font-medium">{unlockedCount}</span>/{totalStandards} skills available</span>
-          </div>
-          <div className="flex items-center justify-between text-xs text-zinc-400">
-            <span><span className="text-emerald-400 font-medium">{masteredCount}</span>/{totalStandards} skills mastered</span>
-          </div>
-          <div className="h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
-            <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full transition-all duration-1000"
-              style={{ width: `${Math.max(progressPct, 1)}%` }}
-            />
+          {/* Stats (no progress bar) */}
+          <div className="px-2 pb-2 pt-1 flex flex-col gap-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400">
+              <span><span className="text-blue-400 font-medium">{unlockedCount}</span>/{totalStandards} skills available</span>
+            </div>
+            <div className="flex items-center justify-between text-xs text-zinc-400">
+              <span><span className="text-emerald-400 font-medium">{masteredCount}</span>/{totalStandards} skills mastered</span>
+            </div>
           </div>
         </div>
       </div>
