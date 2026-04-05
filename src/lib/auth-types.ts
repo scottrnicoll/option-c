@@ -5,6 +5,7 @@ export interface UserProfile {
   grade: string
   interests: string[]
   classId: string
+  classIds?: string[] // All classes a guide owns (guides only)
   tokens: number
   linkedGoogleUid?: string
   createdAt: number

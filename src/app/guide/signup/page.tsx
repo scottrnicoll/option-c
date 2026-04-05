@@ -98,7 +98,8 @@ export default function GuideSignupPage() {
 
       await setDoc(doc(db, "users", uid), {
         uid, name: name.trim(), role: "guide", grade: "", interests: [],
-        classId: classRef.id, tokens: 0, createdAt: Date.now(), lastLoginAt: Date.now(),
+        classId: classRef.id, classIds: [classRef.id],
+        tokens: 0, createdAt: Date.now(), lastLoginAt: Date.now(),
       })
 
       await updateDoc(doc(db, "invites", inviteCode), { used: true, usedBy: uid, usedAt: Date.now() })

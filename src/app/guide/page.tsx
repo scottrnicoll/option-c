@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
 import { db } from "@/lib/firebase"
-import { collection, query, where, getDocs, doc, getDoc, updateDoc } from "firebase/firestore"
+import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
-import { Copy, Check, Users, GamepadIcon, Clock } from "lucide-react"
+import { Copy, Check, Users, GamepadIcon, Clock, Plus, ChevronDown } from "lucide-react"
 import type { Game } from "@/lib/game-types"
 
 interface StudentSummary {
@@ -17,10 +17,17 @@ interface StudentSummary {
   skillsMastered: number
 }
 
+interface ClassInfo {
+  id: string
+  name: string
+  code: string
+}
+
 export default function GuideDashboard() {
   const { profile, signOut } = useAuth()
   const [tab, setTab] = useState<"students" | "reviews" | "games">("students")
-  const [classData, setClassData] = useState<{ name: string; code: string } | null>(null)
+  const [classData, setClassData] = useState<ClassInfo | null>(null)
+  const [allClasses, setAllClasses] = useState<ClassInfo[]>([])
   const [students, setStudents] = useState<StudentSummary[]>([])
   const [pendingGames, setPendingGames] = useState<Game[]>([])
   const [publishedGames, setPublishedGames] = useState<Game[]>([])
@@ -28,27 +35,93 @@ export default function GuideDashboard() {
   const [copied, setCopied] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(null)
   const [studentGames, setStudentGames] = useState<Game[]>([])
+  const [showClassPicker, setShowClassPicker] = useState(false)
+  const [showNewClass, setShowNewClass] = useState(false)
+  const [newClassName, setNewClassName] = useState("")
+  const [creatingClass, setCreatingClass] = useState(false)
+
+  // Load all classes the guide owns
+  useEffect(() => {
+    if (!profile) return
+    const classIds = profile.classIds || (profile.classId ? [profile.classId] : [])
+    if (classIds.length === 0) return
+    Promise.all(
+      classIds.map(async (id) => {
+        const snap = await getDoc(doc(db, "classes", id))
+        if (snap.exists()) {
+          const d = snap.data()
+          return { id, name: d.name, code: d.code } as ClassInfo
+        }
+        return null
+      })
+    ).then((results) => {
+      setAllClasses(results.filter(Boolean) as ClassInfo[])
+    })
+  }, [profile])
 
   useEffect(() => {
     if (!profile?.classId) return
-    loadDashboard()
+    loadDashboard(profile.classId)
   }, [profile?.classId])
 
-  async function loadDashboard() {
-    if (!profile?.classId) return
+  const switchClass = useCallback(async (classId: string) => {
+    if (!profile) return
+    await updateDoc(doc(db, "users", profile.uid), { classId })
+    setShowClassPicker(false)
+    // Reload with new class
+    loadDashboard(classId)
+    // Update the local classData immediately
+    const info = allClasses.find(c => c.id === classId)
+    if (info) setClassData(info)
+  }, [profile, allClasses])
+
+  const createNewClass = useCallback(async () => {
+    if (!profile || !newClassName.trim()) return
+    setCreatingClass(true)
+    try {
+      const code = Array.from({ length: 6 }, () =>
+        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]
+      ).join("")
+
+      const classRef = doc(collection(db, "classes"))
+      await setDoc(classRef, { name: newClassName.trim(), code, guideUid: profile.uid, createdAt: Date.now() })
+
+      // Add to guide's classIds and switch to it
+      await updateDoc(doc(db, "users", profile.uid), {
+        classId: classRef.id,
+        classIds: arrayUnion(classRef.id),
+      })
+
+      const newClass: ClassInfo = { id: classRef.id, name: newClassName.trim(), code }
+      setAllClasses(prev => [...prev, newClass])
+      setClassData(newClass)
+      setNewClassName("")
+      setShowNewClass(false)
+      setShowClassPicker(false)
+      loadDashboard(classRef.id)
+    } catch (err) {
+      console.error("Create class error:", err)
+    } finally {
+      setCreatingClass(false)
+    }
+  }, [profile, newClassName])
+
+  async function loadDashboard(classId?: string) {
+    const activeClassId = classId || profile?.classId
+    if (!activeClassId) return
     setLoading(true)
     try {
       // Load class
-      const classSnap = await getDoc(doc(db, "classes", profile.classId))
+      const classSnap = await getDoc(doc(db, "classes", activeClassId))
       if (classSnap.exists()) {
         const d = classSnap.data()
-        setClassData({ name: d.name, code: d.code })
+        setClassData({ id: activeClassId, name: d.name, code: d.code })
       }
 
       // Load students
       const studentsQuery = query(
         collection(db, "users"),
-        where("classId", "==", profile.classId),
+        where("classId", "==", activeClassId),
         where("role", "==", "student")
       )
       const studentsSnap = await getDocs(studentsQuery)
@@ -79,7 +152,7 @@ export default function GuideDashboard() {
       // Load games
       const gamesQuery = query(
         collection(db, "games"),
-        where("classId", "==", profile.classId)
+        where("classId", "==", activeClassId)
       )
       const gamesSnap = await getDocs(gamesQuery)
       const pending: Game[] = []
@@ -116,7 +189,7 @@ export default function GuideDashboard() {
         reviews: [{ reviewerUid: profile.uid, reviewerName: profile.name, approved: true, createdAt: Date.now() }],
       })
       // Reload
-      loadDashboard()
+      loadDashboard(classData?.id)
     } catch (err) {
       console.error("Approve error:", err)
     }
@@ -146,13 +219,67 @@ export default function GuideDashboard() {
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">
-              {classData?.name || "Your Class"}
-            </h1>
+          <div className="relative">
+            <button
+              onClick={() => allClasses.length > 1 ? setShowClassPicker(!showClassPicker) : undefined}
+              className={`flex items-center gap-2 ${allClasses.length > 1 ? "cursor-pointer hover:opacity-80" : ""}`}
+            >
+              <h1 className="text-2xl font-bold text-white">
+                {classData?.name || "Your Class"}
+              </h1>
+              {allClasses.length > 1 && <ChevronDown className="size-4 text-zinc-400" />}
+            </button>
             <p className="text-zinc-400 text-sm mt-1">
               {students.length} student{students.length !== 1 ? "s" : ""} enrolled
             </p>
+            {/* Class picker dropdown */}
+            {showClassPicker && (
+              <div className="absolute top-full left-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl z-50 w-72 overflow-hidden">
+                {allClasses.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => switchClass(c.id)}
+                    className={`w-full text-left px-4 py-3 text-sm hover:bg-zinc-800 transition-colors flex items-center justify-between ${
+                      c.id === classData?.id ? "text-blue-400" : "text-zinc-300"
+                    }`}
+                  >
+                    <span>{c.name}</span>
+                    <span className="font-mono text-xs text-zinc-500">{c.code}</span>
+                  </button>
+                ))}
+                <div className="border-t border-zinc-800">
+                  {showNewClass ? (
+                    <form
+                      onSubmit={(e) => { e.preventDefault(); createNewClass() }}
+                      className="p-3 flex gap-2"
+                    >
+                      <input
+                        autoFocus
+                        value={newClassName}
+                        onChange={(e) => setNewClassName(e.target.value)}
+                        placeholder="Class name..."
+                        className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                      <button
+                        type="submit"
+                        disabled={creatingClass || !newClassName.trim()}
+                        className="bg-blue-500 hover:bg-blue-600 disabled:opacity-30 text-white rounded-lg px-3 py-2 text-sm transition-colors"
+                      >
+                        {creatingClass ? "..." : "Create"}
+                      </button>
+                    </form>
+                  ) : (
+                    <button
+                      onClick={() => setShowNewClass(true)}
+                      className="w-full text-left px-4 py-3 text-sm text-blue-400 hover:bg-zinc-800 transition-colors flex items-center gap-2"
+                    >
+                      <Plus className="size-4" />
+                      Create Another Class
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-3">
             {classData && (
