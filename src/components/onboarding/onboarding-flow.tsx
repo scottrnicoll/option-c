@@ -379,16 +379,19 @@ function WelcomeStep({
 export type { OnboardingData }
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
-  const { user, profile, activeProfile, signInStudent } = useAuth()
+  const { user, profile, activeProfile, impersonating, signInStudent } = useAuth()
 
-  // If user is already authenticated with a profile, skip to first incomplete step
-  const initialStep = activeProfile ? (!activeProfile.grade ? 2 : activeProfile.interests.length === 0 ? 4 : 0) : 0
+  // When impersonating, skip class code (step 0) and name (step 1) — demo student already has those
+  const source = impersonating ?? activeProfile
+  const initialStep = source
+    ? (!source.grade ? 2 : source.interests.length === 0 ? 4 : 0)
+    : 0
   const [step, setStep] = useState(initialStep)
   const [classCode, setClassCode] = useState("")
   const [data, setData] = useState<OnboardingData>({
-    name: activeProfile?.name || "",
-    grade: activeProfile?.grade || "",
-    interests: activeProfile?.interests || [],
+    name: (impersonating ?? activeProfile)?.name || "",
+    grade: (impersonating ?? activeProfile)?.grade || "",
+    interests: (impersonating ?? activeProfile)?.interests || [],
   })
   const [authError, setAuthError] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
@@ -416,9 +419,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   }
 
   const handleInterestsComplete = async () => {
-    if (user) {
+    const targetUid = impersonating?.uid ?? user?.uid
+    if (targetUid) {
       try {
-        await updateDoc(doc(db, "users", user.uid), {
+        await updateDoc(doc(db, "users", targetUid), {
           grade: data.grade,
           interests: data.interests,
         })
