@@ -379,13 +379,16 @@ function WelcomeStep({
 export type { OnboardingData }
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
-  const { user, signInStudent } = useAuth()
-  const [step, setStep] = useState(0)
+  const { user, profile, signInStudent } = useAuth()
+
+  // If user is already authenticated with a profile, skip to first incomplete step
+  const initialStep = profile ? (!profile.grade ? 2 : profile.interests.length === 0 ? 4 : 0) : 0
+  const [step, setStep] = useState(initialStep)
   const [classCode, setClassCode] = useState("")
   const [data, setData] = useState<OnboardingData>({
-    name: "",
-    grade: "",
-    interests: [],
+    name: profile?.name || "",
+    grade: profile?.grade || "",
+    interests: profile?.interests || [],
   })
   const [authError, setAuthError] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)

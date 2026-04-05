@@ -79,8 +79,14 @@ export function GraphPage({ data }: GraphPageProps) {
   useEffect(() => {
     if (profile) {
       setStudentData({ name: profile.name, grade: profile.grade, interests: profile.interests })
-      setOnboardingComplete(true)
       setTokens(profile.tokens)
+
+      // Only skip onboarding if profile is complete (has grade and interests)
+      const profileComplete = profile.grade && profile.interests.length > 0
+      if (profileComplete) {
+        setOnboardingComplete(true)
+      }
+
       // Load progress from Firestore
       loadProgress().then((progressDocs) => {
         const map = new Map(initialProgress)
