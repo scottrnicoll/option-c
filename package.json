@@ -22,6 +22,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.3.1",
     "firebase": "^12.11.0",
+    "firebase-admin": "^13.7.0",
     "geist": "^1.7.0",
     "graphology": "^0.26.0",
     "graphology-layout-forceatlas2": "^0.10.1",
