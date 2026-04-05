@@ -5,8 +5,7 @@ import { useAuth } from "@/lib/auth"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { signInWithEmailAndPassword } from "firebase/auth"
-import { doc, getDoc } from "firebase/firestore"
-import { auth, db } from "@/lib/firebase"
+import { auth } from "@/lib/firebase"
 
 export default function AdminLoginPage() {
   const { profile, loading } = useAuth()
@@ -27,16 +26,36 @@ export default function AdminLoginPage() {
     setSigningIn(true)
     setError(null)
     try {
+      // 1. Sign in with Firebase Auth (no Firestore needed)
       const cred = await signInWithEmailAndPassword(auth, email, password)
-      const snap = await getDoc(doc(db, "users", cred.user.uid))
-      if (!snap.exists() || snap.data().role !== "admin") {
+
+      // 2. Get the ID token
+      const idToken = await cred.user.getIdToken()
+
+      // 3. Verify admin role server-side (uses Firebase Admin SDK, not client Firestore)
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
         await auth.signOut()
-        setError("This account does not have admin access.")
+        setError(data.error || "This account does not have admin access.")
         return
       }
-      router.push("/admin")
+
+      // 4. Reload to let AuthProvider pick up the session
+      window.location.href = "/admin"
     } catch (err: any) {
-      setError(err.message || "Login failed.")
+      const msg = err.message || "Login failed."
+      if (msg.includes("invalid-credential")) {
+        setError("Invalid email or password.")
+      } else {
+        setError(msg)
+      }
     } finally {
       setSigningIn(false)
     }

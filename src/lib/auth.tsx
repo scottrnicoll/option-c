@@ -55,12 +55,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Load user profile from Firestore
+  // Load user profile from Firestore (with retry and error handling)
   const loadProfile = useCallback(async (uid: string) => {
-    const snap = await getDoc(doc(db, "users", uid))
-    if (snap.exists()) {
-      setProfile(snap.data() as UserProfile)
-    } else {
+    try {
+      const snap = await getDoc(doc(db, "users", uid))
+      if (snap.exists()) {
+        setProfile(snap.data() as UserProfile)
+      } else {
+        setProfile(null)
+      }
+    } catch (err) {
+      console.warn("Failed to load profile, will retry:", err)
       setProfile(null)
     }
   }, [])
