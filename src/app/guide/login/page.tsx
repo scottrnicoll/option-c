@@ -22,13 +22,16 @@ export default function GuideLoginPage() {
       router.replace("/guide")
     } else if (profile?.role === "admin") {
       router.replace("/admin")
-    } else if (user && profile && !["guide", "admin"].includes(profile.role)) {
-      // Signed in but not a guide
+    } else if (user && !user.isAnonymous && profile && !["guide", "admin"].includes(profile.role)) {
+      // Signed in with Google/email but not a guide
       setError("This account doesn't have guide access. Contact your admin for an invite link.")
       signOut()
-    } else if (user && !profile) {
+    } else if (user && !user.isAnonymous && !profile) {
       // Signed in with Google but no user doc at all
       setError("No guide account found for this email. Ask your admin for an invite link to sign up.")
+      signOut()
+    } else if (user && user.isAnonymous) {
+      // Anonymous user (student) — sign them out so guide can log in fresh
       signOut()
     }
   }, [user, profile, loading, router, signOut])
