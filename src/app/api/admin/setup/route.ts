@@ -1,6 +1,14 @@
 import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin"
 
+export async function GET() {
+  return setupAdmin()
+}
+
 export async function POST() {
+  return setupAdmin()
+}
+
+async function setupAdmin() {
   try {
     const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
