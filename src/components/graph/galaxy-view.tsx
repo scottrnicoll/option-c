@@ -226,22 +226,39 @@ export function GalaxyView({ galaxyData, onPlanetClick, onLockedPlanetClick, cur
       group.add(new THREE.Mesh(wireGeom, wireMat))
     }
 
-    // Pulse ring for completed planets
+    // Mastery ring for completed planets — spinning golden outer ring + inner pulsing ring
     if (node.isCompleted) {
-      const ringGeom = new THREE.RingGeometry(
+      // Inner pulse ring (same color as planet)
+      const innerGeom = new THREE.RingGeometry(
         Math.sqrt(node.val) * 1.6,
         Math.sqrt(node.val) * 1.9,
         32
       )
-      const ringMat = new THREE.MeshBasicMaterial({
+      const innerMat = new THREE.MeshBasicMaterial({
         color: node.color,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.35,
         side: THREE.DoubleSide,
       })
-      const ring = new THREE.Mesh(ringGeom, ringMat)
-      ring.userData = { isPulse: true }
-      group.add(ring)
+      const innerRing = new THREE.Mesh(innerGeom, innerMat)
+      innerRing.userData = { isPulse: true }
+      group.add(innerRing)
+
+      // Outer spinning golden ring
+      const outerGeom = new THREE.RingGeometry(
+        Math.sqrt(node.val) * 2.1,
+        Math.sqrt(node.val) * 2.35,
+        32
+      )
+      const outerMat = new THREE.MeshBasicMaterial({
+        color: "#f59e0b",
+        transparent: true,
+        opacity: 0.55,
+        side: THREE.DoubleSide,
+      })
+      const outerRing = new THREE.Mesh(outerGeom, outerMat)
+      outerRing.userData = { isMasteredRing: true }
+      group.add(outerRing)
     }
 
     // "Start here" indicator for recommended planet
@@ -321,6 +338,10 @@ export function GalaxyView({ galaxyData, onPlanetClick, onLockedPlanetClick, cur
           if (obj.userData?.isPulse) {
             obj.scale.setScalar(1 + Math.sin(time * 2) * 0.15)
             obj.material.opacity = 0.2 + Math.sin(time * 2) * 0.1
+          }
+          if (obj.userData?.isMasteredRing) {
+            obj.rotation.z = time * 0.4
+            obj.material.opacity = 0.4 + Math.sin(time * 1.5) * 0.2
           }
           if (obj.userData?.isRecommendedRing) {
             obj.scale.setScalar(1 + Math.sin(time * 3) * 0.2)

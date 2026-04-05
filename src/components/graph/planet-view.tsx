@@ -10,6 +10,7 @@ import { GamePlayer } from "@/components/game/game-player"
 interface PlanetViewProps {
   planet: Planet
   moons: MoonData[]
+  isMastered?: boolean
   onMoonClick: (standardId: string, status: NodeStatus) => void
   onBridgeClick: (targetPlanetId: string) => void
   bridges: Bridge[]
@@ -47,6 +48,7 @@ function statusLabel(status: NodeStatus): string {
 export function PlanetView({
   planet,
   moons,
+  isMastered = false,
   onMoonClick,
   onBridgeClick,
   bridges,
@@ -62,7 +64,7 @@ export function PlanetView({
 
   // Community games
   const [communityGames, setCommunityGames] = useState<Omit<Game, "gameHtml">[]>([])
-  const [playingGame, setPlayingGame] = useState<{ id: string; title: string; html: string } | null>(null)
+  const [playingGame, setPlayingGame] = useState<{ id: string; title: string; html: string; concept?: string } | null>(null)
 
   useEffect(() => {
     fetch(`/api/games/planet/${planet.id}`)
@@ -77,7 +79,7 @@ export function PlanetView({
       if (!res.ok) return
       const html = await res.text()
       const game = communityGames.find((g) => g.id === gameId)
-      setPlayingGame({ id: gameId, title: game?.title || "Game", html })
+      setPlayingGame({ id: gameId, title: game?.title || "Game", html, concept: game?.designDoc?.concept })
     } catch {
       // Silent fail
     }
@@ -160,6 +162,9 @@ export function PlanetView({
           }}
         >
           <div className="text-center">
+            {isMastered && (
+              <div className="text-base mb-0.5" title="Planet Mastered!">🚩</div>
+            )}
             <div className="text-white font-bold text-sm leading-tight">{planet.domainName}</div>
             <div className="text-white/70 text-xs">Grade {planet.grade}</div>
           </div>
@@ -299,6 +304,7 @@ export function PlanetView({
           gameId={playingGame.id}
           title={playingGame.title}
           html={playingGame.html}
+          concept={playingGame.concept}
           onClose={() => setPlayingGame(null)}
         />
       )}

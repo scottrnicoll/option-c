@@ -12,7 +12,9 @@ import type { OnboardingData } from "@/components/onboarding/onboarding-flow"
 import { StandardPanel } from "@/components/standard/standard-panel"
 import { BuildScreen } from "@/components/game/build-screen"
 import { Workshop } from "@/components/game/workshop"
+import { MasteryAnimation } from "./mastery-animation"
 import type { GameDesignDoc } from "@/lib/game-types"
+import { getTokens, addTokens } from "@/lib/tokens"
 
 interface GraphPageProps {
   data: StandardsGraph
@@ -68,6 +70,17 @@ export function GraphPage({ data }: GraphPageProps) {
   const [showWaveEffect, setShowWaveEffect] = useState(false)
   const [waveColor, setWaveColor] = useState("#22c55e")
   const [lockedMessage, setLockedMessage] = useState<string | null>(null)
+
+  // Tokens
+  const [tokens, setTokens] = useState(0)
+  // Sync from localStorage on mount (client only)
+  useState(() => { if (typeof window !== "undefined") setTokens(getTokens()) })
+
+  // Mastery animation
+  const [masteryEvent, setMasteryEvent] = useState<{ planetName: string; planetColor: string; tokenGain: number } | null>(null)
+
+  // Token notification (for game publish)
+  const [tokenNotify, setTokenNotify] = useState<string | null>(null)
 
   // Game builder state
   const [buildMode, setBuildMode] = useState<"idle" | "building" | "workshop">("idle")
@@ -209,12 +222,12 @@ export function GraphPage({ data }: GraphPageProps) {
   const handleUnlock = useCallback((standardId: string) => {
     setPanelOpen(false)
 
-    // Determine the planet color for the wave effect
+    // Determine the planet this standard belongs to
     const node = data.nodes.find(n => n.id === standardId)
-    if (node) {
-      const planet = planets.find(p => p.id === `${node.grade}.${node.domainCode}`)
-      if (planet) setWaveColor(planet.color)
-    }
+    const planet = node ? planets.find(p => p.id === `${node.grade}.${node.domainCode}`) : null
+
+    // Wave effect
+    if (planet) setWaveColor(planet.color)
     setShowWaveEffect(true)
     setTimeout(() => setShowWaveEffect(false), 1500)
 
@@ -226,6 +239,24 @@ export function GraphPage({ data }: GraphPageProps) {
       for (const id of newlyAvailable) {
         next.set(id, "available")
       }
+
+      // Award +5 tokens per skill
+      const newTotal = addTokens(5)
+      setTokens(newTotal)
+
+      // Detect planet mastery: all moons on this planet now unlocked
+      if (planet) {
+        const allMastered = planet.standards.every(s =>
+          s.id === standardId || next.get(s.id) === "unlocked"
+        )
+        if (allMastered) {
+          // Delay slightly so the wave effect plays first
+          setTimeout(() => {
+            setMasteryEvent({ planetName: planet.domainName, planetColor: planet.color, tokenGain: 0 })
+          }, 800)
+        }
+      }
+
       return next
     })
 
@@ -317,6 +348,12 @@ export function GraphPage({ data }: GraphPageProps) {
       const result = await reviewRes.json()
 
       if (result.pass) {
+        // Award +1 token for published game
+        const newTotal = addTokens(1)
+        setTokens(newTotal)
+        setTokenNotify("+1 token — game published!")
+        setTimeout(() => setTokenNotify(null), 3000)
+
         setReviewResult(result)
         setTimeout(() => {
           setBuildMode("idle")
@@ -401,6 +438,7 @@ export function GraphPage({ data }: GraphPageProps) {
           <PlanetView
             planet={currentPlanet}
             moons={currentMoons}
+            isMastered={currentMoons.length > 0 && currentMoons.every(m => m.status === "unlocked")}
             onMoonClick={handleMoonClick}
             onBridgeClick={handleBridgeClick}
             bridges={currentBridges}
@@ -424,7 +462,7 @@ export function GraphPage({ data }: GraphPageProps) {
 
       {/* Top-right controls */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 items-end">
-        {/* Progress */}
+        {/* Progress + tokens */}
         <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg px-4 py-2.5 border border-zinc-800">
           <div className="flex items-center gap-3">
             <div className="text-sm">
@@ -438,6 +476,10 @@ export function GraphPage({ data }: GraphPageProps) {
                 className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full transition-all duration-1000"
                 style={{ width: `${Math.max((counts.unlocked / counts.total) * 100, 2)}%` }}
               />
+            </div>
+            <div className="flex items-center gap-1 border-l border-zinc-700 pl-3">
+              <span className="text-amber-400 text-sm">⬡</span>
+              <span className="text-amber-300 font-mono font-bold text-sm">{tokens}</span>
             </div>
           </div>
         </div>
@@ -546,6 +588,23 @@ export function GraphPage({ data }: GraphPageProps) {
         interests={studentData?.interests}
         nodeStatus={selectedStandard ? progressMap.get(selectedStandard.id) : undefined}
       />
+
+      {/* Planet mastery celebration */}
+      {masteryEvent && (
+        <MasteryAnimation
+          planetName={masteryEvent.planetName}
+          planetColor={masteryEvent.planetColor}
+          tokenGain={masteryEvent.tokenGain}
+          onDone={() => setMasteryEvent(null)}
+        />
+      )}
+
+      {/* Token earned notification */}
+      {tokenNotify && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[150] bg-amber-500/20 border border-amber-400/40 rounded-full px-5 py-2 text-sm text-amber-300 font-medium animate-fade-in">
+          {tokenNotify}
+        </div>
+      )}
     </div>
   )
 }
