@@ -25,15 +25,11 @@ export default function GuideSignupPage() {
   const [creating, setCreating] = useState(false)
   const [done, setDone] = useState<{ classCode: string } | null>(null)
 
-  // Verify invite code
+  // If there's an invite code, assume valid — we'll verify when they submit
   useEffect(() => {
     console.log("[GuideSignup] inviteCode:", inviteCode)
-    if (!inviteCode) { console.log("[GuideSignup] No invite code"); setValid(false); return }
-    getDoc(doc(db, "invites", inviteCode)).then(snap => {
-      const isValid = snap.exists() && !snap.data()?.used
-      console.log("[GuideSignup] Invite valid:", isValid, snap.exists() ? snap.data() : "not found")
-      setValid(isValid)
-    }).catch((err) => { console.error("[GuideSignup] Invite check error:", err); setValid(false) })
+    if (!inviteCode) { setValid(false); return }
+    setValid(true)
   }, [inviteCode])
 
   // Check if returning from Google redirect
@@ -88,6 +84,13 @@ export default function GuideSignupPage() {
     setCreating(true)
     setError(null)
     try {
+      // Verify invite is still valid (user is authenticated now)
+      const inviteSnap = await getDoc(doc(db, "invites", inviteCode))
+      if (!inviteSnap.exists() || inviteSnap.data()?.used) {
+        setError("This invite link is invalid or has already been used.")
+        return
+      }
+
       const code = Array.from({ length: 6 }, () =>
         "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]
       ).join("")
