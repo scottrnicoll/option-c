@@ -27,21 +27,26 @@ export default function GuideSignupPage() {
 
   // Verify invite code
   useEffect(() => {
-    if (!inviteCode) { setValid(false); return }
+    console.log("[GuideSignup] inviteCode:", inviteCode)
+    if (!inviteCode) { console.log("[GuideSignup] No invite code"); setValid(false); return }
     getDoc(doc(db, "invites", inviteCode)).then(snap => {
-      setValid(snap.exists() && !snap.data()?.used)
-    }).catch(() => setValid(false))
+      const isValid = snap.exists() && !snap.data()?.used
+      console.log("[GuideSignup] Invite valid:", isValid, snap.exists() ? snap.data() : "not found")
+      setValid(isValid)
+    }).catch((err) => { console.error("[GuideSignup] Invite check error:", err); setValid(false) })
   }, [inviteCode])
 
   // Check if returning from Google redirect
   useEffect(() => {
+    console.log("[GuideSignup] Checking redirect result...")
     getRedirectResult(auth).then(result => {
+      console.log("[GuideSignup] Redirect result:", result ? { uid: result.user.uid, name: result.user.displayName } : "null")
       if (result?.user) {
         setUid(result.user.uid)
         setName(result.user.displayName || "Guide")
         setStep("class")
       }
-    }).catch(() => {})
+    }).catch((err) => { console.error("[GuideSignup] Redirect error:", err) })
   }, [])
 
   const handleEmailSignup = async (e: React.FormEvent) => {
@@ -65,10 +70,16 @@ export default function GuideSignupPage() {
   }
 
   const handleGoogleSignup = async () => {
+    console.log("[GuideSignup] Starting Google signup, inviteCode:", inviteCode)
     // Store invite code in sessionStorage so we can recover it after redirect
     if (inviteCode) sessionStorage.setItem("pendingInvite", inviteCode)
-    await signInGuideWithGoogle()
-    // Page will redirect to Google, then back here
+    try {
+      await signInGuideWithGoogle()
+      console.log("[GuideSignup] signInGuideWithGoogle returned (should redirect)")
+    } catch (err) {
+      console.error("[GuideSignup] Google signup error:", err)
+      setError(String(err))
+    }
   }
 
   const handleCreateClass = async (e: React.FormEvent) => {
