@@ -75,6 +75,18 @@ export function GraphPage({ data }: GraphPageProps) {
   // Tokens
   const [tokens, setTokens] = useState(0)
 
+  // Reset galaxy state when switching profiles (impersonation)
+  useEffect(() => {
+    setOnboardingComplete(false)
+    setProgressMap(initialProgress)
+    setTokens(0)
+    setStudentData(null)
+    setViewMode("galaxy")
+    setCurrentPlanetId(null)
+    setPanelOpen(false)
+    setBuildMode("idle")
+  }, [activeProfile?.uid, initialProgress])
+
   // Load from auth profile on mount / when profile changes
   useEffect(() => {
     if (activeProfile) {
