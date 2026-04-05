@@ -24,6 +24,7 @@ function statusGlow(status: NodeStatus): string {
     case "available": return "rgba(96,165,250,0.5)"
     case "in_progress": return "rgba(251,191,36,0.6)"
     case "unlocked": return "rgba(52,211,153,0.5)"
+    case "mastered": return "rgba(251,191,36,0.7)"
   }
 }
 
@@ -33,6 +34,7 @@ function statusBorder(status: NodeStatus): string {
     case "available": return "border-blue-400/60"
     case "in_progress": return "border-amber-400/60"
     case "unlocked": return "border-emerald-400/60"
+    case "mastered": return "border-amber-400/60"
   }
 }
 
@@ -42,6 +44,7 @@ function statusLabel(status: NodeStatus): string {
     case "available": return "Ready to Explore"
     case "in_progress": return "Progressing"
     case "unlocked": return "Demonstrated"
+    case "mastered": return "Mastered"
   }
 }
 

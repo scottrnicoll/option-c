@@ -341,6 +341,10 @@ export function buildMoonData(
         size = 2.5
         color = baseColor
         break
+      case "mastered":
+        size = 3
+        color = "#f59e0b"
+        break
     }
 
     return {

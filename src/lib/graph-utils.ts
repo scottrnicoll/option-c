@@ -42,6 +42,7 @@ export function getNodeColor(node: StandardNode, status: NodeStatus): string {
     case "available": return blendColor(domainColor, 0.7)     // bright
     case "in_progress": return blendColor(domainColor, 0.85)  // brighter
     case "unlocked": return blendColor(domainColor, 1.0)      // full color
+    case "mastered": return "#f59e0b"                         // gold
   }
 }
 
@@ -52,6 +53,7 @@ export function getNodeSize(status: NodeStatus, isHub: boolean): number {
     case "available": return base * 1.0
     case "in_progress": return base * 1.2
     case "unlocked": return base * 0.8
+    case "mastered": return base * 1.0
   }
 }
 

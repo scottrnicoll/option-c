@@ -1,4 +1,4 @@
-import { adminAuth, adminDb } from "@/lib/firebase-admin"
+import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin"
 
 export async function POST(req: Request) {
   try {
@@ -7,6 +7,9 @@ export async function POST(req: Request) {
     if (!email || !className) {
       return Response.json({ error: "Email and className required" }, { status: 400 })
     }
+
+    const adminAuth = getAdminAuth()
+    const adminDb = getAdminDb()
 
     // Create Firebase Auth user
     const userRecord = await adminAuth.createUser({
