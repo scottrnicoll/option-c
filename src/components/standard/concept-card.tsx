@@ -133,11 +133,15 @@ interface ConceptCardProps {
 }
 
 export function ConceptCard({ standard, onReady, interests, readOnly }: ConceptCardProps) {
-  const [readingLevel, setReadingLevel] = useState<ReadingLevel>("default")
+  const [readingLevel, setReadingLevel] = useState<ReadingLevel>(
+    interests && interests.length > 0 ? "challenge" : "default"
+  )
   const [showIllustration, setShowIllustration] = useState(false)
   const [explanation, setExplanation] = useState<Explanation | null>(null)
   const [loading, setLoading] = useState(true)
-  const [customInterest, setCustomInterest] = useState<string | null>(null)
+  const [customInterest, setCustomInterest] = useState<string | null>(
+    interests && interests.length > 0 ? interests[0] : null
+  )
   const [labelFlipped, setLabelFlipped] = useState(false)
   const [speaking, setSpeaking] = useState(false)
 

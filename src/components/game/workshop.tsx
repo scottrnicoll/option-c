@@ -148,12 +148,6 @@ export function Workshop({
         <h2 className="text-sm font-medium text-white truncate max-w-[200px]">
           {designDoc.title}
         </h2>
-        <button
-          onClick={() => onSendForReview(html, currentGameId)}
-          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors"
-        >
-          Send for Review
-        </button>
       </div>
 
       {/* Main content */}
@@ -243,6 +237,19 @@ export function Workshop({
               </button>
             </div>
           </form>
+
+          {/* Send for Review */}
+          <div className="p-3 border-t border-zinc-700">
+            <p className="text-xs text-zinc-400 text-center mb-2">
+              Ready? Submit for your classmates to review.
+            </p>
+            <button
+              onClick={() => onSendForReview(html, currentGameId)}
+              className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium transition-colors"
+            >
+              Send for Review
+            </button>
+          </div>
 
         </div>
       </div>
