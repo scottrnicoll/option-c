@@ -486,8 +486,8 @@ export function GraphPage({ data }: GraphPageProps) {
         </>
       )}
 
-      {/* Student navigation */}
-      {buildMode === "idle" && <StudentNav />}
+      {/* Student navigation — galaxy view only (planet view has Back to Galaxy) */}
+      {buildMode === "idle" && viewMode === "galaxy" && <StudentNav />}
 
       {/* Main view (hidden when building) */}
       {buildMode === "idle" && (
