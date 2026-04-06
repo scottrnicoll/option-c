@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
 import { db } from "@/lib/firebase"
-import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore"
+import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, arrayUnion, increment } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Copy, Check, Users, GamepadIcon, Clock, Plus, ChevronDown, Eye } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -207,11 +207,29 @@ export default function GuideDashboard() {
     if (!profile) return
     try {
       const gameRef = doc(db, "games", gameId)
+      // Read the game doc to get author and standard info
+      const gameSnap = await getDoc(gameRef)
+      if (!gameSnap.exists()) return
+      const game = gameSnap.data()
+
       await updateDoc(gameRef, {
         status: "published",
         approvedBy: profile.uid,
         reviews: [{ reviewerUid: profile.uid, reviewerName: profile.name, approved: true, createdAt: Date.now() }],
       })
+
+      // Unlock the concept for the student
+      await setDoc(
+        doc(db, "progress", game.authorUid, "standards", game.standardId),
+        { status: "unlocked", unlockedAt: Date.now() },
+        { merge: true }
+      )
+
+      // Award +5 tokens to the author
+      await updateDoc(doc(db, "users", game.authorUid), {
+        tokens: increment(5),
+      })
+
       // Reload
       loadDashboard(classData?.id)
     } catch (err) {
