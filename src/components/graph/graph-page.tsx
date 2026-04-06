@@ -235,7 +235,17 @@ export function GraphPage({ data }: GraphPageProps) {
     setSelectedStandard(node)
     setPanelOpen(true)
     if (tutorialStep === 1) setTutorialStep(2)
-  }, [data.nodes, tutorialStep])
+
+    // Mark as in_progress when first opened (if currently available)
+    if (status === "available") {
+      saveProgress(standardId, { status: "in_progress" }).catch(() => {})
+      setProgressMap(prev => {
+        const next = new Map(prev)
+        next.set(standardId, "in_progress")
+        return next
+      })
+    }
+  }, [data.nodes, tutorialStep, saveProgress])
 
   // Planet view: click bridge -> fly to that planet
   const handleBridgeClick = useCallback((targetPlanetId: string) => {
@@ -396,7 +406,10 @@ export function GraphPage({ data }: GraphPageProps) {
         })
       }
 
-      setReviewResult({ pass: true, feedback: "Sent for review! Your classmates will check it out." })
+      // Award +1 token for submitting
+      updateTokens(1).then(newTotal => setTokens(newTotal)).catch(() => setTokens(t => t + 1))
+
+      setReviewResult({ pass: true, feedback: "Sent for review! +1 token earned." })
       setTimeout(() => {
         setBuildMode("idle")
         setCurrentDesignDoc(null)
