@@ -9,10 +9,8 @@ export function StudentNav() {
   const { activeProfile, impersonating } = useAuth()
   const pathname = usePathname()
 
-  // Show for students, impersonating guides, or when on /student page
-  const isStudentPage = pathname.startsWith("/student")
-  const isStudent = activeProfile?.role === "student"
-  if (!activeProfile || (!isStudent && !impersonating && !isStudentPage)) return null
+  // Hide on guide/admin pages — show everywhere else (galaxy, student dashboard)
+  if (!activeProfile) return null
   if (pathname.startsWith("/guide") || pathname.startsWith("/admin")) return null
 
   const isExplore = pathname === "/"
