@@ -13,8 +13,9 @@ async function setupAdmin() {
     const adminAuth = getAdminAuth()
     const adminDb = getAdminDb()
 
-    const adminEmail = "mrdavolatech@gmail.com"
-    const adminPassword = "OptionC-Admin-2026!"
+    const adminEmail = process.env.ADMIN_EMAIL
+    const adminPassword = process.env.ADMIN_PASSWORD || "OptionC-Admin-2026!"
+    if (!adminEmail) return Response.json({ error: "ADMIN_EMAIL not set in .env.local" }, { status: 500 })
 
     // Find or create the admin auth user
     let userRecord
