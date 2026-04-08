@@ -149,11 +149,6 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
     startGeneration(visualBullets, pickedVibe)
   }
 
-  const handleConceptRetry = () => {
-    setVisualBullets([])
-    visualBulletsRef.current = []
-    fetchVisualConcept()
-  }
 
   return (
     <div className="fixed inset-0 z-50 flex bg-zinc-950">
@@ -211,20 +206,12 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
                       </p>
                     ))}
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleConceptRetry}
-                      className="flex-1 py-3 rounded-lg border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500 text-sm font-medium transition-colors"
-                    >
-                      Try a different look
-                    </button>
-                    <button
-                      onClick={handleConceptApprove}
-                      className="flex-1 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors"
-                    >
-                      Build it! →
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleConceptApprove}
+                    className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors"
+                  >
+                    Build it! →
+                  </button>
                 </>
               )}
               {conceptError && (
@@ -253,7 +240,7 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
                   </div>
                 </div>
               </button>
-              {/* Commodore 64 */}
+              {/* Retro Game */}
               <button
                 onClick={() => handleVibePick("c64")}
                 className="w-full p-4 rounded-xl border-2 border-blue-400/40 bg-blue-950 hover:border-blue-300 transition-all text-left"
@@ -262,8 +249,8 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
                 <div className="flex items-center gap-3 mb-1">
                   <span className="text-2xl">💻</span>
                   <div>
-                    <p className="text-sm font-bold text-white">COMMODORE 64</p>
-                    <p className="text-xs text-blue-200">1982 home computer aesthetic</p>
+                    <p className="text-sm font-bold text-white">RETRO GAME</p>
+                    <p className="text-xs text-blue-200">1980s home computer aesthetic</p>
                   </div>
                 </div>
               </button>
@@ -309,7 +296,7 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
           {phase === "generating" && (
             <div className="space-y-4">
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-1.5">
-                <p className="text-xs text-zinc-500 uppercase tracking-wide mb-2">Building this in {vibe === "arcade" ? "Arcade" : vibe === "c64" ? "Commodore 64" : vibe === "cute" ? "Cute" : "Sketch"} style:</p>
+                <p className="text-xs text-zinc-500 uppercase tracking-wide mb-2">Building this in {vibe === "arcade" ? "Arcade" : vibe === "c64" ? "Retro Game" : vibe === "cute" ? "Cute" : "Sketch"} style:</p>
                 {visualBullets.map((b, i) => (
                   <p key={i} className="text-sm text-zinc-200">{b}</p>
                 ))}

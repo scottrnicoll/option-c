@@ -26,7 +26,7 @@ function statusGlow(status: NodeStatus): string {
     case "locked": return "rgba(100,100,100,0.15)"
     case "available": return "rgba(96,165,250,0.5)"
     case "in_progress": return "rgba(251,191,36,0.6)"
-    case "in_review": return "rgba(245,158,11,0.6)"
+    case "in_review": return "rgba(161,98,7,0.6)"   // mustard glow
     case "approved_unplayed": return "rgba(245,158,11,0.7)"
     case "unlocked": return "rgba(52,211,153,0.6)"
     case "mastered": return "rgba(251,191,36,0.7)"
@@ -38,7 +38,7 @@ function statusBorder(status: NodeStatus): string {
     case "locked": return "border-zinc-700/40"
     case "available": return "border-blue-400/60"
     case "in_progress": return "border-amber-400/60"
-    case "in_review": return "border-amber-500/60"
+    case "in_review": return "border-yellow-700/70"   // mustard border
     case "approved_unplayed": return "border-amber-500/70"
     case "unlocked": return "border-emerald-400/60"
     case "mastered": return "border-amber-400/60"

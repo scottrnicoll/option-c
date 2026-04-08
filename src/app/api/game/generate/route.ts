@@ -44,9 +44,9 @@ Vocabulary:
 `,
   },
   c64: {
-    label: "Commodore 64",
+    label: "Retro Game",
     spec: `
-💻 COMMODORE 64 VIBE — strict spec, follow exactly:
+💻 RETRO GAME VIBE — strict spec, follow exactly (1980s home computer aesthetic):
 
 Color palette (use ONLY these — these are the ACTUAL C64 hardware colors):
   Background:   #4040E0 (C64 light blue)

@@ -5,7 +5,6 @@ import {
   collection,
   query,
   where,
-  orderBy,
   getDocs,
   doc,
   updateDoc,
@@ -36,34 +35,28 @@ export function FeedbackInbox({ mode }: FeedbackInboxProps) {
     if (!activeProfile) return
     setLoading(true)
     try {
+      // NOTE: deliberately no orderBy in any of these queries — combining
+      // where(...) + orderBy(...) requires a Firestore composite index
+      // that we haven't deployed. Without it, the query silently returns
+      // nothing. We sort client-side instead.
       let q
       if (mode === "received") {
         if (isAdmin) {
-          // Admin: all admin-targeted messages
-          q = query(
-            collection(db, "feedback"),
-            where("target", "==", "admin"),
-            orderBy("updatedAt", "desc")
-          )
+          q = query(collection(db, "feedback"), where("target", "==", "admin"))
         } else {
-          // Student/guide: messages sent to a game I own
           q = query(
             collection(db, "feedback"),
             where("target", "==", "game"),
-            where("toUid", "==", activeProfile.uid),
-            orderBy("updatedAt", "desc")
+            where("toUid", "==", activeProfile.uid)
           )
         }
       } else {
-        // Sent: messages I sent (so I can see replies in my inbox)
-        q = query(
-          collection(db, "feedback"),
-          where("fromUid", "==", activeProfile.uid),
-          orderBy("updatedAt", "desc")
-        )
+        q = query(collection(db, "feedback"), where("fromUid", "==", activeProfile.uid))
       }
       const snap = await getDocs(q)
-      setItems(snap.docs.map((d) => d.data() as FeedbackDoc))
+      const docs = snap.docs.map((d) => d.data() as FeedbackDoc)
+      docs.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+      setItems(docs)
     } catch (err) {
       console.warn("feedback load failed:", err)
       setItems([])

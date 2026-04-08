@@ -322,9 +322,12 @@ export function GraphPage({ data }: GraphPageProps) {
   }, [progressMap, data.nodes, studentData?.grade])
 
   // Recommended next planet — "closest to finishing" rule:
-  // among accessible, not-yet-fully-mastered planets, pick the one with the
-  // highest unlocked-percentage. Tiebreaker: most available moons.
+  // among accessible, not-yet-fully-completed planets that have at least
+  // one ACTIONABLE moon (blue or yellow), pick the one with the highest
+  // unlocked-percentage. Tiebreaker: most available moons.
   // If a grade filter is on, scope to that grade.
+  // A planet with only green + locked moons is NOT a candidate — there's
+  // nothing the learner can do there right now, so the ring should move on.
   const recommendedPlanetId = useMemo(() => {
     const grade = studentData?.grade
     const candidates = galaxyData.nodes.filter(n => {
@@ -332,8 +335,12 @@ export function GraphPage({ data }: GraphPageProps) {
       if (n.isCompleted) return false
       if (n.moonCount === 0) return false
       if (gradeFilter === "myGrade" && grade && n.grade !== grade) return false
-      // Must have *something* the student can do — otherwise don't push them there
-      if (n.availableCount === 0 && n.unlockedCount === 0) return false
+      // The learner must have something ACTIONABLE on this planet right now:
+      // a blue moon (available), an in_progress moon, or an approved_unplayed.
+      // in_review is yellow but waiting on the guide — NOT actionable.
+      // Green-only or green+locked or green+in_review doesn't qualify.
+      const actionable = n.availableCount + n.actionableCount
+      if (actionable === 0) return false
       return true
     })
     if (candidates.length === 0) return null
@@ -341,7 +348,7 @@ export function GraphPage({ data }: GraphPageProps) {
       const aPct = a.unlockedCount / a.moonCount
       const bPct = b.unlockedCount / b.moonCount
       if (Math.abs(aPct - bPct) > 0.001) return bPct - aPct
-      return b.availableCount - a.availableCount
+      return (b.availableCount + b.actionableCount) - (a.availableCount + a.actionableCount)
     })
     return candidates[0].id
   }, [galaxyData.nodes, studentData?.grade, gradeFilter])
@@ -463,21 +470,32 @@ export function GraphPage({ data }: GraphPageProps) {
   }, [data, progressMap, tutorialStep, planets, saveProgress])
 
   // Standard panel: learner demonstrated a skill (won their own game 3 in
-  // a row). Flip the local moon to "unlocked", close the panel, fly back
-  // to the galaxy, and ONLY THEN fire the supernova so the learner can
+  // a row). Flip the local moon to "unlocked", cascade-unlock any dependent
+  // moons whose prereqs are now all met, close the panel, fly back to
+  // the galaxy, and ONLY THEN fire the supernova so the learner can
   // actually see it happen.
   const handleDemonstrated = useCallback((standardId: string) => {
     const node = data.nodes.find(n => n.id === standardId)
     const planet = node ? planets.find(p => p.id === `${node.grade}.${node.domainCode}`) : null
 
+    // Cascade: any moons that were locked but had this one as their last
+    // missing prereq now flip to "available" (blue).
+    const newlyAvailable = computeNewlyAvailable(data, progressMap, standardId)
+
     setProgressMap(prev => {
       const next = new Map(prev)
       next.set(standardId, "unlocked")
+      for (const id of newlyAvailable) {
+        next.set(id, "available")
+      }
       return next
     })
 
-    // Persist (mastery-play already saved the status, but this guarantees it)
+    // Persist the demonstrated standard AND each newly-available one
     saveProgress(standardId, { status: "unlocked", unlockedAt: Date.now() }).catch(() => {})
+    for (const id of newlyAvailable) {
+      saveProgress(id, { status: "available" }).catch(() => {})
+    }
 
     // Close the standard panel + fly back to galaxy
     setPanelOpen(false)

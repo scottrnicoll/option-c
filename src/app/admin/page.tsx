@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
-import { collection, getDocs, query, where, doc, updateDoc, setDoc, deleteDoc } from "firebase/firestore"
+import { collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc, deleteDoc, arrayUnion, increment } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,9 +18,12 @@ import {
   Copy,
   RefreshCw,
   Trash2,
+  Pencil,
 } from "lucide-react"
 import { FeedbackInbox } from "@/components/feedback/feedback-inbox"
 import { UserMenu } from "@/components/user-menu"
+import { GamePlayer } from "@/components/game/game-player"
+import { Play } from "lucide-react"
 
 type Tab = "overview" | "guides" | "classes" | "students" | "games" | "feedback"
 
@@ -55,10 +58,14 @@ interface GameRow {
   id: string
   title: string
   authorName: string
+  authorUid: string
   className: string
+  classId: string
+  standardId: string
   status: string
   plays: number
   rating: number
+  ratingCount: number
 }
 
 export default function AdminDashboardPage() {
@@ -71,6 +78,7 @@ export default function AdminDashboardPage() {
   const [classes, setClasses] = useState<ClassRow[]>([])
   const [students, setStudents] = useState<StudentRow[]>([])
   const [games, setGames] = useState<GameRow[]>([])
+  const [feedbackCount, setFeedbackCount] = useState(0)
 
   // Invite form
   const [showInvite, setShowInvite] = useState(false)
@@ -89,6 +97,105 @@ export default function AdminDashboardPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("")
   const [deleting, setDeleting] = useState(false)
 
+  // Game player state — admin can play any game in the full GamePlayer
+  // (which already supports approve / un-approve when the viewer is admin)
+  const [playingGame, setPlayingGame] = useState<{
+    id: string
+    title: string
+    html: string
+    authorUid: string
+    standardId: string
+    isPublished: boolean
+    isPendingReview: boolean
+  } | null>(null)
+  const [loadingPlay, setLoadingPlay] = useState<string | null>(null)
+
+  const handlePlayAdminGame = async (g: GameRow) => {
+    setLoadingPlay(g.id)
+    try {
+      const snap = await getDoc(doc(db, "games", g.id))
+      if (!snap.exists()) return
+      const data = snap.data()
+      setPlayingGame({
+        id: g.id,
+        title: g.title,
+        html: data.gameHtml || "",
+        authorUid: g.authorUid,
+        standardId: g.standardId,
+        isPublished: g.status === "published",
+        isPendingReview: g.status === "pending_review",
+      })
+    } finally {
+      setLoadingPlay(null)
+    }
+  }
+
+  // Quick-approve a pending game from the admin Games tab.
+  // Mirrors the guide flow: flip game status, set the author's standard
+  // to "approved_unplayed", award +2000 tokens, drop an inbox message.
+  const handleApproveGameAdmin = async (g: GameRow) => {
+    if (!profile) return
+    if (g.status !== "pending_review") return
+    try {
+      const gameRef = doc(db, "games", g.id)
+      await updateDoc(gameRef, {
+        status: "published",
+        approvedBy: profile.uid,
+        reviews: arrayUnion({
+          reviewerUid: profile.uid,
+          reviewerName: profile.name,
+          approved: true,
+          createdAt: Date.now(),
+        }),
+      })
+      if (g.authorUid && g.standardId) {
+        await setDoc(
+          doc(db, "progress", g.authorUid, "standards", g.standardId),
+          { status: "approved_unplayed", approvedAt: Date.now() },
+          { merge: true }
+        )
+        await updateDoc(doc(db, "users", g.authorUid), { tokens: increment(2000) }).catch(() => {})
+        // Inbox notification
+        const fbId = doc(collection(db, "feedback")).id
+        const now = Date.now()
+        await setDoc(doc(db, "feedback", fbId), {
+          id: fbId,
+          fromUid: profile.uid,
+          fromName: profile.name,
+          fromRole: "admin",
+          target: "game",
+          gameId: g.id,
+          gameTitle: g.title,
+          toUid: g.authorUid,
+          type: "improvement",
+          message: `🎉 Your game "${g.title}" was approved by admin! +2000 tokens earned.\n\nNext step: open the moon and win your own game 3 times in a row to turn the moon green.`,
+          status: "open",
+          replies: [],
+          unreadForRecipient: true,
+          unreadForSender: false,
+          createdAt: now,
+          updatedAt: now,
+        }).catch(() => {})
+      }
+      fetchData()
+    } catch (err) {
+      console.error("Admin approve error:", err)
+    }
+  }
+
+  // Class create / edit / delete state
+  const [showClassForm, setShowClassForm] = useState(false)
+  const [editingClass, setEditingClass] = useState<ClassRow | null>(null)
+  const [classFormName, setClassFormName] = useState("")
+  const [classFormGuideUid, setClassFormGuideUid] = useState("")          // existing guide
+  const [classFormNewGuideName, setClassFormNewGuideName] = useState("")  // OR create new
+  const [classFormNewGuideEmail, setClassFormNewGuideEmail] = useState("")
+  const [classFormMode, setClassFormMode] = useState<"existing" | "new">("existing")
+  const [classFormBusy, setClassFormBusy] = useState(false)
+  const [classFormError, setClassFormError] = useState<string | null>(null)
+  const [deletingClass, setDeletingClass] = useState<ClassRow | null>(null)
+  const [classDeleteConfirmText, setClassDeleteConfirmText] = useState("")
+
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
@@ -103,6 +210,16 @@ export default function AdminDashboardPage() {
       // Fetch all games
       const gamesSnap = await getDocs(collection(db, "games"))
       const allGames = gamesSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as any[]
+
+      // Fetch feedback count (admin-targeted messages only)
+      try {
+        const feedbackSnap = await getDocs(
+          query(collection(db, "feedback"), where("target", "==", "admin"))
+        )
+        setFeedbackCount(feedbackSnap.size)
+      } catch {
+        setFeedbackCount(0)
+      }
 
       // Build lookup maps
       const classMap = new Map(allClasses.map((c) => [c.id, c]))
@@ -159,18 +276,24 @@ export default function AdminDashboardPage() {
       })
       setStudents(studentRows)
 
-      // Games
+      // Games — use the actual field names on the game doc
       const gameRows: GameRow[] = allGames.map((g) => {
         const author = userMap.get(g.authorUid)
         const cls = classMap.get(g.classId)
+        const ratingSum = typeof g.ratingSum === "number" ? g.ratingSum : 0
+        const ratingCount = typeof g.ratingCount === "number" ? g.ratingCount : 0
         return {
           id: g.id,
           title: g.title || "Untitled",
-          authorName: author?.name || g.authorName || "Unknown",
+          authorName: author?.name || g.designerName || "Unknown",
+          authorUid: g.authorUid || "",
           className: cls?.name || "No class",
+          classId: g.classId || "",
+          standardId: g.standardId || "",
           status: g.status || "draft",
-          plays: g.plays || 0,
-          rating: g.rating || 0,
+          plays: typeof g.playCount === "number" ? g.playCount : 0,
+          rating: ratingCount > 0 ? ratingSum / ratingCount : 0,
+          ratingCount,
         }
       })
       setGames(gameRows)
@@ -215,6 +338,116 @@ export default function AdminDashboardPage() {
       setInviteError(err.message)
     } finally {
       setInviting(false)
+    }
+  }
+
+  // ==== Class create / edit / delete ====
+  const openCreateClass = () => {
+    setEditingClass(null)
+    setClassFormName("")
+    setClassFormGuideUid(guides[0]?.uid ?? "")
+    setClassFormNewGuideName("")
+    setClassFormNewGuideEmail("")
+    setClassFormMode(guides.length > 0 ? "existing" : "new")
+    setClassFormError(null)
+    setShowClassForm(true)
+  }
+
+  const openEditClass = (row: ClassRow) => {
+    setEditingClass(row)
+    setClassFormName(row.name)
+    // Look up the guide uid by name (admin row only stores the name)
+    const guide = guides.find((g) => g.name === row.guideName)
+    setClassFormGuideUid(guide?.uid ?? "")
+    setClassFormMode("existing")
+    setClassFormError(null)
+    setShowClassForm(true)
+  }
+
+  const handleSaveClass = async () => {
+    if (!classFormName.trim()) {
+      setClassFormError("Class needs a name.")
+      return
+    }
+    setClassFormBusy(true)
+    setClassFormError(null)
+    try {
+      let guideUid = classFormGuideUid
+
+      // Create a new guide inline if requested
+      if (classFormMode === "new") {
+        if (!classFormNewGuideName.trim() || !classFormNewGuideEmail.trim()) {
+          setClassFormError("New guide needs a name and email.")
+          setClassFormBusy(false)
+          return
+        }
+        // Create a placeholder guide user doc. The guide will sign in via
+        // an invite link the admin sends them separately.
+        const guideRef = doc(collection(db, "users"))
+        await setDoc(guideRef, {
+          uid: guideRef.id,
+          name: classFormNewGuideName.trim(),
+          email: classFormNewGuideEmail.trim(),
+          role: "guide",
+          grade: "",
+          interests: [],
+          classId: "",
+          tokens: 0,
+          createdAt: Date.now(),
+          lastLoginAt: 0,
+        })
+        guideUid = guideRef.id
+      }
+
+      if (editingClass) {
+        // Edit: update name + reassign guide
+        await updateDoc(doc(db, "classes", editingClass.id), {
+          name: classFormName.trim(),
+          guideUid,
+        })
+        // Also point the guide's classId at this class so their dashboard works
+        if (guideUid) {
+          await updateDoc(doc(db, "users", guideUid), { classId: editingClass.id })
+            .catch(() => {})
+        }
+      } else {
+        // Create: generate code + insert
+        const code = Array.from({ length: 6 }, () =>
+          "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]
+        ).join("")
+        const classRef = doc(collection(db, "classes"))
+        await setDoc(classRef, {
+          name: classFormName.trim(),
+          code,
+          guideUid,
+          createdAt: Date.now(),
+        })
+        // Point the guide's classId at the new class so they can sign in
+        if (guideUid) {
+          await updateDoc(doc(db, "users", guideUid), { classId: classRef.id })
+            .catch(() => {})
+        }
+      }
+
+      setShowClassForm(false)
+      fetchData()
+    } catch (err) {
+      setClassFormError(err instanceof Error ? err.message : "Failed to save class.")
+    } finally {
+      setClassFormBusy(false)
+    }
+  }
+
+  const handleDeleteClass = async () => {
+    if (!deletingClass) return
+    if (classDeleteConfirmText.trim() !== deletingClass.name) return
+    try {
+      await deleteDoc(doc(db, "classes", deletingClass.id))
+      setDeletingClass(null)
+      setClassDeleteConfirmText("")
+      fetchData()
+    } catch (err) {
+      console.error("Delete class failed:", err)
     }
   }
 
@@ -269,7 +502,7 @@ export default function AdminDashboardPage() {
     { key: "classes", label: "Classes", icon: <School className="size-4" /> },
     { key: "students", label: "Learners", icon: <GraduationCap className="size-4" /> },
     { key: "games", label: "Games", icon: <Gamepad2 className="size-4" /> },
-    { key: "feedback", label: "Feedback", icon: <MessageCircle className="size-4" /> },
+    { key: "feedback", label: `Feedback${feedbackCount > 0 ? ` (${feedbackCount})` : ""}`, icon: <MessageCircle className="size-4" /> },
   ]
 
   return (
@@ -322,11 +555,12 @@ export default function AdminDashboardPage() {
             {/* Overview Tab */}
             {tab === "overview" && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <StatCard label="Learners" value={students.length} icon={<GraduationCap className="size-5" />} />
-                  <StatCard label="Guides" value={guides.length} icon={<Users className="size-5" />} />
-                  <StatCard label="Classes" value={classes.length} icon={<School className="size-5" />} />
-                  <StatCard label="Games" value={games.length} icon={<Gamepad2 className="size-5" />} />
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <StatCard label="Guides" value={guides.length} icon={<Users className="size-5" />} onClick={() => setTab("guides")} />
+                  <StatCard label="Classes" value={classes.length} icon={<School className="size-5" />} onClick={() => setTab("classes")} />
+                  <StatCard label="Learners" value={students.length} icon={<GraduationCap className="size-5" />} onClick={() => setTab("students")} />
+                  <StatCard label="Games" value={games.length} icon={<Gamepad2 className="size-5" />} onClick={() => setTab("games")} />
+                  <StatCard label="Feedback" value={feedbackCount} icon={<MessageCircle className="size-5" />} onClick={() => setTab("feedback")} />
                 </div>
 
                 {/* One-time token migration */}
@@ -455,7 +689,12 @@ export default function AdminDashboardPage() {
             {/* Classes Tab */}
             {tab === "classes" && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold">Classes ({classes.length})</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Classes ({classes.length})</h2>
+                  <Button size="sm" onClick={openCreateClass}>
+                    <Plus className="size-4" data-icon="inline-start" /> Create Class
+                  </Button>
+                </div>
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
                   <table className="w-full text-sm">
                     <thead>
@@ -465,12 +704,13 @@ export default function AdminDashboardPage() {
                         <th className="text-left px-4 py-3 font-medium">Guide</th>
                         <th className="text-right px-4 py-3 font-medium">Learners</th>
                         <th className="text-right px-4 py-3 font-medium">Games</th>
+                        <th className="text-right px-4 py-3 font-medium"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {classes.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-zinc-500">
+                          <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">
                             No classes yet.
                           </td>
                         </tr>
@@ -494,6 +734,24 @@ export default function AdminDashboardPage() {
                             <td className="px-4 py-3 text-zinc-300">{c.guideName}</td>
                             <td className="px-4 py-3 text-right text-zinc-300">{c.studentCount}</td>
                             <td className="px-4 py-3 text-right text-zinc-300">{c.gameCount}</td>
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex items-center gap-1 justify-end">
+                                <button
+                                  onClick={() => openEditClass(c)}
+                                  className="text-zinc-400 hover:text-blue-300 hover:bg-blue-500/10 rounded p-1.5 transition-colors"
+                                  title="Edit class"
+                                >
+                                  <Pencil className="size-4" />
+                                </button>
+                                <button
+                                  onClick={() => { setDeletingClass(c); setClassDeleteConfirmText("") }}
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded p-1.5 transition-colors"
+                                  title="Delete class"
+                                >
+                                  <Trash2 className="size-4" />
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                         ))
                       )}
@@ -588,17 +846,29 @@ export default function AdminDashboardPage() {
                             </td>
                             <td className="px-4 py-3 text-right text-zinc-300">{g.plays}</td>
                             <td className="px-4 py-3 text-right text-zinc-300">
-                              {g.rating ? g.rating.toFixed(1) : "-"}
+                              {g.ratingCount > 0 ? `${g.rating.toFixed(1)} (${g.ratingCount})` : "-"}
                             </td>
                             <td className="px-4 py-3 text-right">
-                              {g.status === "pending" && (
+                              <div className="flex items-center gap-1.5 justify-end">
                                 <Button
-                                  size="xs"
-                                  onClick={() => handleApproveGame(g.id)}
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={loadingPlay === g.id}
+                                  onClick={() => handlePlayAdminGame(g)}
                                 >
-                                  <Check className="size-3" data-icon="inline-start" /> Approve
+                                  <Play className="size-3" data-icon="inline-start" />
+                                  {loadingPlay === g.id ? "..." : "Play"}
                                 </Button>
-                              )}
+                                {g.status === "pending_review" && (
+                                  <Button
+                                    size="sm"
+                                    className="bg-emerald-600 hover:bg-emerald-500"
+                                    onClick={() => handleApproveGameAdmin(g)}
+                                  >
+                                    <Check className="size-3" data-icon="inline-start" /> Approve
+                                  </Button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -611,6 +881,165 @@ export default function AdminDashboardPage() {
           </>
         )}
       </div>
+
+      {/* GamePlayer — opens when admin clicks Play on a game.
+          Reuses the same component the guide uses; admins automatically
+          get the Un-approve button when viewing a published game. */}
+      {playingGame && (
+        <GamePlayer
+          gameId={playingGame.id}
+          title={playingGame.title}
+          html={playingGame.html}
+          authorUid={playingGame.authorUid}
+          standardId={playingGame.standardId}
+          isPublished={playingGame.isPublished}
+          isPendingReview={playingGame.isPendingReview}
+          onClose={() => setPlayingGame(null)}
+          onUnapproved={() => { setPlayingGame(null); fetchData() }}
+        />
+      )}
+
+      {/* Class create / edit modal */}
+      {showClassForm && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-blue-500/30 rounded-xl max-w-md w-full p-6 space-y-4">
+            <h3 className="text-lg font-bold text-white">
+              {editingClass ? "Edit class" : "Create a new class"}
+            </h3>
+
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">Class name</label>
+              <input
+                value={classFormName}
+                onChange={(e) => setClassFormName(e.target.value)}
+                placeholder="e.g. Ms. Smith's 5th Grade Math"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                autoFocus
+              />
+            </div>
+
+            {/* Guide picker — existing or create new inline */}
+            <div className="space-y-2">
+              <label className="text-xs text-zinc-400 block">Guide</label>
+              <div className="bg-zinc-800 rounded-lg p-1 flex gap-1 border border-zinc-700">
+                <button
+                  onClick={() => setClassFormMode("existing")}
+                  disabled={guides.length === 0}
+                  className={`flex-1 px-3 py-1.5 rounded-md text-xs transition-colors ${
+                    classFormMode === "existing" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-zinc-200"
+                  } disabled:opacity-30`}
+                >
+                  Pick existing
+                </button>
+                <button
+                  onClick={() => setClassFormMode("new")}
+                  className={`flex-1 px-3 py-1.5 rounded-md text-xs transition-colors ${
+                    classFormMode === "new" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  Create new guide
+                </button>
+              </div>
+
+              {classFormMode === "existing" && (
+                <select
+                  value={classFormGuideUid}
+                  onChange={(e) => setClassFormGuideUid(e.target.value)}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                >
+                  {guides.length === 0 && <option value="">No guides yet</option>}
+                  {guides.map((g) => (
+                    <option key={g.uid} value={g.uid}>
+                      {g.name} ({g.email || "no email"})
+                    </option>
+                  ))}
+                </select>
+              )}
+              {classFormMode === "new" && (
+                <div className="space-y-2">
+                  <input
+                    value={classFormNewGuideName}
+                    onChange={(e) => setClassFormNewGuideName(e.target.value)}
+                    placeholder="New guide's name"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                  />
+                  <input
+                    value={classFormNewGuideEmail}
+                    onChange={(e) => setClassFormNewGuideEmail(e.target.value)}
+                    placeholder="email@example.com"
+                    type="email"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                  />
+                  <p className="text-[11px] text-zinc-500">
+                    Send the guide an invite link from the Guides tab to set their password.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {classFormError && (
+              <p className="text-red-400 text-sm">{classFormError}</p>
+            )}
+
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowClassForm(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveClass} disabled={classFormBusy}>
+                {classFormBusy ? "Saving..." : editingClass ? "Save changes" : "Create class"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete class confirmation modal */}
+      {deletingClass && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-red-500/30 rounded-xl max-w-md w-full p-6 space-y-4">
+            <h3 className="text-lg font-bold text-white">Delete this class?</h3>
+            <p className="text-sm text-zinc-300">
+              You&apos;re about to delete <span className="font-semibold text-white">{deletingClass.name}</span>.
+            </p>
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs text-amber-200">
+              <p className="font-medium mb-1">What happens:</p>
+              <ul className="list-disc list-inside space-y-0.5">
+                <li>The class is removed (no learner can join with its code anymore)</li>
+                <li>The {deletingClass.studentCount} learner{deletingClass.studentCount === 1 ? "" : "s"} stay but become orphaned</li>
+                <li>The {deletingClass.gameCount} game{deletingClass.gameCount === 1 ? "" : "s"} stay</li>
+                <li>The guide account is not deleted</li>
+              </ul>
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">
+                Type <span className="text-white font-semibold">{deletingClass.name}</span> to confirm:
+              </label>
+              <input
+                value={classDeleteConfirmText}
+                onChange={(e) => setClassDeleteConfirmText(e.target.value)}
+                placeholder={deletingClass.name}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-500/50"
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => { setDeletingClass(null); setClassDeleteConfirmText("") }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-red-600 hover:bg-red-500"
+                disabled={classDeleteConfirmText.trim() !== deletingClass.name}
+                onClick={handleDeleteClass}
+              >
+                Delete class
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete guide confirmation modal */}
       {deletingGuide && (
@@ -670,19 +1099,27 @@ function StatCard({
   label,
   value,
   icon,
+  onClick,
 }: {
   label: string
   value: number
   icon: React.ReactNode
+  onClick?: () => void
 }) {
+  const Tag = onClick ? "button" : "div"
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <Tag
+      onClick={onClick}
+      className={`bg-zinc-900 border border-zinc-800 rounded-xl p-5 text-left ${
+        onClick ? "hover:border-blue-500/50 hover:bg-zinc-800/50 cursor-pointer transition-colors" : ""
+      }`}
+    >
       <div className="flex items-center justify-between mb-3">
         <span className="text-zinc-400 text-sm">{label}</span>
         <span className="text-zinc-500">{icon}</span>
       </div>
       <p className="text-3xl font-bold">{value}</p>
-    </div>
+    </Tag>
   )
 }
 

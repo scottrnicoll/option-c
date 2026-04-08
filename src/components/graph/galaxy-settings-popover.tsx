@@ -61,107 +61,106 @@ export function GalaxySettingsPopover({
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-72 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden z-50">
-          {/* Color mode */}
-          <div className="p-4 border-b border-zinc-800 space-y-2">
-            <p className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wide">
-              Color planets
-            </p>
-            <div className="bg-zinc-800 rounded-lg flex overflow-hidden border border-zinc-700">
-              <button
-                onClick={() => onColorModeChange("mastery")}
-                className={`flex-1 px-3 py-1.5 text-sm transition-colors ${
-                  colorMode === "mastery"
-                    ? "bg-zinc-700 text-white"
-                    : "text-zinc-300 hover:text-white"
-                }`}
-              >
-                By progress
-              </button>
-              <button
-                onClick={() => onColorModeChange("domain")}
-                className={`flex-1 px-3 py-1.5 text-sm transition-colors ${
-                  colorMode === "domain"
-                    ? "bg-zinc-700 text-white"
-                    : "text-zinc-300 hover:text-white"
-                }`}
-              >
-                By concept
-              </button>
+        <div className="absolute right-0 mt-2 w-[500px] max-w-[calc(100vw-2rem)] bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden z-50">
+          <div className="grid grid-cols-2 divide-x divide-zinc-800">
+            {/* LEFT — settings (compact, tight) */}
+            <div className="p-3 space-y-3">
+              {/* Color mode */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wide">
+                  Color planets
+                </p>
+                <div className="bg-zinc-800 rounded-md flex overflow-hidden border border-zinc-700">
+                  <button
+                    onClick={() => onColorModeChange("mastery")}
+                    className={`flex-1 px-2 py-1 text-xs transition-colors ${
+                      colorMode === "mastery"
+                        ? "bg-zinc-700 text-white"
+                        : "text-zinc-300 hover:text-white"
+                    }`}
+                  >
+                    By progress
+                  </button>
+                  <button
+                    onClick={() => onColorModeChange("domain")}
+                    className={`flex-1 px-2 py-1 text-xs transition-colors ${
+                      colorMode === "domain"
+                        ? "bg-zinc-700 text-white"
+                        : "text-zinc-300 hover:text-white"
+                    }`}
+                  >
+                    By concept
+                  </button>
+                </div>
+              </div>
+
+              {/* Grade filter — only meaningful in "By progress" mode */}
+              {showGradeFilter && colorMode === "mastery" && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wide">
+                    Show
+                  </p>
+                  <div className="bg-zinc-800 rounded-md flex overflow-hidden border border-zinc-700">
+                    <button
+                      onClick={() => onGradeFilterChange("myGrade")}
+                      className={`flex-1 px-2 py-1 text-xs transition-colors ${
+                        gradeFilter === "myGrade"
+                          ? "bg-zinc-700 text-white"
+                          : "text-zinc-300 hover:text-white"
+                      }`}
+                    >
+                      My grade
+                    </button>
+                    <button
+                      onClick={() => onGradeFilterChange("all")}
+                      className={`flex-1 px-2 py-1 text-xs transition-colors ${
+                        gradeFilter === "all"
+                          ? "bg-zinc-700 text-white"
+                          : "text-zinc-300 hover:text-white"
+                      }`}
+                    >
+                      All grades
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT — legend */}
+            <div className="p-3 space-y-2">
+              <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wide">
+                What the colors mean
+              </p>
+
+              {colorMode === "mastery" && (
+                <div className="grid grid-cols-1 gap-1">
+                  <LegendRow color="bg-blue-500" label="My grade level" />
+                  <LegendRow color="bg-yellow-500" label="Progressing" />
+                  <LegendRow color="bg-yellow-700" label="In review" />
+                  <LegendRow color="bg-emerald-500" label="Demonstrated" />
+                  <LegendRow color="bg-amber-500" label="Mastered" />
+                  {showOtherGradeSwatch && (
+                    <LegendRow color="bg-purple-600" label="Other grade" />
+                  )}
+                  <LegendRow color="bg-zinc-500" label="Locked" />
+                </div>
+              )}
+
+              {colorMode === "domain" && (
+                <div className="grid grid-cols-1 gap-1 max-h-48 overflow-y-auto pr-1">
+                  {CONCEPT_LEGEND.map((c) => (
+                    <div key={c.name} className="flex items-center gap-2">
+                      <div
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: c.color }}
+                      />
+                      <span className="text-[11px] text-zinc-200 leading-tight">{c.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Grade filter — only meaningful in "By progress" mode.
-              In "By concept" mode the colors aren't grade-aware, so the
-              toggle would be confusing. */}
-          {showGradeFilter && colorMode === "mastery" && (
-            <div className="p-4 border-b border-zinc-800 space-y-2">
-              <p className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wide">
-                Show
-              </p>
-              <div className="bg-zinc-800 rounded-lg flex overflow-hidden border border-zinc-700">
-                <button
-                  onClick={() => onGradeFilterChange("myGrade")}
-                  className={`flex-1 px-3 py-1.5 text-sm transition-colors ${
-                    gradeFilter === "myGrade"
-                      ? "bg-zinc-700 text-white"
-                      : "text-zinc-300 hover:text-white"
-                  }`}
-                >
-                  My grade
-                </button>
-                <button
-                  onClick={() => onGradeFilterChange("all")}
-                  className={`flex-1 px-3 py-1.5 text-sm transition-colors ${
-                    gradeFilter === "all"
-                      ? "bg-zinc-700 text-white"
-                      : "text-zinc-300 hover:text-white"
-                  }`}
-                >
-                  All grades
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Legend — by progress */}
-          {colorMode === "mastery" && (
-            <div className="p-4 space-y-2">
-              <p className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wide">
-                What the colors mean
-              </p>
-              <div className="grid grid-cols-1 gap-1.5">
-                <LegendRow color="bg-blue-500" label="My grade level" />
-                <LegendRow color="bg-yellow-500" label="Progressing" />
-                <LegendRow color="bg-emerald-500" label="Demonstrated" />
-                <LegendRow color="bg-amber-500" label="Mastered" />
-                {showOtherGradeSwatch && (
-                  <LegendRow color="bg-purple-600" label="Available, not your grade" />
-                )}
-                <LegendRow color="bg-zinc-500" label="Locked" />
-              </div>
-            </div>
-          )}
-
-          {/* Legend — by concept (math domain colors) */}
-          {colorMode === "domain" && (
-            <div className="p-4 space-y-2 max-h-64 overflow-y-auto">
-              <p className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wide">
-                What the colors mean
-              </p>
-              <div className="grid grid-cols-2 gap-y-1.5 gap-x-3">
-                {CONCEPT_LEGEND.map((c) => (
-                  <div key={c.name} className="flex items-center gap-2">
-                    <div
-                      className="w-2.5 h-2.5 rounded-full shrink-0"
-                      style={{ backgroundColor: c.color }}
-                    />
-                    <span className="text-xs text-zinc-200">{c.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -171,8 +170,8 @@ export function GalaxySettingsPopover({
 function LegendRow({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-2">
-      <div className={`w-2.5 h-2.5 rounded-full ${color} shrink-0`} />
-      <span className="text-xs text-zinc-200">{label}</span>
+      <div className={`w-2 h-2 rounded-full ${color} shrink-0`} />
+      <span className="text-[11px] text-zinc-200 leading-tight">{label}</span>
     </div>
   )
 }

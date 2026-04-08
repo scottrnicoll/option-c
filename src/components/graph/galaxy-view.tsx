@@ -382,7 +382,7 @@ export function GalaxyView({ galaxyData, onPlanetClick, onLockedPlanetClick, cur
     let frame: number
     const animate = () => {
       const fg = fgRef.current
-      if (fg && fg.scene) {
+      if (fg && typeof fg.scene === "function") {
         // Sync zoom slider from current camera distance
         const pos = fg.cameraPosition()
         const dist = Math.sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z)
@@ -391,7 +391,10 @@ export function GalaxyView({ galaxyData, onPlanetClick, onLockedPlanetClick, cur
         setZoomLevel(Math.round(level))
 
         const time = Date.now() * 0.001
-        fg.scene.traverse((obj: any) => {
+        // In react-force-graph-3d, fg.scene is a method that returns the
+        // THREE.Scene, not a property. Older versions exposed it as a
+        // property — call it as a function for the current version.
+        fg.scene().traverse((obj: any) => {
           if (obj.userData?.isPulse) {
             obj.scale.setScalar(1 + Math.sin(time * 2) * 0.15)
             obj.material.opacity = 0.2 + Math.sin(time * 2) * 0.1

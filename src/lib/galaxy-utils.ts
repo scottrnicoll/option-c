@@ -39,6 +39,14 @@ export interface GalaxyNode {
   moonCount: number
   unlockedCount: number
   availableCount: number
+  // Number of moons in any "in-progress-ish" state (in_progress,
+  // in_review, or approved_unplayed). Used for planet color.
+  inProgressCount: number
+  // Number of moons the learner can actively work on RIGHT NOW.
+  // Includes available (blue), in_progress, and approved_unplayed.
+  // EXCLUDES in_review (waiting on the guide). Used by the white-ring
+  // recommendation logic.
+  actionableCount: number
   // True when every moon is unlocked or mastered (planet turns green)
   isCompleted: boolean
   // True when every moon is mastered (planet earns the gold ring)
@@ -273,7 +281,8 @@ export function buildGalaxyData(
   const nodes: GalaxyNode[] = planets.map(planet => {
     let unlockedCount = 0
     let availableCount = 0
-    let inProgressCount = 0
+    let inProgressCount = 0   // includes in_review (used for planet color)
+    let actionableCount = 0   // excludes in_review (used for ring recommendation)
     let masteredCount = 0
     for (const std of planet.standards) {
       const status = progressMap.get(std.id) ?? "locked"
@@ -281,6 +290,9 @@ export function buildGalaxyData(
       if (status === "mastered") masteredCount++
       if (status === "available") availableCount++
       if (status === "in_progress" || status === "in_review" || status === "approved_unplayed") inProgressCount++
+      // "Actionable" = something the learner can DO right now.
+      // in_review is yellow but waiting on the guide → not actionable.
+      if (status === "in_progress" || status === "approved_unplayed") actionableCount++
     }
     // "Completed" planet = every moon green or gold (not just yellow).
     // Triggers the supernova when the last yellow flips to green.
@@ -333,6 +345,8 @@ export function buildGalaxyData(
       moonCount: planet.standards.length,
       unlockedCount,
       availableCount,
+      inProgressCount,
+      actionableCount,
       isCompleted,
       isFullyMastered,
       access,
@@ -431,11 +445,11 @@ export function buildMoonData(
         break
       case "in_review":
         size = 3.5
-        color = "#eab308" // yellow
+        color = "#a16207" // mustard — non-actionable, waiting on guide
         break
       case "approved_unplayed":
         size = 3.5
-        color = "#eab308" // yellow
+        color = "#eab308" // yellow — actionable (play to demonstrate)
         break
       case "unlocked":
         size = 3.5

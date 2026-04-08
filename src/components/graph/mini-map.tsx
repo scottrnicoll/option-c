@@ -107,7 +107,7 @@ export function MiniMap({
   return (
     <div className="absolute bottom-4 left-4 z-20" ref={containerRef}>
       <div
-        className="transition-all duration-300 ease-in-out overflow-hidden bg-zinc-900/95 backdrop-blur-sm border-2 border-zinc-600 rounded-xl shadow-lg"
+        className="transition-all duration-300 ease-in-out overflow-hidden bg-zinc-900/95 backdrop-blur-sm border-2 border-zinc-300 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.15)]"
         style={{
           width: expanded ? width : 64,
           height: expanded ? height + 100 : 64,

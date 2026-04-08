@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth"
 import { db } from "@/lib/firebase"
 import { collection, query, where, getDocs, doc, getDoc, setDoc } from "firebase/firestore"
 import { GameIframe } from "@/components/game/game-iframe"
-import { Star, Trophy } from "lucide-react"
+import { Trophy } from "lucide-react"
 import type { Game } from "@/lib/game-types"
 import type { FeedbackDoc } from "@/lib/feedback-types"
 
@@ -133,7 +133,7 @@ export function MasteryPlay({ standardId, onDemonstrated }: MasteryPlayProps) {
           </div>
           <div className="flex items-center gap-1">
             {[0, 1, 2].map((i) => (
-              <Star
+              <Trophy
                 key={i}
                 className={`size-5 ${i < wins ? "text-amber-400 fill-amber-400" : "text-zinc-600"}`}
               />
@@ -172,7 +172,7 @@ export function MasteryPlay({ standardId, onDemonstrated }: MasteryPlayProps) {
         <span className="text-sm text-zinc-300">Your streak</span>
         <div className="flex items-center gap-1">
           {[0, 1, 2].map((i) => (
-            <Star
+            <Trophy
               key={i}
               className={`size-5 ${i < wins ? "text-amber-400 fill-amber-400" : "text-zinc-600"}`}
             />
