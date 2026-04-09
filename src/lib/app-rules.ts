@@ -59,6 +59,17 @@ export const APP_RULES: RulesByRole = {
       ],
     },
     {
+      heading: "The 3 game criteria",
+      body: [
+        "Every game you build must meet 3 criteria before you can submit it. As you chat with the AI to design your game, these light up one by one.",
+        "🎮 PLAYABLE — Could a kid actually play this in a browser? Are the rules clear? Is the game finishable? You'll work on this in the chat.",
+        "🧠 AUTHENTIC — Does the math show up in a real way? Is the game truly about the math concept, not just decorated with it?",
+        "💎 ESSENTIAL — Is the math the CORE of the game? If you removed the math, would the game still work? If yes, the math isn't essential — the game just has a math sticker on it.",
+        "If you pick one of the 3 game ideas suggested when you open a moon, AUTHENTIC and ESSENTIAL are already checked for you — those ideas were designed to embody the math. You only need to work on PLAYABLE.",
+        "If you describe your own game from scratch, the AI will check all 3 criteria with you in the chat.",
+      ],
+    },
+    {
       heading: "How to master a skill (gold star)",
       body: [
         "After your moon is green, play other learners' games on the same skill.",
