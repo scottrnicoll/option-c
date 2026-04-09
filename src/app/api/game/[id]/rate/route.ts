@@ -1,5 +1,5 @@
-import { db } from "@/lib/firebase"
-import { doc, getDoc, updateDoc, increment, arrayUnion } from "firebase/firestore"
+import { getAdminDb } from "@/lib/firebase-admin"
+import { FieldValue } from "firebase-admin/firestore"
 
 export async function POST(
   req: Request,
@@ -18,17 +18,18 @@ export async function POST(
     )
   }
 
-  const snap = await getDoc(doc(db, "games", id))
-  if (!snap.exists()) {
+  const adminDb = getAdminDb()
+  const snap = await adminDb.collection("games").doc(id).get()
+  if (!snap.exists) {
     return Response.json({ error: "Not found" }, { status: 404 })
   }
 
-  await updateDoc(doc(db, "games", id), {
-    ratingSum: increment(rating),
-    ratingCount: increment(1),
+  await adminDb.collection("games").doc(id).update({
+    ratingSum: FieldValue.increment(rating),
+    ratingCount: FieldValue.increment(1),
     // Store the rating-with-comment privately so guides + admins + the
     // author can see it. Visible only to those parties (enforced in UI).
-    privateReviews: arrayUnion({
+    privateReviews: FieldValue.arrayUnion({
       rating,
       comment: comment.trim(),
       raterUid: raterUid || "",

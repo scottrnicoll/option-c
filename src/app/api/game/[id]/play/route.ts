@@ -1,8 +1,8 @@
 // Increment a game's playCount. Called once per session by the game player
 // (the client guards against double-counting and skips author's own plays).
 
-import { db } from "@/lib/firebase"
-import { doc, updateDoc, increment } from "firebase/firestore"
+import { getAdminDb } from "@/lib/firebase-admin"
+import { FieldValue } from "firebase-admin/firestore"
 
 export async function POST(
   _req: Request,
@@ -10,8 +10,9 @@ export async function POST(
 ) {
   const { id } = await params
   try {
-    await updateDoc(doc(db, "games", id), {
-      playCount: increment(1),
+    const adminDb = getAdminDb()
+    await adminDb.collection("games").doc(id).update({
+      playCount: FieldValue.increment(1),
     })
     return Response.json({ ok: true })
   } catch (err) {

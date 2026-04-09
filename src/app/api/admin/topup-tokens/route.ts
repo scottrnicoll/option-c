@@ -8,12 +8,12 @@
 // as the admin. Idempotent — uses a per-user "tokenTopupAt" timestamp so
 // it won't double-pay if you hit it twice.
 
-import { db } from "@/lib/firebase"
-import { collection, getDocs, doc, updateDoc, query, where } from "firebase/firestore"
+import { getAdminDb } from "@/lib/firebase-admin"
 
 export async function POST() {
   try {
-    const usersSnap = await getDocs(query(collection(db, "users"), where("role", "==", "student")))
+    const adminDb = getAdminDb()
+    const usersSnap = await adminDb.collection("users").where("role", "==", "student").get()
     let topped = 0
     let skipped = 0
     let totalAwarded = 0
@@ -26,19 +26,19 @@ export async function POST() {
       }
 
       // Count this student's published games
-      const gamesSnap = await getDocs(
-        query(
-          collection(db, "games"),
-          where("authorUid", "==", user.uid),
-          where("status", "==", "published")
-        )
-      )
+      const gamesSnap = await adminDb
+        .collection("games")
+        .where("authorUid", "==", user.uid)
+        .where("status", "==", "published")
+        .get()
       const publishedGameCount = gamesSnap.size
 
       // Count this student's mastered standards
-      const progressSnap = await getDocs(
-        collection(db, "progress", user.uid, "standards")
-      )
+      const progressSnap = await adminDb
+        .collection("progress")
+        .doc(user.uid)
+        .collection("standards")
+        .get()
       let masteredCount = 0
       progressSnap.forEach((d) => {
         if ((d.data() as { status?: string }).status === "mastered") masteredCount++
@@ -46,7 +46,7 @@ export async function POST() {
 
       const award = publishedGameCount * 2000 + masteredCount * 100
       if (award > 0) {
-        await updateDoc(doc(db, "users", user.uid), {
+        await adminDb.collection("users").doc(user.uid).update({
           tokens: (user.tokens ?? 0) + award,
           tokenTopupAt: Date.now(),
         })
@@ -54,7 +54,7 @@ export async function POST() {
         totalAwarded += award
       } else {
         // Mark anyway so we don't recount on next run
-        await updateDoc(doc(db, "users", user.uid), { tokenTopupAt: Date.now() })
+        await adminDb.collection("users").doc(user.uid).update({ tokenTopupAt: Date.now() })
       }
     }
 

@@ -1,5 +1,5 @@
-import { db } from "@/lib/firebase"
-import { doc, getDoc, updateDoc, setDoc, arrayUnion, increment } from "firebase/firestore"
+import { getAdminDb } from "@/lib/firebase-admin"
+import { FieldValue } from "firebase-admin/firestore"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -10,13 +10,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return Response.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const gameRef = doc(db, "games", id)
-    const gameSnap = await getDoc(gameRef)
-    if (!gameSnap.exists()) {
+    const adminDb = getAdminDb()
+    const gameSnap = await adminDb.collection("games").doc(id).get()
+    if (!gameSnap.exists) {
       return Response.json({ error: "Game not found" }, { status: 404 })
     }
 
-    const game = gameSnap.data()
+    const game = gameSnap.data()!
 
     // Can't review your own game
     if (game.authorUid === reviewerUid) {
@@ -32,7 +32,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
 
     const updates: Record<string, unknown> = {
-      reviews: arrayUnion(review),
+      reviews: FieldValue.arrayUnion(review),
     }
 
     if (approved) {
@@ -40,19 +40,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       updates.approvedBy = reviewerUid
     }
 
-    await updateDoc(gameRef, updates)
+    await adminDb.collection("games").doc(id).update(updates)
 
     // If approved, award +2000 tokens AND move the standard to
     // "approved_unplayed" — student still needs to win 3 in a row on
     // their own game to flip it to fully unlocked (green).
     if (approved && game.authorUid && game.standardId) {
-      const authorRef = doc(db, "users", game.authorUid)
-      await updateDoc(authorRef, { tokens: increment(2000) })
-      await setDoc(
-        doc(db, "progress", game.authorUid, "standards", game.standardId),
-        { status: "approved_unplayed", approvedAt: Date.now() },
-        { merge: true }
-      )
+      await adminDb.collection("users").doc(game.authorUid).update({
+        tokens: FieldValue.increment(2000),
+      })
+      await adminDb
+        .collection("progress")
+        .doc(game.authorUid)
+        .collection("standards")
+        .doc(game.standardId)
+        .set(
+          { status: "approved_unplayed", approvedAt: Date.now() },
+          { merge: true }
+        )
     }
 
     return Response.json({

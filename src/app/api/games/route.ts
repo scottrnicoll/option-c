@@ -1,5 +1,4 @@
-import { db } from "@/lib/firebase"
-import { collection, query, where, getDocs } from "firebase/firestore"
+import { getAdminDb } from "@/lib/firebase-admin"
 
 // NOTE: deliberately no orderBy in the Firestore query — combining
 // where(...) + orderBy(...) requires a Firestore composite index, and
@@ -13,21 +12,13 @@ export async function GET(req: Request) {
     const classId = url.searchParams.get("classId")
     const status = url.searchParams.get("status") || "published"
 
-    let q
+    const adminDb = getAdminDb()
+    let q: FirebaseFirestore.Query = adminDb.collection("games").where("status", "==", status)
     if (classId) {
-      q = query(
-        collection(db, "games"),
-        where("status", "==", status),
-        where("classId", "==", classId)
-      )
-    } else {
-      q = query(
-        collection(db, "games"),
-        where("status", "==", status)
-      )
+      q = q.where("classId", "==", classId)
     }
 
-    const snap = await getDocs(q)
+    const snap = await q.get()
     const games = snap.docs.map((d) => {
       const data = d.data()
       const { gameHtml: _gameHtml, ...meta } = data

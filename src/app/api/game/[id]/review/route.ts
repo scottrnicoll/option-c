@@ -1,6 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk"
-import { db } from "@/lib/firebase"
-import { doc, getDoc, updateDoc } from "firebase/firestore"
+import { getAdminDb } from "@/lib/firebase-admin"
 
 export const maxDuration = 30
 
@@ -11,13 +10,14 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const snap = await getDoc(doc(db, "games", id))
+  const adminDb = getAdminDb()
+  const snap = await adminDb.collection("games").doc(id).get()
 
-  if (!snap.exists()) {
+  if (!snap.exists) {
     return Response.json({ error: "Not found" }, { status: 404 })
   }
 
-  const game = snap.data()
+  const game = snap.data()!
   const html = game.gameHtml as string
   const designDoc = game.designDoc as { concept?: string; title?: string }
 
@@ -51,7 +51,7 @@ ${html.slice(0, 8000)}`,
     const result = JSON.parse(cleaned)
 
     if (result.pass) {
-      await updateDoc(doc(db, "games", id), {
+      await adminDb.collection("games").doc(id).update({
         status: "published",
         updatedAt: Date.now(),
       })

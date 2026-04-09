@@ -1,12 +1,11 @@
-import { db } from "@/lib/firebase"
-import { collection, doc, setDoc } from "firebase/firestore"
+import { getAdminDb } from "@/lib/firebase-admin"
 
 export async function POST(req: Request) {
   const game = await req.json()
-  const gamesRef = collection(db, "games")
-  const gameId = game.id || doc(gamesRef).id
+  const adminDb = getAdminDb()
+  const gameId = game.id || adminDb.collection("games").doc().id
 
-  await setDoc(doc(db, "games", gameId), {
+  await adminDb.collection("games").doc(gameId).set({
     ...game,
     id: gameId,
     reviews: game.reviews || [],
