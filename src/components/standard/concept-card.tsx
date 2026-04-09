@@ -144,14 +144,17 @@ function GameTemplates({
         Game ideas
       </p>
       <p className="text-xs text-zinc-500 -mt-1">
-        Pick the shape of your game. You decide the world in the next step.
+        Pick the basic player action of your game. You&apos;ll decide the specifics in the next step.
       </p>
 
       <div className="space-y-2">
         {templates.map((t, i) => {
-          // Seed message: describe the template but let the learner fill
-          // in the theme in chat. The Genie will ask what world they want.
-          const seed = `I want to build a game where you ${t.description.toLowerCase().replace(/\.$/, "")}. I haven't decided on the theme yet — help me pick something fun.`
+          // Seed message: terse, non-declarative — just names which
+          // template the learner picked. The chat picks it up from
+          // there and walks them through theme/action/win-condition.
+          // (Verbose seeds caused the AI to grade the mechanic as if
+          // it were a fresh idea instead of treating it as pre-verified.)
+          const seed = `I picked the "${t.title}" template.`
           // On read-only moons (locked / in_review / already mastered)
           // we render the same card but as a disabled div with a
           // "Locked" pill instead of the Build → action.

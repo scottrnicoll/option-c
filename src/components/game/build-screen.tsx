@@ -31,7 +31,7 @@ function buildNarrationSequence(designDoc: GameDesignDoc): NarrationItem[] {
 
 type Phase = "narration" | "visualConcept" | "vibe" | "generating" | "done"
 
-type Vibe = "arcade" | "c64" | "cute" | "sketch"
+type Vibe = "arcade" | "c64" | "kawaii" | "stickman"
 
 export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
   const narrationSequence = buildNarrationSequence(designDoc)
@@ -255,9 +255,9 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
                   </div>
                 </div>
               </button>
-              {/* Cute */}
+              {/* Kawaii (was: Cute) */}
               <button
-                onClick={() => handleVibePick("cute")}
+                onClick={() => handleVibePick("kawaii")}
                 className="w-full p-4 rounded-xl border-2 border-pink-300/60 hover:border-pink-300 transition-all text-left"
                 style={{
                   background: "linear-gradient(135deg, #fef9c3 0%, #ffe4e6 100%)",
@@ -266,27 +266,27 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
                 }}
               >
                 <div className="flex items-center gap-3 mb-1">
-                  <span className="text-2xl">🎀</span>
+                  <span className="text-2xl">🥹</span>
                   <div>
-                    <p className="text-sm font-bold" style={{ color: "#9d174d" }}>Cute</p>
-                    <p className="text-xs" style={{ color: "#831843" }}>Soft pastels, sparkles, pretty things</p>
+                    <p className="text-sm font-bold" style={{ color: "#9d174d" }}>Kawaii</p>
+                    <p className="text-xs" style={{ color: "#831843" }}>Chubby characters, big shiny eyes</p>
                   </div>
                 </div>
               </button>
-              {/* Sketch */}
+              {/* Stick Man (was: Sketch) */}
               <button
-                onClick={() => handleVibePick("sketch")}
+                onClick={() => handleVibePick("stickman")}
                 className="w-full p-4 rounded-xl border-2 border-zinc-600 hover:border-zinc-400 transition-all text-left"
                 style={{
-                  background: "#fdfcf7",
+                  background: "#18181b",
                   fontFamily: "'Patrick Hand', cursive",
                 }}
               >
                 <div className="flex items-center gap-3 mb-1">
                   <span className="text-2xl">✏️</span>
                   <div>
-                    <p className="text-sm font-bold" style={{ color: "#1f2937" }}>Sketch</p>
-                    <p className="text-xs" style={{ color: "#374151" }}>Hand-drawn stick figures on paper</p>
+                    <p className="text-sm font-bold" style={{ color: "#e4e4e7" }}>Stick Man</p>
+                    <p className="text-xs" style={{ color: "#a1a1aa" }}>Faceless stick figures on dark zinc</p>
                   </div>
                 </div>
               </button>
@@ -297,7 +297,7 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
           {phase === "generating" && (
             <div className="space-y-4">
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-1.5">
-                <p className="text-xs text-zinc-500 uppercase tracking-wide mb-2">Building this in {vibe === "arcade" ? "Arcade" : vibe === "c64" ? "Retro Game" : vibe === "cute" ? "Cute" : "Sketch"} style:</p>
+                <p className="text-xs text-zinc-500 uppercase tracking-wide mb-2">Building this in {vibe === "arcade" ? "Arcade" : vibe === "c64" ? "Retro Game" : vibe === "kawaii" ? "Kawaii" : "Stick Man"} style:</p>
                 {visualBullets.map((b, i) => (
                   <p key={i} className="text-sm text-zinc-200">{b}</p>
                 ))}

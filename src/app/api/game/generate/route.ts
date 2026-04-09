@@ -77,11 +77,13 @@ Vocabulary:
   This is the 1982 home computer aesthetic. Embrace it.
 `,
   },
-  cute: {
-    label: "Cute",
+  kawaii: {
+    label: "Kawaii",
     allowPastels: true,
     spec: `
-🎀 CUTE VIBE — soft pastel, kawaii-inspired but NOT cheesy:
+🎀 KAWAII VIBE — chubby characters with big shiny googly eyes, soft
+pastel world. Think Sanrio / Studio Ghibli soot-sprite cuteness, not
+sticker-book cheese.
 
 Color palette (use ONLY these soft pastels):
   Background:   #fff1f2 (very pale rose) or a vertical gradient from #fef9c3 (cream) to #ffe4e6 (rose)
@@ -99,16 +101,40 @@ Typography:
   font-weight 600 for body, 700 for headings.
   Generous letter-spacing on headings (0.02em).
 
+🥹 KAWAII CHARACTERS — exact specification:
+  Use SVG-drawn chubby characters, NOT emoji. Each character must have:
+
+  - A round, chubby BODY: a single soft circle or a slightly squished
+    oval (wider than tall), pastel-filled, ~50-70px diameter. Think
+    a marshmallow or a dumpling shape.
+  - SHINY GOOGLY EYES: two large round black eyes set wide apart on
+    the upper third of the body. Each eye has a small white highlight
+    circle inside (offset to the upper-right of the eye) to make it
+    look glossy and reflective. Eye size ~30% of head width. The
+    highlight is what makes them "shiny googly eyes" — never omit it.
+  - A tiny MOUTH: a small "ω" shape, a sideways "3", or a soft curve.
+    Optional small pink blush dots on the cheeks (#fda4af, opacity 0.5).
+  - Small stub ARMS and LEGS: short rounded rectangles or stubby
+    paws sticking out from the body. They should look too small for
+    the body — that's what makes them chubby and cute.
+  - Optional ears, tail, or flower on top depending on the character:
+    cat ears (two small triangles), bunny ears (two long ovals), a
+    little leaf, etc.
+
+  Example mental model: a Pokémon's basic form, a Tamagotchi, a
+  Studio Ghibli soot sprite, or a kawaii sticker character. NOT a
+  generic cartoon mascot.
+
 Effects:
   - Gentle gradient or solid pastel background. NO black backgrounds, NO neon, NO scanlines.
   - Everything has soft rounded corners (border-radius 12-24px).
   - Buttons have a soft shadow (box-shadow: 0 4px 12px rgba(244, 114, 182, 0.25)).
-  - Sprinkle a FEW decorative emoji floating gently in the background: 🌸 ✨ 💖 ⭐ ☁️ 🌷 (max 6-8 total).
-  - Use big emoji as game characters (50px+) — prefer cute ones: 🐱 🐰 🦄 🐼 🐻 🌸 🍰 🍓 ⭐ 🌙 ☁️ 🦋 🐝 🌷.
+  - Sprinkle a FEW decorative emoji floating gently in the background: 🌸 ✨ 💖 ⭐ ☁️ 🌷 (max 6-8 total). These are background decoration only — the main characters are SVG-drawn chubby creatures, NOT emoji.
   - On wins, briefly pop heart sparkles ✨💖 with a CSS keyframe animation (fade + scale).
   - Animations are gentle and bouncy (cubic-bezier with ease-out, no harsh step()).
+  - Characters can have a tiny "breathing" idle animation: scale 1.0 → 1.03 → 1.0 over 2-3 seconds.
 
-🚫 BUT NOT CHEESY — ban these even though it's the cute vibe:
+🚫 BUT NOT CHEESY — ban these even though it's the kawaii vibe:
   - NO rainbows everywhere (one rainbow OK as accent, not 5)
   - NO unicorn spam (one cute character is fine)
   - NO "OMG!", "yay!", "so cute!" in UI text — keep copy calm and respectful
@@ -121,19 +147,23 @@ Vocabulary:
   This is for learners who like soft, pretty things — not condescending.
 `,
   },
-  sketch: {
-    label: "Sketch",
+  stickman: {
+    label: "Stick Man",
     allowSketch: true,
     spec: `
-✏️ SKETCH VIBE — hand-drawn notebook aesthetic:
+✏️ STICK MAN VIBE — hand-drawn notebook aesthetic, using the Diagonally
+unified stick figure style:
 
 Color palette (use ONLY these):
-  Background:   #fdfcf7 (warm paper white) — apply a subtle paper texture using a CSS background of repeating noise or a tiny grain pattern.
-  Ink:          #1f2937 (near-black, wobbly handwritten ink)
-  Faint grid:   #e5e7eb at 0.4 opacity — optional notebook ruling lines or grid
-  Accent:       #dc2626 (red ink for highlights, like a teacher's pen)
-  Light accent: #fde68a (highlighter yellow) — use sparingly for selected items
-  Text:         #1f2937
+  Background:   #18181b (dark zinc — matches the Diagonally mechanic
+                illustration backgrounds, NOT a paper white)
+  Figure:       #e4e4e7 (light zinc — the standard stick figure stroke
+                color used across all our mechanic SVGs)
+  Accent:       #60a5fa (blue) for interactive items / props
+  Highlight:    #fbbf24 (amber) for stars, points, success markers
+  Success:      #22c55e (green) for win states and completed elements
+  Danger:       #ef4444 (red) for failure / wrong moves
+  Text:         #e4e4e7 (light) on the dark background
 
 Typography:
   @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
@@ -141,23 +171,52 @@ Typography:
   font-size 22-30px (handwriting needs to be bigger to read).
 
 Effects:
-  - Paper background — use a CSS background-image with a subtle paper grain or just solid #fdfcf7.
-  - All borders are 2-3px solid #1f2937 with a slightly imperfect feel (use border-radius: 4px max — no perfectly round shapes).
-  - Lines are 1.5-2.5px thick.
-  - NO drop shadows. NO glow. NO gradients.
-  - Add a subtle "wobble" animation to characters: a CSS keyframe that translates by 1-2px and rotates by 0.5-1deg, creating a hand-shake feel.
-  - Optional: faint horizontal notebook lines across the background.
+  - Solid dark zinc background (#18181b).
+  - All shape strokes are 2-2.5px solid #e4e4e7. Lines are crisp, no
+    wobble — clean diagram-style.
+  - NO drop shadows. NO glow. NO gradients. NO paper texture.
+  - NO rounded corners on borders.
 
-🎨 SKETCH CHARACTERS — special rule:
-  Unlike other vibes, this vibe USES STICK FIGURES AND SIMPLE LINE DRAWINGS, NOT EMOJI.
-  - The player and other characters are stick figures drawn in SVG: head circle, body line, arm lines, leg lines, all in #1f2937 ink.
-  - Items can be simple line-drawn shapes (a square with squiggles for a box, a triangle with a base for a mountain, etc.).
-  - You CAN use emoji for tiny decorations (a star, a heart) but NEVER as the main character.
-  - Stick figures should wobble or step like the ones in Diagonally's mechanic illustrations.
+🎨 STICK MAN CHARACTERS — exact specification (matches our mechanic SVGs):
+  Use SVG stick figures with these EXACT proportions, identical to the
+  Diagonally mechanic illustrations:
+
+  - Head: a faceless circle, radius 6-8px, stroke #e4e4e7 stroke-width 2,
+    NO eyes, NO mouth, NO smile. Just an empty circle.
+  - Neck gap: the body line starts 2px BELOW the head circle so it
+    never enters the head.
+  - Body (torso): a single straight vertical line from neck (just
+    below head) to hip, total length ~14-16px. Short torso, not long.
+  - Arms: 2 straight lines from the shoulder pivot (top of body),
+    each ~9-12px long, can rotate via CSS keyframes for waving /
+    holding props.
+  - Legs: 2 SINGLE-SEGMENT straight lines from the hip pivot, each
+    ~11-14px long. NO knees, NO bend, NO joints. Just straight lines
+    that swing from the hip to simulate walking.
+  - Walking: animate each leg with a wide-arc rotation (±22 degrees)
+    from the hip. The figure should also translateX horizontally to
+    show actual walking motion, not just leg-waving in place.
+  - Floating gait: the body bobs up and down 1-2px during the walk
+    cycle for a "floaty" feel.
+
+  Items / props in the world should also be simple line drawings in
+  the same #e4e4e7 stroke style: a square with a stroke for a box,
+  a triangle for a mountain, a circle for a ball. Filled rectangles
+  in the accent colors (#60a5fa, #fbbf24, #22c55e) are OK for things
+  the player interacts with — they pop against the dark background.
+
+  - You CAN use small filled accent shapes for collectibles (yellow
+    circles for coins, green squares for goals).
+  - NEVER use emoji as a main character or game element. Tiny emoji
+    are OK only as decorative flourishes (a star above a head, etc).
 
 Vocabulary:
-  Score panel: "Score:" (handwritten feel). Win: "you win!" (lowercase, like a kid wrote it).
-  This looks like a math notebook came to life.
+  Score panel: "Score:" (handwritten feel). Win: "you win!" (lowercase,
+  like a kid wrote it).
+
+  This is the Diagonally house style — every game built in Stick Man
+  vibe should feel like it could be one of the mechanic illustrations
+  from the moon panels, but playable.
 `,
   },
 }
