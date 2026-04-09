@@ -236,7 +236,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Returning-student login: look up by personal code + name, then migrate
   // their data to a new anonymous uid.
   const signInReturning = useCallback(async (name: string, personalCode: string) => {
-    // 1. Find the existing student by personal code
+    // 1. Sign in anonymously FIRST so the Firestore queries below run as
+    //    an authenticated user. Without this, the users-by-personalCode
+    //    query is rejected by Firestore rules with "Missing or
+    //    insufficient permissions."
+    let currentUser = auth.currentUser
+    if (!currentUser) {
+      const cred = await signInAnonymously(auth)
+      currentUser = cred.user
+    }
+
+    // 2. Find the existing student by personal code
     const normalizedCode = personalCode.trim().toUpperCase()
     const codeQuery = query(
       collection(db, "users"),
@@ -249,16 +259,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const existingDoc = codeSnap.docs[0]
     const existingData = existingDoc.data() as UserProfile
 
-    // 2. Second factor: name must match (case-insensitive, trimmed)
+    // 3. Second factor: name must match (case-insensitive, trimmed)
     if (existingData.name.trim().toLowerCase() !== name.trim().toLowerCase()) {
       throw new Error("That code doesn't match the name. Try again.")
-    }
-
-    // 3. Sign in anonymously to get a new uid
-    let currentUser = auth.currentUser
-    if (!currentUser) {
-      const cred = await signInAnonymously(auth)
-      currentUser = cred.user
     }
 
     // 4. Copy the profile to the new uid and migrate data
