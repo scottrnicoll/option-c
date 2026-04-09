@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { sendPasswordResetEmail } from "firebase/auth"
 import { auth } from "@/lib/firebase"
+import { Logo } from "@/components/logo"
 
 export default function GuideLoginPage() {
   const { signInGuide, signInGuideWithGoogle, user, profile, loading, signOut } = useAuth()
@@ -63,9 +64,12 @@ export default function GuideLoginPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
       <div className="max-w-sm w-full space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Guide Login</h1>
-          <p className="text-zinc-400 text-sm mt-1">Sign in to view your class</p>
+        <div className="text-center flex flex-col items-center gap-3">
+          <Logo size={48} className="text-emerald-400" />
+          <div>
+            <h1 className="text-2xl font-bold text-white">Guide Login</h1>
+            <p className="text-zinc-400 text-sm mt-1">Sign in to view your class</p>
+          </div>
         </div>
 
         <form onSubmit={handleEmailLogin} className="space-y-4">

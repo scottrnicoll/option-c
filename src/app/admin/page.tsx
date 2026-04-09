@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { FeedbackInbox } from "@/components/feedback/feedback-inbox"
 import { UserMenu } from "@/components/user-menu"
+import { Logo } from "@/components/logo"
 import { GamePlayer } from "@/components/game/game-player"
 import { Play } from "lucide-react"
 
@@ -511,6 +512,7 @@ export default function AdminDashboardPage() {
       <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <Logo size={28} className="text-blue-400" />
             <h1 className="text-lg font-bold">Diagonally</h1>
             <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-medium">
               Admin

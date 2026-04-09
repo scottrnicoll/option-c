@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Logo } from "@/components/logo"
 import { useAuth } from "@/lib/auth"
 import { doc, updateDoc, getDoc } from "firebase/firestore"
 import { db, auth } from "@/lib/firebase"
@@ -59,6 +60,7 @@ function WelcomeChoiceStep({
 }) {
   return (
     <div className="flex flex-col items-center gap-6">
+      <Logo size={56} className="text-blue-400" />
       <h1 className="text-3xl font-bold text-white text-center">Welcome to Diagonally</h1>
       <p className="text-zinc-400 text-sm text-center">
         Are you new here, or coming back?

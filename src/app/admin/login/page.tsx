@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth"
 import { auth } from "@/lib/firebase"
+import { Logo } from "@/components/logo"
 
 export default function AdminLoginPage() {
   const { profile, loading } = useAuth()
@@ -72,9 +73,12 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
       <div className="max-w-sm w-full space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Admin Login</h1>
-          <p className="text-zinc-400 text-sm mt-1">Sign in to manage Diagonally</p>
+        <div className="text-center flex flex-col items-center gap-3">
+          <Logo size={48} className="text-blue-400" />
+          <div>
+            <h1 className="text-2xl font-bold text-white">Admin Login</h1>
+            <p className="text-zinc-400 text-sm mt-1">Sign in to manage Diagonally</p>
+          </div>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
