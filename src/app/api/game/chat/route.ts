@@ -1,6 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk"
 
-export const maxDuration = 60
+// 60s was too tight — refining a full HTML game can take 40-90 seconds
+// when the existing game is large. Some kids were seeing "connection
+// error" because the route timed out mid-generation. Vercel's hard limit
+// for hobby/free plans is 60s; pro plans allow up to 300. 120s is the
+// safe middle ground.
+export const maxDuration = 120
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
@@ -19,7 +24,10 @@ async function callAnthropic(
     try {
       const response = await anthropic.messages.create({
         model: "claude-sonnet-4-5-20250929",
-        max_tokens: 8000,
+        // Bumped from 8000 → 12000 because some games were getting
+        // truncated mid-HTML, leaving the kid with broken markup
+        // they couldn't recover from.
+        max_tokens: 12000,
         system,
         messages: [{ role: "user", content: userContent }],
       })
@@ -112,8 +120,17 @@ All CSS and JavaScript must remain inline.`
     return Response.json({ html, ...(reply ? { reply } : {}) })
   } catch (error) {
     console.error("Chat API error:", error)
+    // Tell the kid what's actually happening so they can decide whether
+    // to wait, retry, or try a smaller change. The old "Connection
+    // error. Please try again." was vague and unhelpful.
+    const errMsg = error instanceof Error ? error.message : String(error)
+    const isTimeout = errMsg.toLowerCase().includes("timeout") || errMsg.toLowerCase().includes("aborted")
     return Response.json(
-      { error: "Still working on it... please try again in a moment." },
+      {
+        error: isTimeout
+          ? "That took too long. Try a smaller change — describe one thing at a time."
+          : "Something went wrong on my end. Try sending your message again in a few seconds.",
+      },
       { status: 500 }
     )
   }
