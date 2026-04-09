@@ -153,7 +153,7 @@ Effects:
   - The player and other characters are stick figures drawn in SVG: head circle, body line, arm lines, leg lines, all in #1f2937 ink.
   - Items can be simple line-drawn shapes (a square with squiggles for a box, a triangle with a base for a mountain, etc.).
   - You CAN use emoji for tiny decorations (a star, a heart) but NEVER as the main character.
-  - Stick figures should wobble or step like the ones in Option C's mechanic illustrations.
+  - Stick figures should wobble or step like the ones in Diagonally's mechanic illustrations.
 
 Vocabulary:
   Score panel: "Score:" (handwritten feel). Win: "you win!" (lowercase, like a kid wrote it).

@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
       <div className="max-w-sm w-full space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white">Admin Login</h1>
-          <p className="text-zinc-400 text-sm mt-1">Sign in to manage Option C</p>
+          <p className="text-zinc-400 text-sm mt-1">Sign in to manage Diagonally</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">

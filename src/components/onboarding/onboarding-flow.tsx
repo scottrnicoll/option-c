@@ -59,7 +59,7 @@ function WelcomeChoiceStep({
 }) {
   return (
     <div className="flex flex-col items-center gap-6">
-      <h1 className="text-3xl font-bold text-white text-center">Welcome to Option C</h1>
+      <h1 className="text-3xl font-bold text-white text-center">Welcome to Diagonally</h1>
       <p className="text-zinc-400 text-sm text-center">
         Are you new here, or coming back?
       </p>

@@ -21,9 +21,9 @@ export interface RulesByRole {
 export const APP_RULES: RulesByRole = {
   shared: [
     {
-      heading: "What is Option C?",
+      heading: "What is Diagonally?",
       body: [
-        "Option C is a galaxy of math skills. Each planet is a math topic at one grade level (e.g. Geometry Grade 2). Each moon orbiting a planet is a single math skill.",
+        "Diagonally is a galaxy of math skills. Each planet is a math topic at one grade level (e.g. Geometry Grade 2). Each moon orbiting a planet is a single math skill.",
         "Learners pick a moon, learn the concept, build a small game that proves the concept works, and earn tokens once a guide approves the game.",
       ],
     },

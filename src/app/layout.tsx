@@ -11,7 +11,7 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Option C",
+  title: "Diagonally",
   description: "Interactive knowledge graph of math standards",
 };
 

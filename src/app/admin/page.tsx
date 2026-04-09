@@ -511,7 +511,7 @@ export default function AdminDashboardPage() {
       <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold">Option C</h1>
+            <h1 className="text-lg font-bold">Diagonally</h1>
             <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-medium">
               Admin
             </span>
