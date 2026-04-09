@@ -987,7 +987,6 @@ export function GraphPage({ data }: GraphPageProps) {
         onDemonstrated={handleDemonstrated}
         onBuildGame={handleBuildGame}
         onImportHtml={handleImportHtml}
-        interests={studentData?.interests}
         nodeStatus={selectedStandard ? progressMap.get(selectedStandard.id) : undefined}
       />
 

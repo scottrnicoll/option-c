@@ -4,10 +4,14 @@ import { useState, useEffect, useCallback, useMemo } from "react"
 import type { StandardNode } from "@/lib/graph-types"
 import { matchMechanics } from "@/lib/mechanic-animations"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Pencil, Volume2, VolumeX } from "lucide-react"
-import type { ReactNode } from "react"
+import { Volume2, VolumeX, Sparkles } from "lucide-react"
+
+interface Template {
+  title: string
+  description: string
+  examples: string[]
+}
 
 type ReadingLevel = "simpler" | "default" | "challenge"
 
@@ -18,36 +22,139 @@ interface Explanation {
   formula?: string
 }
 
-function ConceptIllustration({ mechanicSvg, mechanicTitle }: { mechanicSvg: ReactNode; mechanicTitle: string }) {
-  return (
-    <div className="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900">
-      <div className="w-full">{mechanicSvg}</div>
-      <p className="text-xs text-zinc-400 text-center py-2 border-t border-zinc-800">
-        Example: {mechanicTitle}
-      </p>
-    </div>
-  )
-}
-
-function GameMechanics({ description, domainCode }: {
-  standardId: string; description: string; grade: string; interests?: string[]; domainCode: string
+// Game-mechanic templates — generic player-action blueprints with
+// example worlds the kid could place the mechanic in. The learner picks
+// a template and then fills in the theme themselves in the chat.
+//
+// Each template is paired with the matched stick-figure animation for
+// this standard, so the kid SEES the verb being performed before
+// picking a template. The animation is the same across all templates
+// for a given standard (they share the same verb by design).
+function GameTemplates({
+  standard,
+  onPick,
+}: {
+  standard: StandardNode
+  onPick: (seedMessage: string) => void
 }) {
-  const matched = useMemo(() => matchMechanics(description, domainCode), [description, domainCode])
+  const [templates, setTemplates] = useState<Template[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
-  if (matched.length === 0) return null
+  // The stick-figure animation for this standard — shown once above the
+  // template cards. Kids watch the verb in action (10s loop) while they
+  // read the templates.
+  const topMechanic = useMemo(() => {
+    const matched = matchMechanics(standard.description, standard.domainCode)
+    return matched[0] ?? null
+  }, [standard.description, standard.domainCode])
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(false)
+    fetch("/api/templates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        standardId: standard.id,
+        description: standard.description,
+        grade: standard.grade,
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return
+        if (Array.isArray(data?.templates) && data.templates.length > 0) {
+          setTemplates(data.templates as Template[])
+        } else {
+          setError(true)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setError(true)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [standard.id, standard.description, standard.grade])
+
+  if (loading) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-zinc-300 font-medium flex items-center gap-1.5">
+          <Sparkles className="size-4 text-blue-400" />
+          Game ideas
+        </p>
+        <div className="space-y-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-24 bg-zinc-800/50 border border-zinc-800 rounded-xl animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !templates || templates.length === 0) {
+    // Fall back silently — the "describe your own game" link below
+    // still works as an escape hatch.
+    return null
+  }
 
   return (
-    <div className="space-y-2">
-      <p className="text-sm text-zinc-300 font-medium">Possible player actions for your game</p>
-      <div className="grid grid-cols-3 gap-2">
-        {matched.map((m) => (
-          <div key={m.id} className="flex flex-col items-center gap-1">
-            <div className="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 w-full">
-              {m.svg}
-            </div>
-            <p className="text-xs text-zinc-400 text-center leading-tight">{m.title}</p>
-          </div>
-        ))}
+    <div className="space-y-3">
+      <p className="text-sm text-zinc-300 font-medium flex items-center gap-1.5">
+        <Sparkles className="size-4 text-blue-400" />
+        Game ideas
+      </p>
+      <p className="text-xs text-zinc-500 -mt-1">
+        Pick the shape of your game. You decide the world in the next step.
+      </p>
+
+      {/* Shared stick-figure demo for this standard — shows the VERB */}
+      {topMechanic && (
+        <div className="rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900">
+          <div className="w-full">{topMechanic.svg}</div>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        {templates.map((t, i) => {
+          // Seed message: describe the template but let the learner fill
+          // in the theme in chat. The Genie will ask what world they want.
+          const seed = `I want to build a game where you ${t.description.toLowerCase().replace(/\.$/, "")}. I haven't decided on the theme yet — help me pick something fun.`
+          return (
+            <button
+              key={i}
+              onClick={() => onPick(seed)}
+              className="w-full text-left bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-blue-500/50 rounded-xl p-3 transition-colors group"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-white">{t.title}</p>
+                  <p className="text-xs text-zinc-300 mt-1 leading-snug">
+                    {t.description}
+                  </p>
+                  {t.examples.length > 0 && (
+                    <p className="text-[11px] text-zinc-500 mt-2 leading-snug">
+                      <span className="text-zinc-600">You could build:</span>{" "}
+                      {t.examples.join(" · ")}
+                    </p>
+                  )}
+                </div>
+                <div className="text-xs text-zinc-500 group-hover:text-blue-300 shrink-0 self-center whitespace-nowrap">
+                  Build →
+                </div>
+              </div>
+            </button>
+          )
+        })}
       </div>
     </div>
   )
@@ -55,24 +162,19 @@ function GameMechanics({ description, domainCode }: {
 
 interface ConceptCardProps {
   standard: StandardNode
-  onReady: () => void
-  interests?: string[]
+  // onReady is called when the learner is ready to start building. The
+  // optional seedMessage gets pre-filled as their first chat message
+  // (used by the template cards).
+  onReady: (seedMessage?: string) => void
   readOnly?: boolean
 }
 
-export function ConceptCard({ standard, onReady, interests, readOnly }: ConceptCardProps) {
+export function ConceptCard({ standard, onReady, readOnly }: ConceptCardProps) {
   const [readingLevel, setReadingLevel] = useState<ReadingLevel>("default")
-  const [showIllustration, setShowIllustration] = useState(false)
   const [explanation, setExplanation] = useState<Explanation | null>(null)
   const [loading, setLoading] = useState(true)
   const [labelFlipped, setLabelFlipped] = useState(false)
   const [speaking, setSpeaking] = useState(false)
-
-  // Top-matched mechanic for "Show me what this looks like"
-  const topMechanic = useMemo(() => {
-    const matched = matchMechanics(standard.description, standard.domainCode)
-    return matched[0] ?? null
-  }, [standard.description, standard.domainCode])
 
   const fetchExplanation = useCallback(async (level: ReadingLevel) => {
     setLoading(true)
@@ -85,7 +187,6 @@ export function ConceptCard({ standard, onReady, interests, readOnly }: ConceptC
           description: standard.description,
           grade: standard.grade,
           readingLevel: level,
-          interests: interests ?? [],
         }),
       })
       const data = await res.json()
@@ -99,7 +200,7 @@ export function ConceptCard({ standard, onReady, interests, readOnly }: ConceptC
     } finally {
       setLoading(false)
     }
-  }, [standard.id, standard.description, standard.grade, interests])
+  }, [standard.id, standard.description, standard.grade])
 
   // Fetch on mount and when level changes
   useEffect(() => {
@@ -255,33 +356,23 @@ export function ConceptCard({ standard, onReady, interests, readOnly }: ConceptC
         )}
       </div>
 
-      {/* Stick figure illustration — top matched mechanic */}
-      {topMechanic && !showIllustration ? (
-        <button
-          onClick={() => setShowIllustration(true)}
-          className="w-full py-3 text-sm rounded-lg border border-dashed border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors flex items-center justify-center gap-2"
-        >
-          <Pencil className="size-4" /> Show me what this looks like
-        </button>
-      ) : topMechanic && showIllustration ? (
-        <ConceptIllustration mechanicSvg={topMechanic.svg} mechanicTitle={topMechanic.title} />
-      ) : null}
-
-      {/* Possible player actions for your game */}
+      {/* Game templates — generic mechanic blueprints with examples.
+          The stick-figure animation is shown inside this section so
+          the learner sees the verb in action before picking a template. */}
       {!readOnly && (
-        <GameMechanics
-          standardId={standard.id}
-          description={standard.description}
-          grade={standard.grade}
-          interests={interests}
-          domainCode={standard.domainCode}
+        <GameTemplates
+          standard={standard}
+          onPick={(seed) => onReady(seed)}
         />
       )}
 
       {!readOnly && (
-        <Button onClick={onReady} size="lg" className="w-full">
-          I have a game idea →
-        </Button>
+        <button
+          onClick={() => onReady()}
+          className="w-full text-sm text-zinc-400 hover:text-zinc-200 underline underline-offset-4 py-2"
+        >
+          Or describe your own game from scratch →
+        </button>
       )}
     </div>
   )

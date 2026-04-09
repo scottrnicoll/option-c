@@ -216,6 +216,7 @@ export default function LearnerDashboard() {
         </div>
       )}
 
+
       {/* Progress Stats */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
@@ -360,6 +361,7 @@ export default function LearnerDashboard() {
           onClose={() => setPreviewGame(null)}
         />
       )}
+
     </div>
   )
 }
@@ -405,8 +407,8 @@ function MoonRow({
   // Pick the right action button per status
   const action = (() => {
     if (status === "locked") {
-      // Show the same Build game button shape so the layout matches the
-      // unlocked rows, but make it grey and inactive.
+      // Same shape as the active Build game button so the layout lines
+      // up, but greyed out and labeled "Locked".
       return (
         <button
           disabled
@@ -414,7 +416,7 @@ function MoonRow({
           className="flex items-center gap-1.5 bg-zinc-800 text-zinc-500 text-xs font-semibold rounded-md px-3 py-1.5 cursor-not-allowed border border-zinc-700/60"
         >
           <Lock className="size-3.5" />
-          Build game
+          Locked
         </button>
       )
     }

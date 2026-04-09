@@ -11,11 +11,15 @@ interface GenieChatProps {
   standardDescription: string
   standardId?: string
   planetId?: string
+  // Optional pre-filled first message — used by the personalized pitch
+  // cards on the concept screen. When set, it auto-sends on mount as
+  // the learner's opening turn so the chat starts with their pitch.
+  seedMessage?: string
   onUnlock: () => void
   onBuildGame?: (designDoc: import("@/lib/game-types").GameDesignDoc, chatHistory: string) => void
 }
 
-export function GenieChat({ standardDescription, standardId, planetId, onUnlock, onBuildGame }: GenieChatProps) {
+export function GenieChat({ standardDescription, standardId, planetId, seedMessage, onUnlock, onBuildGame }: GenieChatProps) {
   const [criteria, setCriteria] = useState({
     playable: false,
     authentic: false,
@@ -32,6 +36,19 @@ export function GenieChat({ standardDescription, standardId, planetId, onUnlock,
   })
 
   const { messages, sendMessage, status } = useChat({ transport })
+
+  // Auto-send the seed message (from a pitch card click) as the first
+  // user turn. We track this with a ref so it only fires once even if
+  // status changes flap on mount. The seed appears in the chat as the
+  // learner's own message — they can immediately follow up to refine.
+  const seedSentRef = useRef(false)
+  useEffect(() => {
+    if (seedSentRef.current) return
+    if (!seedMessage) return
+    if (status !== "ready") return
+    seedSentRef.current = true
+    sendMessage({ text: seedMessage })
+  }, [seedMessage, status, sendMessage])
 
   // Count user messages as exchanges
   const exchangeCount = messages.filter((m) => m.role === "user").length

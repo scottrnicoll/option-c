@@ -106,7 +106,6 @@ interface StandardPanelProps {
   onBuildGame?: (designDoc: import("@/lib/game-types").GameDesignDoc, chatHistory: string) => void
   // Called when the learner clicks "Paste my own HTML" — opens the import flow.
   onImportHtml?: (standard: StandardNode) => void
-  interests?: string[]
   nodeStatus?: "locked" | "available" | "in_progress" | "in_review" | "approved_unplayed" | "unlocked" | "mastered"
 }
 
@@ -118,15 +117,19 @@ export function StandardPanel({
   onDemonstrated,
   onBuildGame,
   onImportHtml,
-  interests,
   nodeStatus,
 }: StandardPanelProps) {
   const [step, setStep] = useState<FlowStep>("learn")
   const [approvedGameCount, setApprovedGameCount] = useState(0)
+  // When the learner clicks one of the personalized pitch cards, we
+  // store the pitch text here and pass it to GenieChat as a seed
+  // message — chat sends it as the learner's first turn automatically.
+  const [seedMessage, setSeedMessage] = useState<string | null>(null)
 
   // Reset step when standard changes
   useEffect(() => {
     setStep("learn")
+    setSeedMessage(null)
   }, [standard?.id])
 
   // Count published games for this exact skill (across all classes), so we
@@ -196,7 +199,6 @@ export function StandardPanel({
               <ConceptCard
                 standard={standard}
                 onReady={() => {}}
-                interests={interests}
                 readOnly
               />
             </div>
@@ -225,7 +227,6 @@ export function StandardPanel({
                 <ConceptCard
                   standard={standard}
                   onReady={() => {}}
-                  interests={interests}
                   readOnly
                 />
               </div>
@@ -244,7 +245,6 @@ export function StandardPanel({
               <ConceptCard
                 standard={standard}
                 onReady={() => {}}
-                interests={interests}
                 readOnly
               />
             </div>
@@ -270,8 +270,10 @@ export function StandardPanel({
                   {playToMasterButton}
                   <ConceptCard
                     standard={standard}
-                    onReady={() => setStep("earn")}
-                    interests={interests}
+                    onReady={(seed) => {
+                      setSeedMessage(seed ?? null)
+                      setStep("earn")
+                    }}
                   />
                   {/* Alternate path: skip the AI build flow and paste your own HTML */}
                   {onImportHtml && (
@@ -290,6 +292,7 @@ export function StandardPanel({
                   standardDescription={standard.description}
                   standardId={standard.id}
                   planetId={`${standard.grade}.${standard.domainCode}`}
+                  seedMessage={seedMessage ?? undefined}
                   onUnlock={() => {
                     setStep("unlocked")
                     onUnlock(standard.id)

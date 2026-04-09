@@ -661,6 +661,96 @@ const SVG_RISE_FALL = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/
 <text x="90" y="116" font-size="6" fill="#71717a" text-anchor="middle">above and below zero</text>
 </svg>`
 
+// Build-a-structure — 10-second multi-stage animation demonstrating
+// the "snap together components to match a target shape" verb.
+// Uses the unified faceless / no-knees / floating body style from
+// SVG_MOTION. Stages:
+//   0-2.5s:  target shape appears on the right (dashed outline)
+//   2.5-5s:  figure floats left-to-right carrying a stick, places
+//            it on the frame
+//   5-7.5s:  figure returns, carries a second stick, places it
+//   7.5-10s: final piece snaps into place, target outline solidifies,
+//            a tiny "✓" pulses in celebration
+//
+// The figure is faceless (no eyes/mouth), legs are single straight
+// lines swinging from the hip, body line stops below the head circle.
+const SVG_BUILD_STRUCTURE = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
+<style>
+  /* Timing: one full 10-second cycle. All children share the same period
+     via animation-delay so stages stay in sync. */
+  @keyframes bs_walk_right { 0%,100%{transform:translateX(0)} 20%,30%{transform:translateX(80px)} 50%,60%{transform:translateX(0)} 80%,90%{transform:translateX(80px)} }
+  @keyframes bs_leg_a      { 0%,100%{transform:rotate(-22deg)} 50%{transform:rotate(22deg)} }
+  @keyframes bs_leg_b      { 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
+  @keyframes bs_bob        { 0%,100%{transform:translateY(-1.5px)} 50%{transform:translateY(1.5px)} }
+  @keyframes bs_carry      { 0%,25%{opacity:1} 26%,49%{opacity:0} 50%,75%{opacity:1} 76%,100%{opacity:0} }
+  @keyframes bs_carry2     { 0%,50%{opacity:0} 51%,75%{opacity:1} 76%,100%{opacity:0} }
+  @keyframes bs_place1     { 0%,25%{opacity:0} 26%,100%{opacity:1} }
+  @keyframes bs_place2     { 0%,50%{opacity:0} 51%,100%{opacity:1} }
+  @keyframes bs_place3     { 0%,75%{opacity:0} 76%,100%{opacity:1} }
+  @keyframes bs_place4     { 0%,90%{opacity:0} 91%,100%{opacity:1} }
+  @keyframes bs_target_fade{ 0%,85%{stroke:#52525b;stroke-dasharray:3,2} 90%,100%{stroke:#22c55e;stroke-dasharray:0} }
+  @keyframes bs_check      { 0%,88%{opacity:0;transform:scale(0)} 92%,100%{opacity:1;transform:scale(1)} }
+
+  .bs_fig     { animation: bs_walk_right 10s ease-in-out infinite; }
+  .bs_bob     { animation: bs_bob 1.2s ease-in-out infinite; }
+  .bs_leg_a   { animation: bs_leg_a 1.2s ease-in-out infinite; transform-origin: 0 22px; }
+  .bs_leg_b   { animation: bs_leg_b 1.2s ease-in-out infinite; transform-origin: 0 22px; }
+  .bs_carry_1 { animation: bs_carry 10s ease-in-out infinite; }
+  .bs_carry_2 { animation: bs_carry2 10s ease-in-out infinite; }
+  .bs_piece1  { animation: bs_place1 10s step-end infinite; }
+  .bs_piece2  { animation: bs_place2 10s step-end infinite; }
+  .bs_piece3  { animation: bs_place3 10s step-end infinite; }
+  .bs_piece4  { animation: bs_place4 10s step-end infinite; }
+  .bs_target  { animation: bs_target_fade 10s step-end infinite; }
+  .bs_check   { animation: bs_check 10s ease-out infinite; transform-origin: 150px 35px; }
+</style>
+<rect width="180" height="120" fill="#18181b"/>
+
+<!-- Target shape outline on the right (dashed while building, solid at the end) -->
+<g class="bs_target" fill="none" stroke="#52525b" stroke-width="2">
+  <line class="bs_piece1" x1="115" y1="35" x2="155" y2="35"/>
+  <line class="bs_piece2" x1="155" y1="35" x2="155" y2="75"/>
+  <line class="bs_piece3" x1="155" y1="75" x2="115" y2="75"/>
+  <line class="bs_piece4" x1="115" y1="75" x2="115" y2="35"/>
+</g>
+
+<!-- Pile of sticks the figure picks from, on the left -->
+<line x1="10" y1="98" x2="30" y2="98" stroke="#a16207" stroke-width="2"/>
+<line x1="12" y1="94" x2="28" y2="94" stroke="#a16207" stroke-width="2"/>
+<line x1="14" y1="90" x2="26" y2="90" stroke="#a16207" stroke-width="2"/>
+
+<!-- Celebration check when all 4 pieces are placed -->
+<text class="bs_check" x="150" y="38" font-size="14" fill="#22c55e" text-anchor="middle">✓</text>
+
+<!-- Figure — starts at x=15, walks right to place pieces. Uses the
+     unified baseline: faceless circle, body stops below head, single
+     straight legs swinging from the hip, no knees. -->
+<g class="bs_fig">
+  <g class="bs_bob">
+    <!-- Head (faceless, r=7) -->
+    <circle cx="15" cy="55" r="7" fill="none" stroke="#e4e4e7" stroke-width="2"/>
+    <!-- Body (below head circle: y=63 → hip y=77) -->
+    <line x1="15" y1="63" x2="15" y2="77" stroke="#e4e4e7" stroke-width="2"/>
+    <!-- Arms (pivot at shoulder y=66) -->
+    <line x1="15" y1="66" x2="24" y2="73" stroke="#e4e4e7" stroke-width="2"/>
+    <line x1="15" y1="66" x2="6" y2="73" stroke="#e4e4e7" stroke-width="2"/>
+    <!-- Stick being carried (visible while walking right with piece 1-2) -->
+    <line class="bs_carry_1" x1="22" y1="70" x2="34" y2="64" stroke="#a16207" stroke-width="2"/>
+    <!-- Second stick (vertical, visible on the second trip) -->
+    <line class="bs_carry_2" x1="22" y1="70" x2="28" y2="58" stroke="#a16207" stroke-width="2"/>
+    <!-- Legs — single straight lines, no knee. Pivot at hip (15, 77). -->
+    <g class="bs_leg_a" style="transform-origin: 15px 77px;">
+      <line x1="15" y1="77" x2="15" y2="97" stroke="#e4e4e7" stroke-width="2"/>
+    </g>
+    <g class="bs_leg_b" style="transform-origin: 15px 77px;">
+      <line x1="15" y1="77" x2="15" y2="97" stroke="#e4e4e7" stroke-width="2"/>
+    </g>
+  </g>
+</g>
+
+<text x="90" y="113" font-size="7" fill="#71717a" text-anchor="middle">snap components to match the target</text>
+</svg>`
+
 export const MECHANIC_ANIMATIONS: MechanicAnimation[] = [
   { id: "resource-management", title: "Collect & Manage", mathDomain: "arithmetic operations",
     descKeywords: ["subtract", "subtraction", "difference", "minus", "take away", "operation"],
@@ -748,6 +838,14 @@ export const MECHANIC_ANIMATIONS: MechanicAnimation[] = [
     // Rely on the specific descKeywords above.
     domainCodes: [],
     svg: dangerousSvg(SVG_RISE_FALL) },
+  { id: "build-structure", title: "Build a Structure", mathDomain: "modeling shapes with components",
+    // Routes K kindergarten "build shapes from components" (K.G.B.5) and
+    // any similar "snap pieces to form a target shape" standards. Has
+    // a higher score than the generic Fit & Rotate mechanic when these
+    // keywords appear, so it wins.
+    descKeywords: ["build shapes", "model shapes", "compose shapes", "components", "sticks and clay", "snap together", "build a shape"],
+    domainCodes: [],
+    svg: dangerousSvg(SVG_BUILD_STRUCTURE) },
 ]
 
 // Match mechanics to a standard. Returns the top 3, ordered by score.

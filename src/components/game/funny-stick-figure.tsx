@@ -39,14 +39,13 @@ export function FunnyStickFigure() {
     <div className="flex flex-col items-center gap-2">
       <svg viewBox="0 0 240 180" width="240" height="180" xmlns="http://www.w3.org/2000/svg">
         <style>{`
-          /* === Walking gait (shared by every action except yoga) ===
-             Hip pivot is at (100, 108). Each leg is a thigh+shin pair
-             so the knee can bend during the gait cycle. */
-          @keyframes fsf_walk_thighA { 0%,100% { transform: rotate(-22deg); } 50% { transform: rotate(22deg); } }
-          @keyframes fsf_walk_thighB { 0%,100% { transform: rotate(22deg); } 50% { transform: rotate(-22deg); } }
-          @keyframes fsf_walk_shinA  { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(35deg); } 50% { transform: rotate(0deg); } }
-          @keyframes fsf_walk_shinB  { 0%,100% { transform: rotate(0deg); } 75% { transform: rotate(35deg); } 50% { transform: rotate(0deg); } }
-          @keyframes fsf_walk_bob    { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
+          /* === Floating walk (shared by every action except yoga) ===
+             Hip pivot is at (100, 92). Legs are straight — no knee bend
+             — and swing in wide arcs like the figure is drifting rather
+             than stepping. A slower bob adds the "floaty" feel. */
+          @keyframes fsf_walk_thighA { 0%,100% { transform: rotate(-28deg); } 50% { transform: rotate(28deg); } }
+          @keyframes fsf_walk_thighB { 0%,100% { transform: rotate(28deg); } 50% { transform: rotate(-28deg); } }
+          @keyframes fsf_walk_bob    { 0%,100% { transform: translateY(-2px); } 50% { transform: translateY(2px); } }
 
           /* Whole-figure horizontal travel — bounces between two ends of the floor */
           @keyframes fsf_travel { 0%,100% { transform: translateX(-30px); } 50% { transform: translateX(30px); } }
@@ -84,57 +83,49 @@ export function FunnyStickFigure() {
 
           .a-dancing .fig-thighA, .a-juggling .fig-thighA, .a-hammering .fig-thighA,
           .a-sweeping .fig-thighA, .a-magicTrick .fig-thighA, .a-weightlifting .fig-thighA {
-            animation: fsf_walk_thighA 0.7s ease-in-out infinite; transform-origin: 100px 108px;
+            animation: fsf_walk_thighA 1.1s ease-in-out infinite; transform-origin: 100px 92px;
           }
           .a-dancing .fig-thighB, .a-juggling .fig-thighB, .a-hammering .fig-thighB,
           .a-sweeping .fig-thighB, .a-magicTrick .fig-thighB, .a-weightlifting .fig-thighB {
-            animation: fsf_walk_thighB 0.7s ease-in-out infinite; transform-origin: 100px 108px;
-          }
-          .a-dancing .fig-shinA, .a-juggling .fig-shinA, .a-hammering .fig-shinA,
-          .a-sweeping .fig-shinA, .a-magicTrick .fig-shinA, .a-weightlifting .fig-shinA {
-            animation: fsf_walk_shinA 0.7s ease-in-out infinite; transform-origin: 100px 122px;
-          }
-          .a-dancing .fig-shinB, .a-juggling .fig-shinB, .a-hammering .fig-shinB,
-          .a-sweeping .fig-shinB, .a-magicTrick .fig-shinB, .a-weightlifting .fig-shinB {
-            animation: fsf_walk_shinB 0.7s ease-in-out infinite; transform-origin: 100px 122px;
+            animation: fsf_walk_thighB 1.1s ease-in-out infinite; transform-origin: 100px 92px;
           }
           .a-dancing .fig-bob, .a-juggling .fig-bob, .a-hammering .fig-bob,
           .a-sweeping .fig-bob, .a-magicTrick .fig-bob, .a-weightlifting .fig-bob {
-            animation: fsf_walk_bob 0.7s ease-in-out infinite;
+            animation: fsf_walk_bob 1.1s ease-in-out infinite;
           }
 
           /* dancing — extra body sway on top of the walk */
-          .a-dancing .fig-armA { animation: fsf_dance_armA 0.6s ease-in-out infinite; transform-origin: 100px 70px; }
-          .a-dancing .fig-armB { animation: fsf_dance_armB 0.6s ease-in-out infinite; transform-origin: 100px 70px; }
-          .a-dancing .fig-body { animation: fsf_dance_body 0.6s ease-in-out infinite; transform-origin: 100px 105px; }
+          .a-dancing .fig-armA { animation: fsf_dance_armA 0.6s ease-in-out infinite; transform-origin: 100px 68px; }
+          .a-dancing .fig-armB { animation: fsf_dance_armB 0.6s ease-in-out infinite; transform-origin: 100px 68px; }
+          .a-dancing .fig-body { animation: fsf_dance_body 0.6s ease-in-out infinite; transform-origin: 100px 80px; }
 
           /* juggling */
-          .a-juggling .fig-armA { animation: fsf_juggle_armA 0.5s ease-in-out infinite; transform-origin: 100px 70px; }
-          .a-juggling .fig-armB { animation: fsf_juggle_armB 0.5s ease-in-out infinite; transform-origin: 100px 70px; }
+          .a-juggling .fig-armA { animation: fsf_juggle_armA 0.5s ease-in-out infinite; transform-origin: 100px 68px; }
+          .a-juggling .fig-armB { animation: fsf_juggle_armB 0.5s ease-in-out infinite; transform-origin: 100px 68px; }
           .a-juggling .ball1 { animation: fsf_juggle_b1 0.8s ease-in-out infinite; }
           .a-juggling .ball2 { animation: fsf_juggle_b2 0.8s ease-in-out 0.27s infinite; }
           .a-juggling .ball3 { animation: fsf_juggle_b3 0.8s ease-in-out 0.53s infinite; }
 
           /* hammering */
-          .a-hammering .fig-armA { animation: fsf_hammer_arm 0.7s ease-in-out infinite; transform-origin: 100px 70px; }
+          .a-hammering .fig-armA { animation: fsf_hammer_arm 0.7s ease-in-out infinite; transform-origin: 100px 68px; }
           .a-hammering .pulse { animation: fsf_hammer_pulse 0.7s ease-in-out infinite; transform-origin: 75px 110px; }
 
           /* sweeping */
-          .a-sweeping .fig-armA { animation: fsf_sweep_armA 1s ease-in-out infinite; transform-origin: 100px 70px; }
+          .a-sweeping .fig-armA { animation: fsf_sweep_armA 1s ease-in-out infinite; transform-origin: 100px 68px; }
           .a-sweeping .dust { animation: fsf_sweep_dust 1s ease-in-out infinite; }
 
           /* magicTrick */
-          .a-magicTrick .fig-armA { animation: fsf_magic_armA 1.5s ease-in-out infinite; transform-origin: 100px 70px; }
-          .a-magicTrick .fig-armB { animation: fsf_magic_armB 1.5s ease-in-out infinite; transform-origin: 100px 70px; }
+          .a-magicTrick .fig-armA { animation: fsf_magic_armA 1.5s ease-in-out infinite; transform-origin: 100px 68px; }
+          .a-magicTrick .fig-armB { animation: fsf_magic_armB 1.5s ease-in-out infinite; transform-origin: 100px 68px; }
           .a-magicTrick .star { animation: fsf_magic_star 1.5s ease-in-out infinite; transform-origin: center; }
 
           /* weightlifting */
-          .a-weightlifting .fig-armA { animation: fsf_lift_armA 1.4s ease-in-out infinite; transform-origin: 100px 70px; }
-          .a-weightlifting .fig-armB { animation: fsf_lift_armB 1.4s ease-in-out infinite; transform-origin: 100px 70px; }
+          .a-weightlifting .fig-armA { animation: fsf_lift_armA 1.4s ease-in-out infinite; transform-origin: 100px 68px; }
+          .a-weightlifting .fig-armB { animation: fsf_lift_armB 1.4s ease-in-out infinite; transform-origin: 100px 68px; }
           .a-weightlifting .barbell { animation: fsf_lift_bar 1.4s ease-in-out infinite; }
 
           /* yoga — sit still (legs are folded, no gait) */
-          .a-yoga .fig-body { animation: fsf_yoga_body 3s ease-in-out infinite; transform-origin: 100px 105px; }
+          .a-yoga .fig-body { animation: fsf_yoga_body 3s ease-in-out infinite; transform-origin: 100px 80px; }
         `}</style>
 
         {/* Floor line */}
@@ -144,50 +135,37 @@ export function FunnyStickFigure() {
             Yoga turns this off via .a-yoga override. */}
         <g className={`traveler a-${action}`}>
           <g className="fig-bob">
-            {/* Head */}
-            <circle cx="100" cy="55" r="9" fill="none" stroke="#e4e4e7" strokeWidth="2.5" />
-            {/* Smile */}
-            <path d="M 96 56 Q 100 60 104 56" fill="none" stroke="#e4e4e7" strokeWidth="1.5" strokeLinecap="round" />
-            {/* Eyes */}
-            <circle cx="97" cy="53" r="0.8" fill="#e4e4e7" />
-            <circle cx="103" cy="53" r="0.8" fill="#e4e4e7" />
-            {/* Body — neck (64) → hip (108) */}
-            <line className="fig-body" x1="100" y1="64" x2="100" y2="108" stroke="#e4e4e7" strokeWidth="2.5" strokeLinecap="round" />
-            {/* Arms — pivot at shoulder (100, 70) */}
+            {/* Head — faceless circle, matches the Race & Calculate baseline
+                style. No eyes, no smile. */}
+            <circle cx="100" cy="52" r="12" fill="none" stroke="#e4e4e7" strokeWidth="2.5" />
+            {/* Body — starts at y=66 (below head), ends at hip y=92. */}
+            <line className="fig-body" x1="100" y1="66" x2="100" y2="92" stroke="#e4e4e7" strokeWidth="2.5" strokeLinecap="round" />
+            {/* Arms — pivot at shoulder (100, 68) */}
             <g className="fig-armA">
-              <line x1="100" y1="70" x2="100" y2="95" stroke="#e4e4e7" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="100" y1="68" x2="100" y2="90" stroke="#e4e4e7" strokeWidth="2.5" strokeLinecap="round" />
             </g>
             <g className="fig-armB">
-              <line x1="100" y1="70" x2="100" y2="95" stroke="#e4e4e7" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="100" y1="68" x2="100" y2="90" stroke="#e4e4e7" strokeWidth="2.5" strokeLinecap="round" />
             </g>
 
-            {/* Legs — two-segment so the knee bends during the gait cycle.
-                Thigh pivots at hip (100, 108); shin pivots at knee (100, 122);
-                foot is a short horizontal line at (100, 138). */}
+            {/* Legs — single-segment straight lines from hip to foot,
+                no knees. Pivot at hip (100, 92); foot at y=132. The
+                swing animation floats rather than stepping (see
+                fsf_walk_thighA/B keyframes). */}
             {action === "yoga" ? (
               <>
-                {/* Cross-legged sit — two short angled legs in front */}
-                <line x1="100" y1="108" x2="86" y2="125" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
-                <line x1="100" y1="108" x2="114" y2="125" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
-                <line x1="86" y1="125" x2="114" y2="125" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
+                {/* Cross-legged sit — angled lines forming a wide triangle */}
+                <line x1="100" y1="92" x2="80" y2="120" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
+                <line x1="100" y1="92" x2="120" y2="120" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
+                <line x1="80" y1="120" x2="120" y2="120" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
               </>
             ) : (
               <>
                 <g className="fig-thighA">
-                  <line x1="100" y1="108" x2="100" y2="122" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
-                  <g className="fig-shinA" style={{ transform: "translate(0,0)" }}>
-                    <line x1="100" y1="122" x2="100" y2="138" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
-                    {/* Foot */}
-                    <line x1="98" y1="138" x2="106" y2="138" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
-                  </g>
+                  <line x1="100" y1="92" x2="100" y2="132" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
                 </g>
                 <g className="fig-thighB">
-                  <line x1="100" y1="108" x2="100" y2="122" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
-                  <g className="fig-shinB">
-                    <line x1="100" y1="122" x2="100" y2="138" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
-                    {/* Foot */}
-                    <line x1="98" y1="138" x2="106" y2="138" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
-                  </g>
+                  <line x1="100" y1="92" x2="100" y2="132" stroke="#e4e4e7" strokeWidth="3" strokeLinecap="round" />
                 </g>
               </>
             )}
@@ -195,60 +173,63 @@ export function FunnyStickFigure() {
             {/* Per-action props */}
             {action === "juggling" && (
               <>
-                <circle className="ball1" cx="100" cy="55" r="4" fill="#f59e0b" />
-                <circle className="ball2" cx="100" cy="55" r="4" fill="#60a5fa" />
-                <circle className="ball3" cx="100" cy="55" r="4" fill="#22c55e" />
+                <circle className="ball1" cx="100" cy="50" r="4" fill="#f59e0b" />
+                <circle className="ball2" cx="100" cy="50" r="4" fill="#60a5fa" />
+                <circle className="ball3" cx="100" cy="50" r="4" fill="#22c55e" />
               </>
             )}
             {action === "hammering" && (
               <>
-                {/* Hammer */}
-                <line x1="100" y1="95" x2="80" y2="115" stroke="#71717a" strokeWidth="2" strokeLinecap="round" />
-                <rect x="72" y="108" width="14" height="6" rx="1" fill="#a1a1aa" />
+                {/* Hammer — held at hand (100, 90), striking down at the anvil */}
+                <line x1="100" y1="90" x2="78" y2="108" stroke="#71717a" strokeWidth="2" strokeLinecap="round" />
+                <rect x="70" y="102" width="14" height="6" rx="1" fill="#a1a1aa" />
                 {/* Impact pulse */}
-                <circle className="pulse" cx="75" cy="110" r="8" fill="none" stroke="#fbbf24" strokeWidth="2" />
+                <circle className="pulse" cx="73" cy="115" r="8" fill="none" stroke="#fbbf24" strokeWidth="2" />
+                {/* Anvil */}
+                <rect x="62" y="118" width="22" height="6" rx="1" fill="#52525b" />
               </>
             )}
             {action === "sweeping" && (
               <>
-                {/* Broom */}
-                <line x1="100" y1="95" x2="125" y2="125" stroke="#a16207" strokeWidth="2" strokeLinecap="round" />
-                <line x1="120" y1="125" x2="135" y2="125" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" />
-                <line x1="122" y1="125" x2="130" y2="132" stroke="#fbbf24" strokeWidth="1.5" />
-                <line x1="125" y1="125" x2="133" y2="132" stroke="#fbbf24" strokeWidth="1.5" />
-                <line x1="128" y1="125" x2="136" y2="132" stroke="#fbbf24" strokeWidth="1.5" />
+                {/* Broom — held at hand (100, 90), sweeps the floor */}
+                <line x1="100" y1="90" x2="125" y2="120" stroke="#a16207" strokeWidth="2" strokeLinecap="round" />
+                <line x1="120" y1="120" x2="135" y2="120" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" />
+                <line x1="122" y1="120" x2="130" y2="128" stroke="#fbbf24" strokeWidth="1.5" />
+                <line x1="125" y1="120" x2="133" y2="128" stroke="#fbbf24" strokeWidth="1.5" />
+                <line x1="128" y1="120" x2="136" y2="128" stroke="#fbbf24" strokeWidth="1.5" />
                 {/* Dust cloud */}
-                <circle className="dust" cx="140" cy="130" r="2" fill="#71717a" opacity="0.6" />
-                <circle className="dust" cx="143" cy="128" r="1.5" fill="#71717a" opacity="0.6" />
+                <circle className="dust" cx="140" cy="128" r="2" fill="#71717a" opacity="0.6" />
+                <circle className="dust" cx="143" cy="126" r="1.5" fill="#71717a" opacity="0.6" />
               </>
             )}
             {action === "magicTrick" && (
               <>
-                {/* Wand */}
-                <line x1="100" y1="95" x2="115" y2="55" stroke="#71717a" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="115" cy="55" r="2.5" fill="#fbbf24" />
+                {/* Wand — held at hand (100, 90), tip in the air */}
+                <line x1="100" y1="90" x2="118" y2="48" stroke="#71717a" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="118" cy="48" r="2.5" fill="#fbbf24" />
                 {/* Magic star */}
-                <g className="star" transform="translate(130 45)">
+                <g className="star" transform="translate(132 38)">
                   <path d="M 0 -8 L 2 -2 L 8 -2 L 3 2 L 5 8 L 0 4 L -5 8 L -3 2 L -8 -2 L -2 -2 Z" fill="#fbbf24" />
                 </g>
               </>
             )}
             {action === "weightlifting" && (
               <>
-                {/* Barbell — bar across both arms held overhead */}
+                {/* Barbell — bar across both arms held overhead, above the
+                    new bigger head (top at y=40) */}
                 <g className="barbell">
-                  <line x1="75" y1="40" x2="125" y2="40" stroke="#a1a1aa" strokeWidth="3" strokeLinecap="round" />
-                  <rect x="70" y="34" width="6" height="12" rx="1" fill="#52525b" />
-                  <rect x="124" y="34" width="6" height="12" rx="1" fill="#52525b" />
+                  <line x1="75" y1="32" x2="125" y2="32" stroke="#a1a1aa" strokeWidth="3" strokeLinecap="round" />
+                  <rect x="70" y="26" width="6" height="12" rx="1" fill="#52525b" />
+                  <rect x="124" y="26" width="6" height="12" rx="1" fill="#52525b" />
                 </g>
               </>
             )}
             {action === "yoga" && (
               <>
-                {/* Halo / serenity dots */}
-                <circle cx="92" cy="40" r="1.5" fill="#a78bfa" />
-                <circle cx="100" cy="36" r="1.5" fill="#a78bfa" />
-                <circle cx="108" cy="40" r="1.5" fill="#a78bfa" />
+                {/* Halo / serenity dots above the head (top at y=40) */}
+                <circle cx="92" cy="34" r="1.5" fill="#a78bfa" />
+                <circle cx="100" cy="30" r="1.5" fill="#a78bfa" />
+                <circle cx="108" cy="34" r="1.5" fill="#a78bfa" />
               </>
             )}
           </g>

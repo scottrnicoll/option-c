@@ -196,7 +196,7 @@ export async function POST(req: Request) {
 
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-5",
-      max_tokens: 8000,
+      max_tokens: 10000,
       system: `You generate complete, self-contained HTML files for playable browser games for learners aged 7-18. Output ONLY the HTML. No markdown. No code fences. Start with <!DOCTYPE html>.
 
 🧠 INTRINSIC INTEGRATION — THE MOST IMPORTANT RULE:
@@ -269,6 +269,39 @@ ${characterRule}
   grids of options, trivia-style Q&A. If the design doc seems to imply these,
   REPLACE the mechanic with the matching intrinsic verb from the table above.
 
+📖 MANDATORY HELP BUTTON — every game must include this:
+A small "?" button (or "Help") visible in a corner of the game UI at all
+times. Clicking it opens a tutorial panel overlay with:
+  1. A short explanation of the math concept (2-3 sentences, age-appropriate)
+  2. At least 2 examples of VALID answers/moves (with numbers shown)
+  3. At least 2 examples of INVALID answers/moves (with WHY they're wrong)
+  4. A "Got it" button to close the panel
+
+The tutorial panel must use the same vibe palette and font as the rest of
+the game. It overlays the play area without breaking the game state. The
+player can open it anytime — including mid-round — to refresh themselves.
+
+Implementation: a fixed-position button (top-right or bottom-right corner),
+a hidden tutorial div that toggles via click. Don't make it a separate
+screen — overlay it on top of the running game so the player doesn't
+lose their place.
+
+Example structure:
+  <button id="helpBtn" onclick="document.getElementById('tutorial').style.display='flex'">?</button>
+  <div id="tutorial" style="display:none; position:fixed; ...">
+    <h2>How to play this</h2>
+    <p>[concept explanation]</p>
+    <h3>✅ Valid moves</h3>
+    <ul><li>...</li><li>...</li></ul>
+    <h3>❌ Invalid moves</h3>
+    <ul><li>... (why it's wrong)</li><li>... (why it's wrong)</li></ul>
+    <button onclick="document.getElementById('tutorial').style.display='none'">Got it</button>
+  </div>
+
+The valid/invalid examples MUST use real numbers from THIS game's math
+concept, not generic placeholders. If the game is about fractions,
+the examples are concrete fractions, not "fraction X" or "number Y".
+
 🚨 MANDATORY POST-MESSAGE PROTOCOL — NON-NEGOTIABLE:
 The game runs inside a parent app that needs to know when the player wins or loses.
 You MUST include this exact handler in your <script> tag:
@@ -308,8 +341,11 @@ REQUIREMENTS:
 - Apply the ${vibePreset.label} vibe spec strictly: palette, font, effects.
 - Responsive — works on desktop and mobile.
 - NEVER use overflow:hidden on the body. Game must be scrollable if needed.
-- Maximum 600 lines of code. Polished, not bloated.
+- Maximum 700 lines of code. Polished, not bloated.
 - Include the gameWin() and gameLose() functions and CALL them at the right moments.
+- Include the mandatory "?" Help button and tutorial overlay (see system
+  prompt). The tutorial must contain CONCRETE valid and invalid examples
+  using real numbers from this game's math concept.
 
 REMEMBER: ${vibePreset.allowSketch
   ? "main characters are stick figures and simple line drawings, NOT emoji."
