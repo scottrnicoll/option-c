@@ -167,6 +167,29 @@ export function PlanetView({
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+        /* Pulsing data beacon — used to mark moons that have published
+           games available. Three rings cascade outward from a center
+           dot like a radar ping. Transform-origin must be set on the
+           SVG circles so they scale from their center, not the
+           top-left of the viewBox. */
+        @keyframes beacon-ring-pulse {
+          0%   { transform: scale(0.4); opacity: 0.95; }
+          100% { transform: scale(3.5); opacity: 0; }
+        }
+        @keyframes beacon-dot-pulse {
+          0%, 100% { opacity: 1; }
+          50%      { opacity: 0.55; }
+        }
+        .beacon-ring {
+          transform-origin: 14px 14px;
+          animation: beacon-ring-pulse 1.8s ease-out infinite;
+        }
+        .beacon-ring-2 { animation-delay: 0.6s; }
+        .beacon-ring-3 { animation-delay: 1.2s; }
+        .beacon-dot {
+          animation: beacon-dot-pulse 1.8s ease-in-out infinite;
+          filter: drop-shadow(0 0 3px rgba(34, 211, 238, 0.85));
+        }
       `}</style>
       <div
         className="relative"
@@ -282,19 +305,34 @@ export function PlanetView({
                 aria-label={`${moon.description} - ${statusLabel(moon.status)}`}
               />
 
-              {/* "Has games" indicator — small 🎮 next to the moon */}
+              {/* "Has games" indicator — pulsing data beacon next to
+                  the moon. SVG so the edges stay crisp at any zoom.
+                  Three concentric rings expand outward from a solid
+                  center dot, fading as they grow. Reads as a sci-fi
+                  "transmission detected" marker. Cyan against the
+                  dark space background for max contrast.
+
+                  We use transform: scale() instead of animating the
+                  SVG `r` attribute because `r` animation isn't
+                  supported in all browsers, but `transform` is. The
+                  rings start tiny and scale up to ~4x while fading. */}
               {gameCount > 0 && (
                 <div
-                  className="absolute z-10 pointer-events-none text-base"
+                  className="absolute z-10 pointer-events-none beacon-indicator"
                   style={{
-                    left: x + hitSize / 2 - 4,
-                    top: y - hitSize / 2 - 8,
-                    lineHeight: 1,
-                    filter: "drop-shadow(0 0 4px rgba(96,165,250,0.6))",
+                    left: x + hitSize / 2 + 2,
+                    top: y - hitSize / 2 - 14,
+                    width: 28,
+                    height: 28,
                   }}
                   title={`${gameCount} game${gameCount === 1 ? "" : "s"} available`}
                 >
-                  🎮
+                  <svg viewBox="0 0 28 28" width="28" height="28" style={{ overflow: "visible" }}>
+                    <circle className="beacon-ring beacon-ring-1" cx="14" cy="14" r="3" fill="none" stroke="#22d3ee" strokeWidth="1.5" />
+                    <circle className="beacon-ring beacon-ring-2" cx="14" cy="14" r="3" fill="none" stroke="#22d3ee" strokeWidth="1.5" />
+                    <circle className="beacon-ring beacon-ring-3" cx="14" cy="14" r="3" fill="none" stroke="#22d3ee" strokeWidth="1.5" />
+                    <circle className="beacon-dot" cx="14" cy="14" r="2.5" fill="#22d3ee" />
+                  </svg>
                 </div>
               )}
 
