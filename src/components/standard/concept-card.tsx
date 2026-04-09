@@ -22,32 +22,54 @@ interface Explanation {
   formula?: string
 }
 
-// Game-mechanic templates — generic player-action blueprints with
-// example worlds the kid could place the mechanic in. The learner picks
-// a template and then fills in the theme themselves in the chat.
-//
-// Each template is paired with the matched stick-figure animation for
-// this standard, so the kid SEES the verb being performed before
-// picking a template. The animation is the same across all templates
-// for a given standard (they share the same verb by design).
-function GameTemplates({
-  standard,
-  onPick,
-}: {
-  standard: StandardNode
-  onPick: (seedMessage: string) => void
-}) {
-  const [templates, setTemplates] = useState<Template[] | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-
-  // The stick-figure animation for this standard — shown once above the
-  // template cards. Kids watch the verb in action (10s loop) while they
-  // read the templates.
+// Stick-figure example animation. Always shows whenever a mechanic
+// matches the standard — even on locked / readOnly moons — because
+// it's educational regardless of whether the learner can build a
+// game right now. Renders at ~1/3 the previous on-screen size so
+// the moon panel doesn't get dominated by it.
+function MechanicExample({ standard }: { standard: StandardNode }) {
   const topMechanic = useMemo(() => {
     const matched = matchMechanics(standard.description, standard.domainCode)
     return matched[0] ?? null
   }, [standard.description, standard.domainCode])
+
+  if (!topMechanic) return null
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">
+        Example
+      </p>
+      <div className="rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 max-w-[300px]">
+        <div className="w-full">{topMechanic.svg}</div>
+      </div>
+    </div>
+  )
+}
+
+// Game-mechanic templates — generic player-action blueprints with
+// example worlds the kid could place the mechanic in. The learner picks
+// a template and then fills in the theme themselves in the chat.
+//
+// Note: the matched stick-figure animation is rendered separately by
+// MechanicExample (above) so it always appears, even when this whole
+// templates section is hidden (locked moons, readOnly mode, or template
+// API failure).
+function GameTemplates({
+  standard,
+  onPick,
+  readOnly,
+}: {
+  standard: StandardNode
+  onPick: (seedMessage: string) => void
+  // readOnly = the moon is locked / in_review / already mastered. Show
+  // the templates so the learner can SEE what's possible, but disable
+  // the build buttons (rendered as a "Locked" pill instead).
+  readOnly?: boolean
+}) {
+  const [templates, setTemplates] = useState<Template[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -117,41 +139,56 @@ function GameTemplates({
         Pick the shape of your game. You decide the world in the next step.
       </p>
 
-      {/* Shared stick-figure demo for this standard — shows the VERB */}
-      {topMechanic && (
-        <div className="rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900">
-          <div className="w-full">{topMechanic.svg}</div>
-        </div>
-      )}
-
       <div className="space-y-2">
         {templates.map((t, i) => {
           // Seed message: describe the template but let the learner fill
           // in the theme in chat. The Genie will ask what world they want.
           const seed = `I want to build a game where you ${t.description.toLowerCase().replace(/\.$/, "")}. I haven't decided on the theme yet — help me pick something fun.`
+          // On read-only moons (locked / in_review / already mastered)
+          // we render the same card but as a disabled div with a
+          // "Locked" pill instead of the Build → action.
+          const cardInner = (
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-white">{t.title}</p>
+                <p className="text-xs text-zinc-300 mt-1 leading-snug">
+                  {t.description}
+                </p>
+                {t.examples.length > 0 && (
+                  <p className="text-[11px] text-zinc-500 mt-2 leading-snug">
+                    <span className="text-zinc-600">You could build:</span>{" "}
+                    {t.examples.join(" · ")}
+                  </p>
+                )}
+              </div>
+              {readOnly ? (
+                <div className="text-xs text-zinc-500 shrink-0 self-center whitespace-nowrap bg-zinc-800 border border-zinc-700/60 rounded-md px-2 py-1">
+                  🔒 Locked
+                </div>
+              ) : (
+                <div className="text-xs text-zinc-500 group-hover:text-blue-300 shrink-0 self-center whitespace-nowrap">
+                  Build →
+                </div>
+              )}
+            </div>
+          )
+          if (readOnly) {
+            return (
+              <div
+                key={i}
+                className="w-full text-left bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 opacity-75"
+              >
+                {cardInner}
+              </div>
+            )
+          }
           return (
             <button
               key={i}
               onClick={() => onPick(seed)}
               className="w-full text-left bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-blue-500/50 rounded-xl p-3 transition-colors group"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-white">{t.title}</p>
-                  <p className="text-xs text-zinc-300 mt-1 leading-snug">
-                    {t.description}
-                  </p>
-                  {t.examples.length > 0 && (
-                    <p className="text-[11px] text-zinc-500 mt-2 leading-snug">
-                      <span className="text-zinc-600">You could build:</span>{" "}
-                      {t.examples.join(" · ")}
-                    </p>
-                  )}
-                </div>
-                <div className="text-xs text-zinc-500 group-hover:text-blue-300 shrink-0 self-center whitespace-nowrap">
-                  Build →
-                </div>
-              </div>
+              {cardInner}
             </button>
           )
         })}
@@ -293,6 +330,12 @@ export function ConceptCard({ standard, onReady, readOnly }: ConceptCardProps) {
             </CardContent>
           </Card>
 
+          {/* Stick-figure example animation. Sits right after "What is this?"
+              and before the formula so kids see the verb early — before the
+              technical math details. Always renders if a mechanic matches,
+              even on locked / read-only moons. */}
+          <MechanicExample standard={standard} />
+
           {explanation.formula && (
             <Card className="border-amber-500/20 bg-amber-500/5">
               <CardHeader className="pb-2">
@@ -357,14 +400,14 @@ export function ConceptCard({ standard, onReady, readOnly }: ConceptCardProps) {
       </div>
 
       {/* Game templates — generic mechanic blueprints with examples.
-          The stick-figure animation is shown inside this section so
-          the learner sees the verb in action before picking a template. */}
-      {!readOnly && (
-        <GameTemplates
-          standard={standard}
-          onPick={(seed) => onReady(seed)}
-        />
-      )}
+          Now also rendered on read-only moons (with disabled "Locked"
+          buttons instead of Build) so the learner can preview what
+          they could build, even before unlocking. */}
+      <GameTemplates
+        standard={standard}
+        onPick={(seed) => onReady(seed)}
+        readOnly={readOnly}
+      />
 
       {!readOnly && (
         <button

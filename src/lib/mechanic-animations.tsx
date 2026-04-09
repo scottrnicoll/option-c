@@ -76,7 +76,23 @@ const SVG_RESOURCE_MGMT = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2
 // Arm stays raised the whole time to emphasize "I'm doing this".
 const SVG_PARTITIONING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
 <style>
-  @keyframes pa_arm_chop { 0%,15%{transform:rotate(-50deg)} 20%,35%{transform:rotate(0deg)} 40%,55%{transform:rotate(-50deg)} 60%,75%{transform:rotate(0deg)} 80%,95%{transform:rotate(-50deg)} 100%{transform:rotate(-50deg)} }
+  /* Arm chop synced with the cut times (cuts appear at 22, 42, 62, 82%).
+     Arm sits at -50deg (raised) most of the time, snaps to 0deg (chop
+     down) right at each cut moment, then snaps back up. After the 4th
+     cut the arm stays raised while the figure walks aside. */
+  @keyframes pa_arm_chop {
+    0%,18%   { transform: rotate(-50deg) }
+    22%      { transform: rotate(0deg)   }
+    26%,38%  { transform: rotate(-50deg) }
+    42%      { transform: rotate(0deg)   }
+    46%,58%  { transform: rotate(-50deg) }
+    62%      { transform: rotate(0deg)   }
+    66%,78%  { transform: rotate(-50deg) }
+    82%      { transform: rotate(0deg)   }
+    86%,100% { transform: rotate(-50deg) }
+  }
+  /* Step aside after the last cut so the result circle is fully visible */
+  @keyframes pa_step_aside { 0%,84%{transform:translateX(0)} 90%,100%{transform:translateX(-22px)} }
   @keyframes pa_lean     { 0%,100%{transform:rotate(0deg)} 25%,55%,85%{transform:rotate(3deg)} }
   @keyframes pa_step1    { 0%,18%{opacity:0} 22%,100%{opacity:1} }
   @keyframes pa_step2    { 0%,38%{opacity:0} 42%,100%{opacity:1} }
@@ -88,8 +104,9 @@ const SVG_PARTITIONING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/20
   @keyframes pa_label3   { 0%,38%{opacity:0} 42%,58%{opacity:1} 62%,100%{opacity:0} }
   @keyframes pa_label4   { 0%,58%{opacity:0} 62%,100%{opacity:1} }
 
+  .pa_outer { animation: pa_step_aside 10s ease-in-out infinite; }
   .pa_g     { animation: pa_lean 10s ease-in-out infinite; transform-origin: 30px 65px; }
-  .pa_arm   { animation: pa_arm_chop 10s ease-in-out infinite; transform-origin: 30px 52px; }
+  .pa_arm   { animation: pa_arm_chop 10s linear infinite; transform-origin: 30px 52px; }
   .pa_cut1  { animation: pa_step1 10s step-end infinite; }
   .pa_cut2  { animation: pa_step2 10s step-end infinite; }
   .pa_cut3  { animation: pa_step3 10s step-end infinite; }
@@ -102,18 +119,22 @@ const SVG_PARTITIONING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/20
 </style>
 <rect width="180" height="120" fill="#18181b"/>
 
-<!-- Figure on the left, faceless, single-segment angled legs -->
-<g class="pa_g">
-  <circle cx="30" cy="40" r="6" fill="none" stroke="#e4e4e7" stroke-width="2"/>
-  <line x1="30" y1="46" x2="30" y2="65" stroke="#e4e4e7" stroke-width="2"/>
-  <g class="pa_arm">
-    <line x1="30" y1="52" x2="55" y2="40" stroke="#e4e4e7" stroke-width="2"/>
-    <!-- Knife held in the raised hand -->
-    <line x1="55" y1="40" x2="62" y2="34" stroke="#60a5fa" stroke-width="2"/>
+<!-- Figure on the left, faceless, single-segment angled legs.
+     Outer wrapper steps aside at the end so the cut circle is unobstructed. -->
+<g class="pa_outer">
+  <g class="pa_g">
+    <circle cx="30" cy="40" r="6" fill="none" stroke="#e4e4e7" stroke-width="2"/>
+    <line x1="30" y1="46" x2="30" y2="65" stroke="#e4e4e7" stroke-width="2"/>
+    <g class="pa_arm">
+      <!-- Shorter arm: ends at (45, 45) instead of (55, 40) -->
+      <line x1="30" y1="52" x2="45" y2="45" stroke="#e4e4e7" stroke-width="2"/>
+      <!-- Knife held in the raised hand -->
+      <line x1="45" y1="45" x2="51" y2="41" stroke="#60a5fa" stroke-width="2"/>
+    </g>
+    <line x1="30" y1="52" x2="15" y2="55" stroke="#e4e4e7" stroke-width="2"/>
+    <line x1="23" y1="79" x2="30" y2="65" stroke="#e4e4e7" stroke-width="2"/>
+    <line x1="30" y1="65" x2="37" y2="79" stroke="#e4e4e7" stroke-width="2"/>
   </g>
-  <line x1="30" y1="52" x2="15" y2="55" stroke="#e4e4e7" stroke-width="2"/>
-  <line x1="23" y1="79" x2="30" y2="65" stroke="#e4e4e7" stroke-width="2"/>
-  <line x1="30" y1="65" x2="37" y2="79" stroke="#e4e4e7" stroke-width="2"/>
 </g>
 
 <!-- Whole circle (always visible) and progressive cuts -->
@@ -133,7 +154,7 @@ const SVG_PARTITIONING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/20
 
 <!-- Label transitions: "1" → "1/2" → "1/4" → "1/8" -->
 <text class="pa_lab1" x="110" y="106" font-size="10" fill="#fbbf24" text-anchor="middle" font-family="monospace">1 whole</text>
-<text class="pa_lab2" x="110" y="106" font-size="10" fill="#fbbf24" text-anchor="middle" font-family="monospace">1/2 + 1/2</text>
+<text class="pa_lab2" x="110" y="106" font-size="10" fill="#fbbf24" text-anchor="middle" font-family="monospace">2 × 1/2</text>
 <text class="pa_lab3" x="110" y="106" font-size="10" fill="#fbbf24" text-anchor="middle" font-family="monospace">4 × 1/4</text>
 <text class="pa_lab4" x="110" y="106" font-size="10" fill="#fbbf24" text-anchor="middle" font-family="monospace">8 × 1/8</text>
 
@@ -158,7 +179,7 @@ const SVG_BALANCE = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
   /* Beam tilt: starts hard left (-12deg), evens out as blocks are added */
   @keyframes bs_beam   { 0%,15%{transform:rotate(-12deg)} 25%,35%{transform:rotate(-8deg)} 45%,55%{transform:rotate(-4deg)} 65%,100%{transform:rotate(0deg)} }
   /* Figure walks from origin (x=10) right to drop at the right pan */
-  @keyframes bs_walk   { 0%,15%{transform:translateX(0)} 25%,35%{transform:translateX(105px)} 40%,45%{transform:translateX(0)} 50%,60%{transform:translateX(105px)} 65%,70%{transform:translateX(0)} 75%,100%{transform:translateX(105px)} }
+  @keyframes bs_walk   { 0%,15%{transform:translateX(0)} 25%,35%{transform:translateX(105px)} 40%,45%{transform:translateX(0)} 50%,60%{transform:translateX(105px)} 65%,70%{transform:translateX(0)} 75%,82%{transform:translateX(105px)} 88%,100%{transform:translateX(155px)} }
   @keyframes bs_legA   { 0%,100%{transform:rotate(-22deg)} 50%{transform:rotate(22deg)} }
   @keyframes bs_legB   { 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
   @keyframes bs_bob    { 0%,100%{transform:translateY(-1.5px)} 50%{transform:translateY(1.5px)} }
@@ -217,10 +238,10 @@ const SVG_BALANCE = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
     <line x1="10" y1="88" x2="17" y2="95" stroke="#e4e4e7" stroke-width="2"/>
     <line x1="10" y1="88" x2="3" y2="95" stroke="#e4e4e7" stroke-width="2"/>
     <g class="bs_legA" style="transform-origin: 10px 98px;">
-      <line x1="10" y1="98" x2="10" y2="113" stroke="#e4e4e7" stroke-width="2"/>
+      <line x1="10" y1="98" x2="10" y2="108" stroke="#e4e4e7" stroke-width="2"/>
     </g>
     <g class="bs_legB" style="transform-origin: 10px 98px;">
-      <line x1="10" y1="98" x2="10" y2="113" stroke="#e4e4e7" stroke-width="2"/>
+      <line x1="10" y1="98" x2="10" y2="108" stroke="#e4e4e7" stroke-width="2"/>
     </g>
   </g>
 </g>
@@ -508,7 +529,7 @@ const SVG_SCORING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
 <style>
   /* Figure travels horizontally; spans x=15 (=0) to x=165 (=10).
      Each tick = 15px. Targets: 4 (x=75), 7 (x=120), 2 (x=45). */
-  @keyframes sr_travel { 0%{transform:translateX(0)} 25%,33%{transform:translateX(60px)} 58%,66%{transform:translateX(105px)} 91%,100%{transform:translateX(30px)} }
+  @keyframes sr_travel { 0%{transform:translateX(0)} 25%,33%{transform:translateX(60px)} 58%,66%{transform:translateX(105px)} 91%,93%{transform:translateX(30px)} 96%,100%{transform:translateX(-25px)} }
   @keyframes sr_leg_a  { 0%,100%{transform:rotate(-25deg)} 50%{transform:rotate(25deg)} }
   @keyframes sr_leg_b  { 0%,100%{transform:rotate(25deg)} 50%{transform:rotate(-25deg)} }
   @keyframes sr_bob    { 0%,100%{transform:translateY(-1.5px)} 50%{transform:translateY(1.5px)} }
@@ -585,15 +606,15 @@ const SVG_SCORING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
     <line x1="15" y1="65" x2="22" y2="72" stroke="#e4e4e7" stroke-width="2"/>
     <line x1="15" y1="65" x2="8" y2="72" stroke="#e4e4e7" stroke-width="2"/>
     <g class="sr_leg_a" style="transform-origin: 15px 75px;">
-      <line x1="15" y1="75" x2="15" y2="93" stroke="#e4e4e7" stroke-width="2"/>
+      <line x1="15" y1="75" x2="15" y2="86" stroke="#e4e4e7" stroke-width="2"/>
     </g>
     <g class="sr_leg_b" style="transform-origin: 15px 75px;">
-      <line x1="15" y1="75" x2="15" y2="93" stroke="#e4e4e7" stroke-width="2"/>
+      <line x1="15" y1="75" x2="15" y2="86" stroke="#e4e4e7" stroke-width="2"/>
     </g>
   </g>
 </g>
 
-<text x="90" y="113" font-size="7" fill="#71717a" text-anchor="middle">fly to a position on the line</text>
+<text x="90" y="113" font-size="7" fill="#71717a" text-anchor="middle">mark positions on a number line</text>
 </svg>`
 
 const SVG_TIMING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
@@ -752,7 +773,7 @@ const SVG_TERRAIN = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
 //   8.5-10s   the result number "234" lights up green
 const SVG_BIDDING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
 <style>
-  @keyframes bi_walk { 0%{transform:translateX(0)} 25%,33%{transform:translateX(40px)} 58%,66%{transform:translateX(75px)} 83%,100%{transform:translateX(110px)} }
+  @keyframes bi_walk { 0%{transform:translateX(0)} 25%,33%{transform:translateX(40px)} 58%,66%{transform:translateX(75px)} 83%,86%{transform:translateX(110px)} 92%,100%{transform:translateX(160px)} }
   @keyframes bi_arm  { 0%,15%{transform:rotate(-50deg)} 22%,30%{transform:rotate(0deg)} 32%,47%{transform:rotate(-50deg)} 54%,62%{transform:rotate(0deg)} 64%,79%{transform:rotate(-50deg)} 86%,100%{transform:rotate(0deg)} }
   @keyframes bi_legA { 0%,100%{transform:rotate(-22deg)} 50%{transform:rotate(22deg)} }
   @keyframes bi_legB { 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
@@ -824,10 +845,10 @@ const SVG_BIDDING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
     </g>
     <line x1="15" y1="65" x2="8" y2="72" stroke="#e4e4e7" stroke-width="2"/>
     <g class="bi_legA" style="transform-origin: 15px 75px;">
-      <line x1="15" y1="75" x2="15" y2="93" stroke="#e4e4e7" stroke-width="2"/>
+      <line x1="15" y1="75" x2="15" y2="86" stroke="#e4e4e7" stroke-width="2"/>
     </g>
     <g class="bi_legB" style="transform-origin: 15px 75px;">
-      <line x1="15" y1="75" x2="15" y2="93" stroke="#e4e4e7" stroke-width="2"/>
+      <line x1="15" y1="75" x2="15" y2="86" stroke="#e4e4e7" stroke-width="2"/>
     </g>
   </g>
 </g>
@@ -899,94 +920,114 @@ const SVG_RISE_FALL = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/
 <text x="90" y="116" font-size="6" fill="#71717a" text-anchor="middle">above and below zero</text>
 </svg>`
 
-// Build-a-structure — 10-second multi-stage animation demonstrating
-// the "snap together components to match a target shape" verb.
-// Uses the unified faceless / no-knees / floating body style from
-// SVG_MOTION. Stages:
-//   0-2.5s:  target shape appears on the right (dashed outline)
-//   2.5-5s:  figure floats left-to-right carrying a stick, places
-//            it on the frame
-//   5-7.5s:  figure returns, carries a second stick, places it
-//   7.5-10s: final piece snaps into place, target outline solidifies,
-//            a tiny "✓" pulses in celebration
+// Build-a-structure — 10-second animation. The figure carries ONE
+// stick at a time, four trips total, building a square one edge per
+// trip. Each trip is 2.5s (10s ÷ 4): pick up at the pile (left), walk
+// right while carrying, drop it on the next edge of the frame, walk
+// empty back to the pile. After the 4th trip the square is complete.
 //
-// The figure is faceless (no eyes/mouth), legs are single straight
-// lines swinging from the hip, body line stops below the head circle.
+// Trip schedule:
+//   Trip 1   0.0-2.5s   place top edge
+//   Trip 2   2.5-5.0s   place right edge
+//   Trip 3   5.0-7.5s   place bottom edge
+//   Trip 4   7.5-10.0s  place left edge → square complete, glow green
+//
+// Figure carries a horizontal stick while walking right, no stick
+// while walking back. Each frame edge appears at the moment the
+// figure arrives at the right side.
 const SVG_BUILD_STRUCTURE = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
 <style>
-  /* Timing: one full 10-second cycle. All children share the same period
-     via animation-delay so stages stay in sync. */
-  @keyframes bs_walk_right { 0%,100%{transform:translateX(0)} 20%,30%{transform:translateX(80px)} 50%,60%{transform:translateX(0)} 80%,90%{transform:translateX(80px)} }
-  @keyframes bs_leg_a      { 0%,100%{transform:rotate(-22deg)} 50%{transform:rotate(22deg)} }
-  @keyframes bs_leg_b      { 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
-  @keyframes bs_bob        { 0%,100%{transform:translateY(-1.5px)} 50%{transform:translateY(1.5px)} }
-  @keyframes bs_carry      { 0%,25%{opacity:1} 26%,49%{opacity:0} 50%,75%{opacity:1} 76%,100%{opacity:0} }
-  @keyframes bs_carry2     { 0%,50%{opacity:0} 51%,75%{opacity:1} 76%,100%{opacity:0} }
-  @keyframes bs_place1     { 0%,25%{opacity:0} 26%,100%{opacity:1} }
-  @keyframes bs_place2     { 0%,50%{opacity:0} 51%,100%{opacity:1} }
-  @keyframes bs_place3     { 0%,75%{opacity:0} 76%,100%{opacity:1} }
-  @keyframes bs_place4     { 0%,90%{opacity:0} 91%,100%{opacity:1} }
-  @keyframes bs_target_fade{ 0%,85%{stroke:#52525b;stroke-dasharray:3,2} 90%,100%{stroke:#22c55e;stroke-dasharray:0} }
-  @keyframes bs_check      { 0%,88%{opacity:0;transform:scale(0)} 92%,100%{opacity:1;transform:scale(1)} }
+  /* NOTE: classes/keyframes are prefixed bk_ (for "build") to avoid
+     colliding with the bs_ prefix used by Balance & Equalize. SVG
+     <style> blocks are global, not scoped, so prefixes matter. */
 
-  .bs_fig     { animation: bs_walk_right 10s ease-in-out infinite; }
-  .bs_bob     { animation: bs_bob 1.2s ease-in-out infinite; }
-  .bs_leg_a   { animation: bs_leg_a 1.2s ease-in-out infinite; transform-origin: 0 22px; }
-  .bs_leg_b   { animation: bs_leg_b 1.2s ease-in-out infinite; transform-origin: 0 22px; }
-  .bs_carry_1 { animation: bs_carry 10s ease-in-out infinite; }
-  .bs_carry_2 { animation: bs_carry2 10s ease-in-out infinite; }
-  .bs_piece1  { animation: bs_place1 10s step-end infinite; }
-  .bs_piece2  { animation: bs_place2 10s step-end infinite; }
-  .bs_piece3  { animation: bs_place3 10s step-end infinite; }
-  .bs_piece4  { animation: bs_place4 10s step-end infinite; }
-  .bs_target  { animation: bs_target_fade 10s step-end infinite; }
-  .bs_check   { animation: bs_check 10s ease-out infinite; transform-origin: 150px 35px; }
+  /* Walk: 4 round trips. Each trip = 25% of the cycle. */
+  @keyframes bk_walk {
+    0%,100% { transform: translateX(0) }
+    12% { transform: translateX(85px) }
+    25% { transform: translateX(0) }
+    37% { transform: translateX(85px) }
+    50% { transform: translateX(0) }
+    62% { transform: translateX(85px) }
+    75% { transform: translateX(0) }
+    87% { transform: translateX(85px) }
+  }
+  @keyframes bk_leg_a { 0%,100%{transform:rotate(-22deg)} 50%{transform:rotate(22deg)} }
+  @keyframes bk_leg_b { 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
+  @keyframes bk_bob   { 0%,100%{transform:translateY(-1px)} 50%{transform:translateY(1px)} }
+
+  /* Carried stick: visible on the way right, hidden on the way back. */
+  @keyframes bk_carry {
+    0%,12%   { opacity: 1 }
+    13%,24%  { opacity: 0 }
+    25%,37%  { opacity: 1 }
+    38%,49%  { opacity: 0 }
+    50%,62%  { opacity: 1 }
+    63%,74%  { opacity: 0 }
+    75%,87%  { opacity: 1 }
+    88%,100% { opacity: 0 }
+  }
+
+  /* Each frame edge appears at the END of its trip. */
+  @keyframes bk_edge1 { 0%,12%  { opacity: 0 } 13%,100% { opacity: 1 } }
+  @keyframes bk_edge2 { 0%,37%  { opacity: 0 } 38%,100% { opacity: 1 } }
+  @keyframes bk_edge3 { 0%,62%  { opacity: 0 } 63%,100% { opacity: 1 } }
+  @keyframes bk_edge4 { 0%,87%  { opacity: 0 } 88%,100% { opacity: 1 } }
+
+  /* When all 4 edges are placed, the whole frame turns green. */
+  @keyframes bk_glow  { 0%,87%  { stroke: #a16207 } 92%,100% { stroke: #22c55e } }
+
+  .bk_fig    { animation: bk_walk 10s ease-in-out infinite; }
+  .bk_bob    { animation: bk_bob 0.7s ease-in-out infinite; }
+  .bk_leg_a  { animation: bk_leg_a 0.7s ease-in-out infinite; }
+  .bk_leg_b  { animation: bk_leg_b 0.7s ease-in-out infinite; }
+  .bk_carry  { animation: bk_carry 10s step-end infinite; }
+  .bk_edge1  { animation: bk_edge1 10s step-end infinite, bk_glow 10s step-end infinite; }
+  .bk_edge2  { animation: bk_edge2 10s step-end infinite, bk_glow 10s step-end infinite; }
+  .bk_edge3  { animation: bk_edge3 10s step-end infinite, bk_glow 10s step-end infinite; }
+  .bk_edge4  { animation: bk_edge4 10s step-end infinite, bk_glow 10s step-end infinite; }
 </style>
 <rect width="180" height="120" fill="#18181b"/>
 
-<!-- Target shape outline on the right (dashed while building, solid at the end) -->
-<g class="bs_target" fill="none" stroke="#52525b" stroke-width="2">
-  <line class="bs_piece1" x1="115" y1="35" x2="155" y2="35"/>
-  <line class="bs_piece2" x1="155" y1="35" x2="155" y2="75"/>
-  <line class="bs_piece3" x1="155" y1="75" x2="115" y2="75"/>
-  <line class="bs_piece4" x1="115" y1="75" x2="115" y2="35"/>
+<!-- Target shape outline (dashed grey "ghost" — always visible as a
+     guide so the kid sees what's being built BEFORE the first edge
+     drops in) -->
+<g fill="none" stroke="#3f3f46" stroke-width="1.5" stroke-dasharray="2,2">
+  <rect x="115" y="40" width="40" height="40"/>
 </g>
 
-<!-- Pile of sticks the figure picks from, on the left -->
-<line x1="10" y1="98" x2="30" y2="98" stroke="#a16207" stroke-width="2"/>
-<line x1="12" y1="94" x2="28" y2="94" stroke="#a16207" stroke-width="2"/>
-<line x1="14" y1="90" x2="26" y2="90" stroke="#a16207" stroke-width="2"/>
+<!-- The 4 placed edges. Each appears in turn as the figure drops a stick. -->
+<line class="bk_edge1" x1="115" y1="40" x2="155" y2="40" stroke="#a16207" stroke-width="2.5" stroke-linecap="round"/>
+<line class="bk_edge2" x1="155" y1="40" x2="155" y2="80" stroke="#a16207" stroke-width="2.5" stroke-linecap="round"/>
+<line class="bk_edge3" x1="155" y1="80" x2="115" y2="80" stroke="#a16207" stroke-width="2.5" stroke-linecap="round"/>
+<line class="bk_edge4" x1="115" y1="80" x2="115" y2="40" stroke="#a16207" stroke-width="2.5" stroke-linecap="round"/>
 
-<!-- Celebration check when all 4 pieces are placed -->
-<text class="bs_check" x="150" y="38" font-size="14" fill="#22c55e" text-anchor="middle">✓</text>
+<!-- Pile of sticks on the left (always visible — the source) -->
+<line x1="10" y1="95" x2="30" y2="95" stroke="#a16207" stroke-width="2"/>
+<line x1="12" y1="91" x2="28" y2="91" stroke="#a16207" stroke-width="2"/>
+<line x1="14" y1="87" x2="26" y2="87" stroke="#a16207" stroke-width="2"/>
 
-<!-- Figure — starts at x=15, walks right to place pieces. Uses the
-     unified baseline: faceless circle, body stops below head, single
-     straight legs swinging from the hip, no knees. -->
-<g class="bs_fig">
-  <g class="bs_bob">
-    <!-- Head (faceless, r=7) -->
-    <circle cx="15" cy="55" r="7" fill="none" stroke="#e4e4e7" stroke-width="2"/>
-    <!-- Body (below head circle: y=63 → hip y=77) -->
-    <line x1="15" y1="63" x2="15" y2="77" stroke="#e4e4e7" stroke-width="2"/>
-    <!-- Arms (pivot at shoulder y=66) -->
-    <line x1="15" y1="66" x2="24" y2="73" stroke="#e4e4e7" stroke-width="2"/>
-    <line x1="15" y1="66" x2="6" y2="73" stroke="#e4e4e7" stroke-width="2"/>
-    <!-- Stick being carried (visible while walking right with piece 1-2) -->
-    <line class="bs_carry_1" x1="22" y1="70" x2="34" y2="64" stroke="#a16207" stroke-width="2"/>
-    <!-- Second stick (vertical, visible on the second trip) -->
-    <line class="bs_carry_2" x1="22" y1="70" x2="28" y2="58" stroke="#a16207" stroke-width="2"/>
-    <!-- Legs — single straight lines, no knee. Pivot at hip (15, 77). -->
-    <g class="bs_leg_a" style="transform-origin: 15px 77px;">
-      <line x1="15" y1="77" x2="15" y2="97" stroke="#e4e4e7" stroke-width="2"/>
+<!-- Figure walks back and forth, carrying one stick per outbound trip.
+     Ends back at the pile (left side) so the completed square is
+     unobstructed. -->
+<g class="bk_fig">
+  <g class="bk_bob">
+    <circle cx="15" cy="55" r="6" fill="none" stroke="#e4e4e7" stroke-width="2"/>
+    <line x1="15" y1="61" x2="15" y2="75" stroke="#e4e4e7" stroke-width="2"/>
+    <line x1="15" y1="65" x2="22" y2="71" stroke="#e4e4e7" stroke-width="2"/>
+    <line x1="15" y1="65" x2="8" y2="71" stroke="#e4e4e7" stroke-width="2"/>
+    <!-- The single stick being carried, held in front of the body. -->
+    <line class="bk_carry" x1="20" y1="70" x2="32" y2="70" stroke="#a16207" stroke-width="2.5" stroke-linecap="round"/>
+    <g class="bk_leg_a" style="transform-origin: 15px 75px;">
+      <line x1="15" y1="75" x2="15" y2="86" stroke="#e4e4e7" stroke-width="2"/>
     </g>
-    <g class="bs_leg_b" style="transform-origin: 15px 77px;">
-      <line x1="15" y1="77" x2="15" y2="97" stroke="#e4e4e7" stroke-width="2"/>
+    <g class="bk_leg_b" style="transform-origin: 15px 75px;">
+      <line x1="15" y1="75" x2="15" y2="86" stroke="#e4e4e7" stroke-width="2"/>
     </g>
   </g>
 </g>
 
-<text x="90" y="113" font-size="7" fill="#71717a" text-anchor="middle">snap components to match the target</text>
+<text x="90" y="113" font-size="6" fill="#71717a" text-anchor="middle">build the shape one piece at a time</text>
 </svg>`
 
 export const MECHANIC_ANIMATIONS: MechanicAnimation[] = [
