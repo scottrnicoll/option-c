@@ -254,7 +254,7 @@ export function StandardPanel({
                 <p className="text-amber-300 font-medium">Your game is being reviewed</p>
                 <p className="text-zinc-400 text-sm mt-1">You&apos;ll get +2000 tokens when your guide approves it.</p>
                 <a
-                  href="/student"
+                  href="/learner"
                   className="text-sm text-blue-400 hover:text-blue-300 mt-2 inline-block"
                 >
                   Check status in My Stuff →
