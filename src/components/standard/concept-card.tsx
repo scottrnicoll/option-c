@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react"
 import type { StandardNode } from "@/lib/graph-types"
 import { matchMechanics } from "@/lib/mechanic-animations"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Volume2, VolumeX, Sparkles } from "lucide-react"
 
@@ -40,8 +41,15 @@ function MechanicExample({ standard }: { standard: StandardNode }) {
       <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">
         Example
       </p>
-      <div className="rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 max-w-[300px]">
-        <div className="w-full">{topMechanic.svg}</div>
+      {/* SVGs use viewBox 180×120 (3:2). Wrapper is a fixed 300×200
+          box so the dangerousSvg helper's height:100% has a real
+          height to fill. Inline style is more reliable than Tailwind's
+          aspect-ratio bracket notation in Tailwind 4. */}
+      <div
+        className="rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900"
+        style={{ width: 300, height: 200 }}
+      >
+        {topMechanic.svg}
       </div>
     </div>
   )
@@ -410,12 +418,13 @@ export function ConceptCard({ standard, onReady, readOnly }: ConceptCardProps) {
       />
 
       {!readOnly && (
-        <button
+        <Button
           onClick={() => onReady()}
-          className="w-full text-sm text-zinc-400 hover:text-zinc-200 underline underline-offset-4 py-2"
+          size="lg"
+          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
         >
-          Or describe your own game from scratch →
-        </button>
+          I have a game idea →
+        </Button>
       )}
     </div>
   )

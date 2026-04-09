@@ -170,7 +170,7 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-white mb-1">
               {phase === "narration" && "Building your game"}
-              {phase === "visualConcept" && "How it'll look"}
+              {phase === "visualConcept" && "Game Specs"}
               {phase === "vibe" && "Pick the look"}
               {phase === "generating" && "Building your game"}
               {phase === "done" && "Done!"}

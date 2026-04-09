@@ -47,8 +47,10 @@ export function FunnyStickFigure() {
           @keyframes fsf_walk_thighB { 0%,100% { transform: rotate(28deg); } 50% { transform: rotate(-28deg); } }
           @keyframes fsf_walk_bob    { 0%,100% { transform: translateY(-2px); } 50% { transform: translateY(2px); } }
 
-          /* Whole-figure horizontal travel — bounces between two ends of the floor */
-          @keyframes fsf_travel { 0%,100% { transform: translateX(-30px); } 50% { transform: translateX(30px); } }
+          /* Whole-figure horizontal travel — bounces between two ends of
+             the floor. Wider range and faster cycle so the walking
+             motion is clearly visible (not just leg-waving in place). */
+          @keyframes fsf_travel { 0%,100% { transform: translateX(-55px); } 50% { transform: translateX(55px); } }
 
           /* === Per-action arm/prop animations (overlaid on top of the walk) === */
           @keyframes fsf_dance_armA { 0%,100% { transform: rotate(-30deg); } 50% { transform: rotate(60deg); } }
@@ -67,8 +69,12 @@ export function FunnyStickFigure() {
           @keyframes fsf_sweep_armA { 0%,100% { transform: rotate(-20deg); } 50% { transform: rotate(50deg); } }
           @keyframes fsf_sweep_dust { 0%,100% { transform: translateX(0); opacity: 0; } 30% { opacity: 1; } 70%,100% { transform: translateX(20px); opacity: 0; } }
 
-          @keyframes fsf_magic_armA { 0%,100% { transform: rotate(-90deg); } 50% { transform: rotate(-110deg); } }
-          @keyframes fsf_magic_armB { 0%,100% { transform: rotate(90deg); } 50% { transform: rotate(110deg); } }
+          /* Magic trick: right arm raised diagonally up so the wand and
+             star are clearly above and away from the body, not popping
+             out of the chest. Arm pivots at shoulder (100, 68); a small
+             wave between -130deg and -140deg. */
+          @keyframes fsf_magic_armA { 0%,100% { transform: rotate(-130deg); } 50% { transform: rotate(-140deg); } }
+          @keyframes fsf_magic_armB { 0%,100% { transform: rotate(20deg); } 50% { transform: rotate(0deg); } }
           @keyframes fsf_magic_star { 0%,100% { opacity: 0; transform: scale(0); } 50% { opacity: 1; transform: scale(1.2) rotate(180deg); } }
 
           @keyframes fsf_lift_armA { 0%,100% { transform: rotate(-90deg); } 50% { transform: rotate(-95deg); } }
@@ -78,7 +84,7 @@ export function FunnyStickFigure() {
           @keyframes fsf_yoga_body { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
 
           /* === Walking + travel applied on every non-yoga action === */
-          .traveler { animation: fsf_travel 6s ease-in-out infinite; }
+          .traveler { animation: fsf_travel 4s ease-in-out infinite; }
           .traveler.a-yoga { animation: none; }
 
           .a-dancing .fig-thighA, .a-juggling .fig-thighA, .a-hammering .fig-thighA,
@@ -140,9 +146,19 @@ export function FunnyStickFigure() {
             <circle cx="100" cy="52" r="12" fill="none" stroke="#e4e4e7" strokeWidth="2.5" />
             {/* Body — starts at y=66 (below head), ends at hip y=92. */}
             <line className="fig-body" x1="100" y1="66" x2="100" y2="92" stroke="#e4e4e7" strokeWidth="2.5" strokeLinecap="round" />
-            {/* Arms — pivot at shoulder (100, 68) */}
+            {/* Arms — pivot at shoulder (100, 68). The right arm (fig-armA)
+                also holds the magic wand: when the magic action is active
+                its rotation makes the wand point diagonally up-right past
+                the head. The wand is INSIDE the rotating group so it
+                visually emerges from the hand, not from the body. */}
             <g className="fig-armA">
               <line x1="100" y1="68" x2="100" y2="90" stroke="#e4e4e7" strokeWidth="2.5" strokeLinecap="round" />
+              {action === "magicTrick" && (
+                <>
+                  <line x1="100" y1="90" x2="100" y2="108" stroke="#71717a" strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="100" cy="108" r="2" fill="#fbbf24" />
+                </>
+              )}
             </g>
             <g className="fig-armB">
               <line x1="100" y1="68" x2="100" y2="90" stroke="#e4e4e7" strokeWidth="2.5" strokeLinecap="round" />
@@ -204,11 +220,10 @@ export function FunnyStickFigure() {
             )}
             {action === "magicTrick" && (
               <>
-                {/* Wand — held at hand (100, 90), tip in the air */}
-                <line x1="100" y1="90" x2="118" y2="48" stroke="#71717a" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="118" cy="48" r="2.5" fill="#fbbf24" />
-                {/* Magic star */}
-                <g className="star" transform="translate(132 38)">
+                {/* Magic star pulses at the wand tip. Positioned in
+                    SVG-absolute coordinates (above-right of head) so it
+                    stays at the tip after the arm rotates the wand. */}
+                <g className="star" transform="translate(125 30)">
                   <path d="M 0 -8 L 2 -2 L 8 -2 L 3 2 L 5 8 L 0 4 L -5 8 L -3 2 L -8 -2 L -2 -2 Z" fill="#fbbf24" />
                 </g>
               </>

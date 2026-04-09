@@ -540,7 +540,6 @@ type Step =
   | "returning"      // returning student: name + personal code
   | "grade"          // grade
   | "intro"          // how-it-works intro
-  | "interests"      // interests picker
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const { user, profile, activeProfile, impersonating, signInLearner, signInReturning } = useAuth()
@@ -549,7 +548,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   // that are already filled in.
   const source = impersonating ?? activeProfile
   const initialStep: Step = source
-    ? (!source.grade ? "grade" : source.interests.length === 0 ? "interests" : "welcome")
+    ? (!source.grade ? "grade" : "welcome")
     : "welcome"
   const [step, setStep] = useState<Step>(initialStep)
   const [classCode, setClassCode] = useState("")
@@ -622,13 +621,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   }
 
-  const handleInterestsComplete = async () => {
+  // Called when the new learner finishes the intro step. Persists the
+  // grade selection to Firestore (the interests field is left empty —
+  // no longer collected during onboarding) and jumps into the galaxy.
+  const handleIntroComplete = async () => {
     const targetUid = impersonating?.uid ?? user?.uid
     if (targetUid) {
       try {
         await updateDoc(doc(db, "users", targetUid), {
           grade: data.grade,
-          interests: data.interests,
         })
       } catch {
         // Silent fail — profile will be updated on next login
@@ -713,24 +714,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           />
         </StepWrapper>
 
-        {/* Intro */}
+        {/* Intro — last step before the galaxy. The old "interests
+            picker" step was removed because asking kids to declare
+            their interests up-front constrained their imagination
+            instead of expanding it. */}
         <StepWrapper visible={step === "intro"}>
-          <IntroStep name={data.name} onNext={() => setStep("interests")} />
-        </StepWrapper>
-
-        {/* Interests */}
-        <StepWrapper visible={step === "interests"}>
-          <InterestsStep
-            selected={data.interests}
-            onToggle={toggleInterest}
-            onAddCustom={(newInterests) => {
-              setData((prev) => ({
-                ...prev,
-                interests: [...prev.interests, ...newInterests.filter(i => !prev.interests.includes(i))],
-              }))
-            }}
-            onNext={handleInterestsComplete}
-          />
+          <IntroStep name={data.name} onNext={handleIntroComplete} />
         </StepWrapper>
       </div>
     </div>

@@ -76,33 +76,39 @@ const SVG_RESOURCE_MGMT = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2
 // Arm stays raised the whole time to emphasize "I'm doing this".
 const SVG_PARTITIONING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
 <style>
-  /* Arm chop synced with the cut times (cuts appear at 22, 42, 62, 82%).
-     Arm sits at -50deg (raised) most of the time, snaps to 0deg (chop
-     down) right at each cut moment, then snaps back up. After the 4th
-     cut the arm stays raised while the figure walks aside. */
+  /* Three chops total. Cut 1 (vertical) at 25%, cut 2 (horizontal)
+     at 50%, cuts 3+4 (both diagonals) at 75% so the circle goes
+     1 → 2 halves → 4 quarters → 8 eighths in three clean steps.
+     Arm sits at -50deg (raised) most of the time, snaps to 0deg
+     (chop down) at each cut moment, then snaps back up. */
   @keyframes pa_arm_chop {
-    0%,18%   { transform: rotate(-50deg) }
-    22%      { transform: rotate(0deg)   }
-    26%,38%  { transform: rotate(-50deg) }
-    42%      { transform: rotate(0deg)   }
-    46%,58%  { transform: rotate(-50deg) }
-    62%      { transform: rotate(0deg)   }
-    66%,78%  { transform: rotate(-50deg) }
-    82%      { transform: rotate(0deg)   }
-    86%,100% { transform: rotate(-50deg) }
+    0%,20%   { transform: rotate(-50deg) }
+    25%      { transform: rotate(0deg)   }
+    30%,45%  { transform: rotate(-50deg) }
+    50%      { transform: rotate(0deg)   }
+    55%,70%  { transform: rotate(-50deg) }
+    75%      { transform: rotate(0deg)   }
+    80%,100% { transform: rotate(-50deg) }
   }
   /* Step aside after the last cut so the result circle is fully visible */
-  @keyframes pa_step_aside { 0%,84%{transform:translateX(0)} 90%,100%{transform:translateX(-22px)} }
-  @keyframes pa_lean     { 0%,100%{transform:rotate(0deg)} 25%,55%,85%{transform:rotate(3deg)} }
-  @keyframes pa_step1    { 0%,18%{opacity:0} 22%,100%{opacity:1} }
-  @keyframes pa_step2    { 0%,38%{opacity:0} 42%,100%{opacity:1} }
-  @keyframes pa_step3    { 0%,58%{opacity:0} 62%,100%{opacity:1} }
-  @keyframes pa_step4    { 0%,78%{opacity:0} 82%,100%{opacity:1} }
-  @keyframes pa_glow     { 0%,80%{opacity:0} 85%,95%{opacity:1} 100%{opacity:0} }
-  @keyframes pa_label1   { 0%,18%{opacity:1} 22%,100%{opacity:0} }
-  @keyframes pa_label2   { 0%,18%{opacity:0} 22%,38%{opacity:1} 42%,100%{opacity:0} }
-  @keyframes pa_label3   { 0%,38%{opacity:0} 42%,58%{opacity:1} 62%,100%{opacity:0} }
-  @keyframes pa_label4   { 0%,58%{opacity:0} 62%,100%{opacity:1} }
+  @keyframes pa_step_aside { 0%,80%{transform:translateX(0)} 86%,100%{transform:translateX(-18px)} }
+  @keyframes pa_lean     { 0%,100%{transform:rotate(0deg)} 28%,53%,78%{transform:rotate(3deg)} }
+  /* Cuts: cut1 at 25%, cut2 at 50%, cut3 + cut4 at 75% (both at once) */
+  @keyframes pa_step1    { 0%,24%{opacity:0} 25%,100%{opacity:1} }
+  @keyframes pa_step2    { 0%,49%{opacity:0} 50%,100%{opacity:1} }
+  @keyframes pa_step3    { 0%,74%{opacity:0} 75%,100%{opacity:1} }
+  @keyframes pa_step4    { 0%,74%{opacity:0} 75%,100%{opacity:1} }
+  /* Final green glow + holds during the "1 whole" label reappearance */
+  @keyframes pa_glow     { 0%,84%{opacity:0} 87%,100%{opacity:0.3} }
+  /* Labels:
+       lab1 "1 whole" — visible at the start AND at the very end
+       lab2 "2 × 1/2" — after cut 1
+       lab3 "4 × 1/4" — after cut 2
+       lab4 "8 × 1/8" — after cuts 3+4 (the eighths beat) */
+  @keyframes pa_label1   { 0%,24%{opacity:1} 25%,84%{opacity:0} 87%,100%{opacity:1} }
+  @keyframes pa_label2   { 0%,24%{opacity:0} 25%,49%{opacity:1} 50%,100%{opacity:0} }
+  @keyframes pa_label3   { 0%,49%{opacity:0} 50%,74%{opacity:1} 75%,100%{opacity:0} }
+  @keyframes pa_label4   { 0%,74%{opacity:0} 75%,84%{opacity:1} 87%,100%{opacity:0} }
 
   .pa_outer { animation: pa_step_aside 10s ease-in-out infinite; }
   .pa_g     { animation: pa_lean 10s ease-in-out infinite; transform-origin: 30px 65px; }
@@ -179,7 +185,7 @@ const SVG_BALANCE = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
   /* Beam tilt: starts hard left (-12deg), evens out as blocks are added */
   @keyframes bs_beam   { 0%,15%{transform:rotate(-12deg)} 25%,35%{transform:rotate(-8deg)} 45%,55%{transform:rotate(-4deg)} 65%,100%{transform:rotate(0deg)} }
   /* Figure walks from origin (x=10) right to drop at the right pan */
-  @keyframes bs_walk   { 0%,15%{transform:translateX(0)} 25%,35%{transform:translateX(105px)} 40%,45%{transform:translateX(0)} 50%,60%{transform:translateX(105px)} 65%,70%{transform:translateX(0)} 75%,82%{transform:translateX(105px)} 88%,100%{transform:translateX(155px)} }
+  @keyframes bs_walk   { 0%,15%{transform:translateX(0)} 25%,35%{transform:translateX(105px)} 40%,45%{transform:translateX(0)} 50%,60%{transform:translateX(105px)} 65%,70%{transform:translateX(0)} 75%,82%{transform:translateX(105px)} 88%,100%{transform:translateX(140px)} }
   @keyframes bs_legA   { 0%,100%{transform:rotate(-22deg)} 50%{transform:rotate(22deg)} }
   @keyframes bs_legB   { 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
   @keyframes bs_bob    { 0%,100%{transform:translateY(-1.5px)} 50%{transform:translateY(1.5px)} }
@@ -190,15 +196,15 @@ const SVG_BALANCE = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
   /* Final equality glow */
   @keyframes bs_glow   { 0%,75%{opacity:0;fill:#71717a} 80%,100%{opacity:1;fill:#22c55e} }
 
-  .bs_g    { animation: bs_walk 10s ease-in-out infinite; }
-  .bs_bob  { animation: bs_bob 0.5s ease-in-out infinite; }
-  .bs_legA { animation: bs_legA 0.5s ease-in-out infinite; transform-origin: 0 22px; }
-  .bs_legB { animation: bs_legB 0.5s ease-in-out infinite; transform-origin: 0 22px; }
-  .bs_beam { animation: bs_beam 10s ease-in-out infinite; transform-origin: 100px 55px; }
-  .bs_b2   { animation: bs_b2 10s step-end infinite; }
-  .bs_b3   { animation: bs_b3 10s step-end infinite; }
-  .bs_b4   { animation: bs_b4 10s step-end infinite; }
-  .bs_glow { animation: bs_glow 10s step-end infinite; }
+  .bs_g    { animation: bs_walk 11s ease-in-out infinite; }
+  .bs_bob  { animation: bs_bob 1s ease-in-out infinite; }
+  .bs_legA { animation: bs_legA 1s ease-in-out infinite; transform-origin: 0 22px; }
+  .bs_legB { animation: bs_legB 1s ease-in-out infinite; transform-origin: 0 22px; }
+  .bs_beam { animation: bs_beam 11s ease-in-out infinite; transform-origin: 100px 55px; }
+  .bs_b2   { animation: bs_b2 11s step-end infinite; }
+  .bs_b3   { animation: bs_b3 11s step-end infinite; }
+  .bs_b4   { animation: bs_b4 11s step-end infinite; }
+  .bs_glow { animation: bs_glow 11s step-end infinite; }
 </style>
 <rect width="180" height="120" fill="#18181b"/>
 
@@ -516,46 +522,90 @@ const SVG_MEASURE = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
 <text x="90" y="115" font-size="7" fill="#71717a" text-anchor="middle">measure and compare</text>
 </svg>`
 
-// Score & Rank — 10-second animation showing the verb "fly to a position
-// on the number line". A target number flashes at the top, the figure
-// floats horizontally to land on that position, drops a flag, then
-// repeats with a new target.
+// Score & Rank — 12-second animation showing the verb "mark positions
+// on a number line". The figure walks to each target in turn and
+// PLANTS a flag from its raised arm. The flag visually emerges from
+// the figure's hand position, not its trunk.
 //
-// Stages:
-//   0.0-3.3s  target = 4 → figure floats from start to position 4, drops flag
-//   3.3-6.6s  target = 7 → figure floats to position 7, drops flag
-//   6.6-10s   target = 2 → figure floats back to position 2, drops flag
+// Stages (12s total):
+//   0.0-3.0s  start at 0, walk to position 4, plant flag from arm
+//   3.0-6.0s  walk from 4 to position 7, plant flag from arm
+//   6.0-9.0s  walk from 7 to position 2, plant flag from arm
+//   9.0-12s   walk to a parking spot at position 0, stay in frame
+//
+// Figure starts at translateX(0) (body x=15, position 0). Target
+// positions: 4=(60), 7=(105), 2=(30). Each arrival also raises the
+// arm (sf_arm) which carries the flag.
 const SVG_SCORING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
 <style>
-  /* Figure travels horizontally; spans x=15 (=0) to x=165 (=10).
-     Each tick = 15px. Targets: 4 (x=75), 7 (x=120), 2 (x=45). */
-  @keyframes sr_travel { 0%{transform:translateX(0)} 25%,33%{transform:translateX(60px)} 58%,66%{transform:translateX(105px)} 91%,93%{transform:translateX(30px)} 96%,100%{transform:translateX(-25px)} }
-  @keyframes sr_leg_a  { 0%,100%{transform:rotate(-25deg)} 50%{transform:rotate(25deg)} }
-  @keyframes sr_leg_b  { 0%,100%{transform:rotate(25deg)} 50%{transform:rotate(-25deg)} }
-  @keyframes sr_bob    { 0%,100%{transform:translateY(-1.5px)} 50%{transform:translateY(1.5px)} }
-  /* Target labels: each visible during its segment */
-  @keyframes sr_t1     { 0%,33%{opacity:1} 34%,100%{opacity:0} }
-  @keyframes sr_t2     { 0%,33%{opacity:0} 34%,66%{opacity:1} 67%,100%{opacity:0} }
-  @keyframes sr_t3     { 0%,66%{opacity:0} 67%,100%{opacity:1} }
-  /* Flags: each appears at the end of its segment and stays */
-  @keyframes sr_flag1  { 0%,28%{opacity:0} 30%,100%{opacity:1} }
-  @keyframes sr_flag2  { 0%,61%{opacity:0} 63%,100%{opacity:1} }
-  @keyframes sr_flag3  { 0%,94%{opacity:0} 96%,100%{opacity:1} }
+  /* Walk: 4 segments, each 25% of the cycle. Smooth ease so the gait
+     looks like a deliberate walk (not a flop). */
+  @keyframes sf_walk {
+    0%       { transform: translateX(0) }
+    20%,25%  { transform: translateX(60px) }
+    45%,50%  { transform: translateX(105px) }
+    70%,75%  { transform: translateX(30px) }
+    95%,100% { transform: translateX(0) }
+  }
+  /* Subtle leg swing; small angles so it doesn't look frantic. */
+  @keyframes sf_leg_a { 0%,100%{transform:rotate(-15deg)} 50%{transform:rotate(15deg)} }
+  @keyframes sf_leg_b { 0%,100%{transform:rotate(15deg)} 50%{transform:rotate(-15deg)} }
+  /* Tiny bob; small range so it doesn't look like flopping. */
+  @keyframes sf_bob   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1px)} }
 
-  .sr_g     { animation: sr_travel 10s ease-in-out infinite; }
-  .sr_bob   { animation: sr_bob 0.6s ease-in-out infinite; }
-  .sr_leg_a { animation: sr_leg_a 0.6s ease-in-out infinite; transform-origin: 0 22px; }
-  .sr_leg_b { animation: sr_leg_b 0.6s ease-in-out infinite; transform-origin: 0 22px; }
-  .sr_t1    { animation: sr_t1 10s step-end infinite; }
-  .sr_t2    { animation: sr_t2 10s step-end infinite; }
-  .sr_t3    { animation: sr_t3 10s step-end infinite; }
-  .sr_flag1 { animation: sr_flag1 10s step-end infinite; }
-  .sr_flag2 { animation: sr_flag2 10s step-end infinite; }
-  .sr_flag3 { animation: sr_flag3 10s step-end infinite; }
+  /* Arm raises (holding flag) only while the figure is AT a target,
+     i.e. the brief plateau in sf_walk. The rest of the time the arm
+     hangs at the side. */
+  @keyframes sf_arm {
+    0%,18%   { transform: rotate(0deg) }
+    21%,25%  { transform: rotate(-90deg) }
+    27%,43%  { transform: rotate(0deg) }
+    46%,50%  { transform: rotate(-90deg) }
+    52%,68%  { transform: rotate(0deg) }
+    71%,75%  { transform: rotate(-90deg) }
+    77%,100% { transform: rotate(0deg) }
+  }
+
+  /* Carried flag — visible only when the arm is raised. Hidden when
+     the arm hangs at the side (otherwise it'd float in the air). */
+  @keyframes sf_carry_flag {
+    0%,18%   { opacity: 0 }
+    21%,25%  { opacity: 1 }
+    27%,43%  { opacity: 0 }
+    46%,50%  { opacity: 1 }
+    52%,68%  { opacity: 0 }
+    71%,75%  { opacity: 1 }
+    77%,100% { opacity: 0 }
+  }
+
+  /* Each PLANTED flag stays after its drop moment. The flag appears
+     just AFTER the figure raises its arm at the target — visually
+     the flag transfers from the hand to the ground. */
+  @keyframes sf_planted1 { 0%,25%{opacity:0} 26%,100%{opacity:1} }
+  @keyframes sf_planted2 { 0%,50%{opacity:0} 51%,100%{opacity:1} }
+  @keyframes sf_planted3 { 0%,75%{opacity:0} 76%,100%{opacity:1} }
+
+  /* Target labels at the top — change as the figure moves between targets */
+  @keyframes sf_t1 { 0%,25%{opacity:1} 26%,100%{opacity:0} }
+  @keyframes sf_t2 { 0%,25%{opacity:0} 26%,50%{opacity:1} 51%,100%{opacity:0} }
+  @keyframes sf_t3 { 0%,50%{opacity:0} 51%,75%{opacity:1} 76%,100%{opacity:0} }
+
+  .sf_g       { animation: sf_walk 12s ease-in-out infinite; }
+  .sf_bob     { animation: sf_bob 0.9s ease-in-out infinite; }
+  .sf_leg_a   { animation: sf_leg_a 0.9s ease-in-out infinite; }
+  .sf_leg_b   { animation: sf_leg_b 0.9s ease-in-out infinite; }
+  .sf_arm     { animation: sf_arm 12s ease-in-out infinite; transform-origin: 15px 65px; }
+  .sf_carry_flag { animation: sf_carry_flag 12s step-end infinite; }
+  .sf_planted1 { animation: sf_planted1 12s step-end infinite; }
+  .sf_planted2 { animation: sf_planted2 12s step-end infinite; }
+  .sf_planted3 { animation: sf_planted3 12s step-end infinite; }
+  .sf_t1      { animation: sf_t1 12s step-end infinite; }
+  .sf_t2      { animation: sf_t2 12s step-end infinite; }
+  .sf_t3      { animation: sf_t3 12s step-end infinite; }
 </style>
 <rect width="180" height="120" fill="#18181b"/>
 
-<!-- Number line -->
+<!-- Number line 0 to 10 -->
 <line x1="15" y1="80" x2="165" y2="80" stroke="#71717a" stroke-width="1.5"/>
 <g stroke="#71717a" stroke-width="1">
   <line x1="15" y1="76" x2="15" y2="84"/>
@@ -579,36 +629,50 @@ const SVG_SCORING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
   <text x="165" y="95">10</text>
 </g>
 
-<!-- Target callout at the top: changes 3 times -->
-<text class="sr_t1" x="90" y="22" font-size="11" fill="#fbbf24" text-anchor="middle" font-family="monospace">target → 4</text>
-<text class="sr_t2" x="90" y="22" font-size="11" fill="#fbbf24" text-anchor="middle" font-family="monospace">target → 7</text>
-<text class="sr_t3" x="90" y="22" font-size="11" fill="#fbbf24" text-anchor="middle" font-family="monospace">target → 2</text>
+<!-- Target callouts -->
+<text class="sf_t1" x="90" y="22" font-size="11" fill="#fbbf24" text-anchor="middle" font-family="monospace">mark → 4</text>
+<text class="sf_t2" x="90" y="22" font-size="11" fill="#fbbf24" text-anchor="middle" font-family="monospace">mark → 7</text>
+<text class="sf_t3" x="90" y="22" font-size="11" fill="#fbbf24" text-anchor="middle" font-family="monospace">mark → 2</text>
 
-<!-- Flags dropped at each target -->
-<g class="sr_flag1">
-  <line x1="75" y1="60" x2="75" y2="78" stroke="#22c55e" stroke-width="1.5"/>
-  <polygon points="75,60 84,63 75,66" fill="#22c55e"/>
+<!-- PLANTED flags at each target. They appear after the figure plants
+     them. Static positions on the number line. -->
+<g class="sf_planted1">
+  <line x1="75" y1="62" x2="75" y2="78" stroke="#22c55e" stroke-width="1.5"/>
+  <polygon points="75,62 83,65 75,68" fill="#22c55e"/>
 </g>
-<g class="sr_flag2">
-  <line x1="120" y1="60" x2="120" y2="78" stroke="#22c55e" stroke-width="1.5"/>
-  <polygon points="120,60 129,63 120,66" fill="#22c55e"/>
+<g class="sf_planted2">
+  <line x1="120" y1="62" x2="120" y2="78" stroke="#22c55e" stroke-width="1.5"/>
+  <polygon points="120,62 128,65 120,68" fill="#22c55e"/>
 </g>
-<g class="sr_flag3">
-  <line x1="45" y1="60" x2="45" y2="78" stroke="#22c55e" stroke-width="1.5"/>
-  <polygon points="45,60 54,63 45,66" fill="#22c55e"/>
+<g class="sf_planted3">
+  <line x1="45" y1="62" x2="45" y2="78" stroke="#22c55e" stroke-width="1.5"/>
+  <polygon points="45,62 53,65 45,68" fill="#22c55e"/>
 </g>
 
-<!-- Floating figure -->
-<g class="sr_g">
-  <g class="sr_bob">
+<!-- The figure walks to each target. When it raises its arm at a
+     target, the carried flag is briefly visible in its hand —
+     transferring to the planted flag at the same moment. -->
+<g class="sf_g">
+  <g class="sf_bob">
     <circle cx="15" cy="55" r="6" fill="none" stroke="#e4e4e7" stroke-width="2"/>
     <line x1="15" y1="61" x2="15" y2="75" stroke="#e4e4e7" stroke-width="2"/>
-    <line x1="15" y1="65" x2="22" y2="72" stroke="#e4e4e7" stroke-width="2"/>
+    <!-- Right arm: animated (raises to plant). The carried flag is a
+         child of this group so it rotates WITH the arm. -->
+    <g class="sf_arm">
+      <line x1="15" y1="65" x2="22" y2="72" stroke="#e4e4e7" stroke-width="2"/>
+      <!-- Carried flag: positioned at the hand (22, 72) when arm is
+           horizontal, swings up to (22, 50ish) when arm is vertical. -->
+      <g class="sf_carry_flag">
+        <line x1="22" y1="62" x2="22" y2="74" stroke="#22c55e" stroke-width="1.5"/>
+        <polygon points="22,62 30,65 22,68" fill="#22c55e"/>
+      </g>
+    </g>
+    <!-- Left arm: static -->
     <line x1="15" y1="65" x2="8" y2="72" stroke="#e4e4e7" stroke-width="2"/>
-    <g class="sr_leg_a" style="transform-origin: 15px 75px;">
+    <g class="sf_leg_a" style="transform-origin: 15px 75px;">
       <line x1="15" y1="75" x2="15" y2="86" stroke="#e4e4e7" stroke-width="2"/>
     </g>
-    <g class="sr_leg_b" style="transform-origin: 15px 75px;">
+    <g class="sf_leg_b" style="transform-origin: 15px 75px;">
       <line x1="15" y1="75" x2="15" y2="86" stroke="#e4e4e7" stroke-width="2"/>
     </g>
   </g>
@@ -773,7 +837,7 @@ const SVG_TERRAIN = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
 //   8.5-10s   the result number "234" lights up green
 const SVG_BIDDING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
 <style>
-  @keyframes bi_walk { 0%{transform:translateX(0)} 25%,33%{transform:translateX(40px)} 58%,66%{transform:translateX(75px)} 83%,86%{transform:translateX(110px)} 92%,100%{transform:translateX(160px)} }
+  @keyframes bi_walk { 0%{transform:translateX(0)} 25%,33%{transform:translateX(40px)} 58%,66%{transform:translateX(75px)} 83%,86%{transform:translateX(110px)} 92%,100%{transform:translateX(140px)} }
   @keyframes bi_arm  { 0%,15%{transform:rotate(-50deg)} 22%,30%{transform:rotate(0deg)} 32%,47%{transform:rotate(-50deg)} 54%,62%{transform:rotate(0deg)} 64%,79%{transform:rotate(-50deg)} 86%,100%{transform:rotate(0deg)} }
   @keyframes bi_legA { 0%,100%{transform:rotate(-22deg)} 50%{transform:rotate(22deg)} }
   @keyframes bi_legB { 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
@@ -790,21 +854,21 @@ const SVG_BIDDING = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/sv
   @keyframes bi_o4 { 0%,82%{opacity:0} 85%,100%{opacity:1} }
   @keyframes bi_total { 0%,85%{opacity:0;fill:#71717a} 88%,100%{opacity:1;fill:#22c55e} }
 
-  .bi_g    { animation: bi_walk 10s ease-in-out infinite; }
-  .bi_bob  { animation: bi_bob 0.5s ease-in-out infinite; }
-  .bi_arm  { animation: bi_arm 10s ease-in-out infinite; transform-origin: 0 -10px; }
-  .bi_legA { animation: bi_legA 0.5s ease-in-out infinite; transform-origin: 0 22px; }
-  .bi_legB { animation: bi_legB 0.5s ease-in-out infinite; transform-origin: 0 22px; }
-  .bi_h1   { animation: bi_h1 10s step-end infinite; }
-  .bi_h2   { animation: bi_h2 10s step-end infinite; }
-  .bi_t1   { animation: bi_t1 10s step-end infinite; }
-  .bi_t2   { animation: bi_t2 10s step-end infinite; }
-  .bi_t3   { animation: bi_t3 10s step-end infinite; }
-  .bi_o1   { animation: bi_o1 10s step-end infinite; }
-  .bi_o2   { animation: bi_o2 10s step-end infinite; }
-  .bi_o3   { animation: bi_o3 10s step-end infinite; }
-  .bi_o4   { animation: bi_o4 10s step-end infinite; }
-  .bi_total{ animation: bi_total 10s step-end infinite; }
+  .bi_g    { animation: bi_walk 13s ease-in-out infinite; }
+  .bi_bob  { animation: bi_bob 1s ease-in-out infinite; }
+  .bi_arm  { animation: bi_arm 13s ease-in-out infinite; transform-origin: 0 -10px; }
+  .bi_legA { animation: bi_legA 1s ease-in-out infinite; transform-origin: 0 22px; }
+  .bi_legB { animation: bi_legB 1s ease-in-out infinite; transform-origin: 0 22px; }
+  .bi_h1   { animation: bi_h1 13s step-end infinite; }
+  .bi_h2   { animation: bi_h2 13s step-end infinite; }
+  .bi_t1   { animation: bi_t1 13s step-end infinite; }
+  .bi_t2   { animation: bi_t2 13s step-end infinite; }
+  .bi_t3   { animation: bi_t3 13s step-end infinite; }
+  .bi_o1   { animation: bi_o1 13s step-end infinite; }
+  .bi_o2   { animation: bi_o2 13s step-end infinite; }
+  .bi_o3   { animation: bi_o3 13s step-end infinite; }
+  .bi_o4   { animation: bi_o4 13s step-end infinite; }
+  .bi_total{ animation: bi_total 13s step-end infinite; }
 </style>
 <rect width="180" height="120" fill="#18181b"/>
 
@@ -938,8 +1002,8 @@ const SVG_RISE_FALL = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/
 const SVG_BUILD_STRUCTURE = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
 <style>
   /* NOTE: classes/keyframes are prefixed bk_ (for "build") to avoid
-     colliding with the bs_ prefix used by Balance & Equalize. SVG
-     <style> blocks are global, not scoped, so prefixes matter. */
+     colliding with the bs_ prefix used by Balance and Equalize. SVG
+     style blocks are global, not scoped, so prefixes matter. */
 
   /* Walk: 4 round trips. Each trip = 25% of the cycle. */
   @keyframes bk_walk {
@@ -977,15 +1041,15 @@ const SVG_BUILD_STRUCTURE = `<svg viewBox="0 0 180 120" xmlns="http://www.w3.org
   /* When all 4 edges are placed, the whole frame turns green. */
   @keyframes bk_glow  { 0%,87%  { stroke: #a16207 } 92%,100% { stroke: #22c55e } }
 
-  .bk_fig    { animation: bk_walk 10s ease-in-out infinite; }
+  .bk_fig    { animation: bk_walk 9s ease-in-out infinite; }
   .bk_bob    { animation: bk_bob 0.7s ease-in-out infinite; }
   .bk_leg_a  { animation: bk_leg_a 0.7s ease-in-out infinite; }
   .bk_leg_b  { animation: bk_leg_b 0.7s ease-in-out infinite; }
-  .bk_carry  { animation: bk_carry 10s step-end infinite; }
-  .bk_edge1  { animation: bk_edge1 10s step-end infinite, bk_glow 10s step-end infinite; }
-  .bk_edge2  { animation: bk_edge2 10s step-end infinite, bk_glow 10s step-end infinite; }
-  .bk_edge3  { animation: bk_edge3 10s step-end infinite, bk_glow 10s step-end infinite; }
-  .bk_edge4  { animation: bk_edge4 10s step-end infinite, bk_glow 10s step-end infinite; }
+  .bk_carry  { animation: bk_carry 9s step-end infinite; }
+  .bk_edge1  { animation: bk_edge1 9s step-end infinite, bk_glow 9s step-end infinite; }
+  .bk_edge2  { animation: bk_edge2 9s step-end infinite, bk_glow 9s step-end infinite; }
+  .bk_edge3  { animation: bk_edge3 9s step-end infinite, bk_glow 9s step-end infinite; }
+  .bk_edge4  { animation: bk_edge4 9s step-end infinite, bk_glow 9s step-end infinite; }
 </style>
 <rect width="180" height="120" fill="#18181b"/>
 
