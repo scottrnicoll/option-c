@@ -311,6 +311,34 @@ export default function GuideDashboard() {
         )
       }
 
+      // Drop a message into the student's inbox so they see the feedback
+      if (game.authorUid) {
+        try {
+          const fbId = doc(collection(db, "feedback")).id
+          const now = Date.now()
+          await setDoc(doc(db, "feedback", fbId), {
+            id: fbId,
+            fromUid: profile.uid,
+            fromName: profile.name,
+            fromRole: "guide",
+            target: "game",
+            gameId,
+            gameTitle: game.title,
+            toUid: game.authorUid,
+            type: "improvement",
+            message: `Your game "${game.title}" needs work. Feedback from your guide:\n\n${feedbackText.trim()}`,
+            status: "open",
+            replies: [],
+            unreadForRecipient: true,
+            unreadForSender: false,
+            createdAt: now,
+            updatedAt: now,
+          })
+        } catch (inboxErr) {
+          console.warn("inbox message failed:", inboxErr)
+        }
+      }
+
       setFeedbackGameId(null)
       setFeedbackText("")
       loadDashboard(classData?.id)
