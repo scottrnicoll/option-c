@@ -35,7 +35,7 @@ export function LearnerNav() {
         }`}
       >
         <Gamepad2 className="size-3.5" />
-        Library
+        Game Library
       </Link>
       <Link
         href="/learner"
