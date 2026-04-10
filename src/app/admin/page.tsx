@@ -574,8 +574,6 @@ export default function AdminDashboardPage() {
                   <StatCard label="Feedback" value={feedbackCount} icon={<MessageCircle className="size-5" />} onClick={() => setTab("feedback")} />
                 </div>
 
-                {/* One-time token migration */}
-                <TokenTopupCard />
               </div>
             )}
 
