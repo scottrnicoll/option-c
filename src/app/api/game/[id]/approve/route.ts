@@ -42,12 +42,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     await adminDb.collection("games").doc(id).update(updates)
 
-    // If approved, award +2000 tokens AND move the standard to
-    // "approved_unplayed" — student still needs to win 3 in a row on
-    // their own game to flip it to fully unlocked (green).
+    // If approved, award tokens (reads admin-configured amount) AND
+    // move the standard to "approved_unplayed" — student still needs
+    // to win 3 in a row on their own game to flip it to fully unlocked (green).
     if (approved && game.authorUid && game.standardId) {
+      let gameApprovedTokens = 2000
+      try {
+        const cfgSnap = await adminDb.collection("config").doc("tokens").get()
+        if (cfgSnap.exists) {
+          const cfg = cfgSnap.data()!
+          if (typeof cfg.gameApproved === "number") gameApprovedTokens = cfg.gameApproved
+        }
+      } catch {}
       await adminDb.collection("users").doc(game.authorUid).update({
-        tokens: FieldValue.increment(2000),
+        tokens: FieldValue.increment(gameApprovedTokens),
       })
       await adminDb
         .collection("progress")

@@ -8,6 +8,7 @@ import { GameIframe } from "@/components/game/game-iframe"
 import { Trophy } from "lucide-react"
 import type { Game } from "@/lib/game-types"
 import type { FeedbackDoc } from "@/lib/feedback-types"
+import { useTokenConfig } from "@/lib/token-config"
 
 interface MasteryPlayProps {
   // The standard the student is trying to demonstrate
@@ -21,6 +22,7 @@ interface MasteryPlayProps {
 // Losing resets the streak. Winning the 3rd flips the standard to "unlocked".
 export function MasteryPlay({ standardId, onDemonstrated }: MasteryPlayProps) {
   const { activeProfile, saveProgress } = useAuth()
+  const { gameApproved: tokenGameApproved } = useTokenConfig()
   const [ownGame, setOwnGame] = useState<Game | null>(null)
   const [loading, setLoading] = useState(true)
   const [playing, setPlaying] = useState(false)
@@ -161,7 +163,7 @@ export function MasteryPlay({ standardId, onDemonstrated }: MasteryPlayProps) {
     <div className="space-y-4">
       <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-center space-y-1">
         <p className="text-sm text-emerald-300 font-medium">
-          Your game was approved! +2000 tokens earned.
+          Your game was approved! +{tokenGameApproved} tokens earned.
         </p>
         <p className="text-xs text-zinc-300">
           Now win your own game <span className="text-amber-300 font-semibold">3 times in a row</span> to turn this moon green.
@@ -227,6 +229,8 @@ export async function postApprovalInboxMessage(
   guideUid: string,
   guideName: string
 ) {
+  const { getTokenConfig } = await import("@/lib/token-config")
+  const tokenCfg = await getTokenConfig()
   const id = doc(collection(db, "feedback")).id
   const now = Date.now()
   const fb: FeedbackDoc = {
@@ -238,7 +242,7 @@ export async function postApprovalInboxMessage(
     gameTitle,
     toUid: studentUid,
     type: "improvement",
-    message: `Your game "${gameTitle}" was approved! 🎉\n\nYou earned +2000 tokens.\n\nNext step: open the moon and win your own game 3 times in a row to turn it green and demonstrate the skill.`,
+    message: `Your game "${gameTitle}" was approved! 🎉\n\nYou earned +${tokenCfg.gameApproved} tokens.\n\nNext step: open the moon and win your own game 3 times in a row to turn it green and demonstrate the skill.`,
     status: "open",
     replies: [],
     unreadForRecipient: true,

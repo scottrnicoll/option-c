@@ -9,6 +9,7 @@ import { GameCard } from "./game-card"
 import { GamePlayer } from "./game-player"
 import { Leaderboard } from "./leaderboard"
 import { Search } from "lucide-react"
+import { useTokenConfig } from "@/lib/token-config"
 
 interface GameLibraryProps {
   games: Omit<Game, "gameHtml">[]
@@ -16,6 +17,7 @@ interface GameLibraryProps {
 
 export function GameLibrary({ games }: GameLibraryProps) {
   const { user, profile, activeProfile } = useAuth()
+  const { gameApproved: tokenGameApproved } = useTokenConfig()
   const [playingGame, setPlayingGame] = useState<{
     id: string
     title: string
@@ -254,7 +256,7 @@ export function GameLibrary({ games }: GameLibraryProps) {
                 No games for grade {myGrade} yet
               </h3>
               <p className="text-zinc-400 text-sm leading-relaxed">
-                Be the first to build one! Pick a moon on your grade level from the galaxy and create a game that demonstrates the math skill. You&apos;ll earn 2000 tokens when your guide approves it.
+                Be the first to build one! Pick a moon on your grade level from the galaxy and create a game that demonstrates the math skill. You&apos;ll earn {tokenGameApproved} tokens when your guide approves it.
               </p>
               <a
                 href="/"

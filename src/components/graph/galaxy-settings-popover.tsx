@@ -134,7 +134,7 @@ export function GalaxySettingsPopover({
 
               {colorMode === "mastery" && (
                 <div className="grid grid-cols-1 gap-1">
-                  <LegendRow color="bg-blue-500" label="My grade level" />
+                  <LegendRow color="bg-blue-500" label="My grade level — not started" />
                   <LegendRow color="bg-yellow-500" label="Progressing" />
                   <LegendRow color="bg-yellow-700" label="In review" />
                   <LegendRow color="bg-emerald-500" label="Demonstrated" />

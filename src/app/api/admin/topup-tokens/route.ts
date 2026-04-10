@@ -18,6 +18,18 @@ export async function POST() {
     let skipped = 0
     let totalAwarded = 0
 
+    // Read admin-configured token amounts
+    let gameApprovedTokens = 2000
+    let skillMasteredTokens = 100
+    try {
+      const cfgSnap = await adminDb.collection("config").doc("tokens").get()
+      if (cfgSnap.exists) {
+        const cfg = cfgSnap.data()!
+        if (typeof cfg.gameApproved === "number") gameApprovedTokens = cfg.gameApproved
+        if (typeof cfg.skillMastered === "number") skillMasteredTokens = cfg.skillMastered
+      }
+    } catch {}
+
     for (const userDoc of usersSnap.docs) {
       const user = userDoc.data() as { uid: string; tokenTopupAt?: number; tokens?: number }
       if (user.tokenTopupAt) {
@@ -44,7 +56,7 @@ export async function POST() {
         if ((d.data() as { status?: string }).status === "mastered") masteredCount++
       })
 
-      const award = publishedGameCount * 2000 + masteredCount * 100
+      const award = publishedGameCount * gameApprovedTokens + masteredCount * skillMasteredTokens
       if (award > 0) {
         await adminDb.collection("users").doc(user.uid).update({
           tokens: (user.tokens ?? 0) + award,

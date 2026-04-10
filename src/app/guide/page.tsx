@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Copy, Check, Users, GamepadIcon, Clock, Plus, ChevronDown, Eye, Play, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { Game } from "@/lib/game-types"
+import { getTokenConfig } from "@/lib/token-config"
 import { GameIframe } from "@/components/game/game-iframe"
 import { UserMenu } from "@/components/user-menu"
 import { LearnerEditModal } from "@/components/learner-edit-modal"
@@ -241,9 +242,10 @@ export default function GuideDashboard() {
         { merge: true }
       )
 
-      // Award +2000 tokens to the author for an approved game
+      // Award tokens to the author for an approved game (reads admin-configured amount)
+      const tokenCfg = await getTokenConfig()
       await updateDoc(doc(db, "users", game.authorUid), {
-        tokens: increment(2000),
+        tokens: increment(tokenCfg.gameApproved),
       })
 
       // Drop a message into the student's inbox so they know what to do next
@@ -260,7 +262,7 @@ export default function GuideDashboard() {
           gameTitle: game.title,
           toUid: game.authorUid,
           type: "improvement",
-          message: `🎉 Your game "${game.title}" was approved! +2000 tokens earned.\n\nNext step: open the moon for this skill and win your own game 3 times in a row to turn the moon green and demonstrate the skill.`,
+          message: `🎉 Your game "${game.title}" was approved! +${tokenCfg.gameApproved} tokens earned.\n\nNext step: open the moon for this skill and win your own game 3 times in a row to turn the moon green and demonstrate the skill.`,
           status: "open",
           replies: [],
           unreadForRecipient: true,

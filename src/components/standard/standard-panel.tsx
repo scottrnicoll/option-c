@@ -17,6 +17,7 @@ import { TemplateChat, type TemplateForChat } from "./template-chat"
 import { MasteryPlay } from "./mastery-play"
 import { GameIframe } from "@/components/game/game-iframe"
 import { useAuth } from "@/lib/auth"
+import { useTokenConfig } from "@/lib/token-config"
 import { db } from "@/lib/firebase"
 import { collection, query, where, getDocs } from "firebase/firestore"
 import type { Game } from "@/lib/game-types"
@@ -120,6 +121,7 @@ export function StandardPanel({
   onImportHtml,
   nodeStatus,
 }: StandardPanelProps) {
+  const { gameApproved: tokenGameApproved } = useTokenConfig()
   const [step, setStep] = useState<FlowStep>("learn")
   const [approvedGameCount, setApprovedGameCount] = useState(0)
   // When the learner picks a template card, store it here and route
@@ -215,7 +217,7 @@ export function StandardPanel({
             ) : (
               <div className="space-y-4">
                 <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 space-y-1">
-                  <p className="text-sm text-emerald-300 font-medium">Your game was approved! +2000 tokens earned.</p>
+                  <p className="text-sm text-emerald-300 font-medium">Your game was approved! +{tokenGameApproved} tokens earned.</p>
                   <p className="text-xs text-zinc-300">
                     Now win your own game <span className="text-amber-300 font-semibold">3 times in a row</span> to turn this moon green.
                   </p>
@@ -254,7 +256,7 @@ export function StandardPanel({
             <div className="space-y-4">
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-center">
                 <p className="text-amber-300 font-medium">Your game is being reviewed</p>
-                <p className="text-zinc-400 text-sm mt-1">You&apos;ll get +2000 tokens when your guide approves it.</p>
+                <p className="text-zinc-400 text-sm mt-1">You&apos;ll get +{tokenGameApproved} tokens when your guide approves it.</p>
                 <a
                   href="/learner"
                   className="text-sm text-blue-400 hover:text-blue-300 mt-2 inline-block"

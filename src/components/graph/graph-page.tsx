@@ -23,6 +23,7 @@ import { FeedbackButton } from "@/components/feedback/feedback-button"
 import { UserMenu } from "@/components/user-menu"
 import { GalaxySettingsPopover } from "./galaxy-settings-popover"
 import { RulesPopover } from "@/components/rules-popover"
+import { useTokenConfig } from "@/lib/token-config"
 import { useSearchParams } from "next/navigation"
 
 interface GraphPageProps {
@@ -104,6 +105,7 @@ function recomputeAvailable(
 
 export function GraphPage({ data }: GraphPageProps) {
   const { user, profile, activeProfile, impersonating, stopImpersonating, loading: authLoading, saveProgress, loadProgress } = useAuth()
+  const { gameApproved: tokenGameApproved } = useTokenConfig()
   const searchParams = useSearchParams()
   const initialProgress = useMemo(() => computeInitialProgress(data), [data])
   const [progressMap, setProgressMap] = useState<Map<string, NodeStatus>>(initialProgress)
@@ -732,7 +734,7 @@ export function GraphPage({ data }: GraphPageProps) {
 
       // No tokens for submitting — only on guide approval (+2000)
 
-      setReviewResult({ pass: true, feedback: "Sent for review! You'll earn 2000 tokens when your guide approves it." })
+      setReviewResult({ pass: true, feedback: `Sent for review! You'll earn ${tokenGameApproved} tokens when your guide approves it.` })
       setTimeout(() => {
         setBuildMode("idle")
         setCurrentDesignDoc(null)
@@ -911,7 +913,7 @@ export function GraphPage({ data }: GraphPageProps) {
             gradeFilter={gradeFilter}
             onGradeFilterChange={setGradeFilter}
             showGradeFilter={!!studentData?.grade}
-            showOtherGradeSwatch={!!studentData?.grade && gradeFilter === "myGrade"}
+            showOtherGradeSwatch={!!studentData?.grade && gradeFilter === "all"}
           />
         )}
 

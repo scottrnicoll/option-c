@@ -19,6 +19,9 @@ import {
   RefreshCw,
   Trash2,
   Pencil,
+  Coins,
+  Megaphone,
+  Send,
 } from "lucide-react"
 import { FeedbackInbox } from "@/components/feedback/feedback-inbox"
 import { LearnerEditModal } from "@/components/learner-edit-modal"
@@ -26,8 +29,9 @@ import { UserMenu } from "@/components/user-menu"
 import { Logo } from "@/components/logo"
 import { GamePlayer } from "@/components/game/game-player"
 import { Play } from "lucide-react"
+import { getTokenConfig, saveTokenConfig, TOKEN_DEFAULTS, type TokenConfig } from "@/lib/token-config"
 
-type Tab = "overview" | "guides" | "classes" | "students" | "games" | "feedback"
+type Tab = "overview" | "guides" | "classes" | "students" | "games" | "feedback" | "tokens" | "broadcast"
 
 interface GuideRow {
   uid: string
@@ -135,11 +139,12 @@ export default function AdminDashboardPage() {
 
   // Quick-approve a pending game from the admin Games tab.
   // Mirrors the guide flow: flip game status, set the author's standard
-  // to "approved_unplayed", award +2000 tokens, drop an inbox message.
+  // to "approved_unplayed", award tokens, drop an inbox message.
   const handleApproveGameAdmin = async (g: GameRow) => {
     if (!profile) return
     if (g.status !== "pending_review") return
     try {
+      const tokenCfg = await getTokenConfig()
       const gameRef = doc(db, "games", g.id)
       await updateDoc(gameRef, {
         status: "published",
@@ -157,7 +162,7 @@ export default function AdminDashboardPage() {
           { status: "approved_unplayed", approvedAt: Date.now() },
           { merge: true }
         )
-        await updateDoc(doc(db, "users", g.authorUid), { tokens: increment(2000) }).catch(() => {})
+        await updateDoc(doc(db, "users", g.authorUid), { tokens: increment(tokenCfg.gameApproved) }).catch(() => {})
         // Inbox notification
         const fbId = doc(collection(db, "feedback")).id
         const now = Date.now()
@@ -171,7 +176,7 @@ export default function AdminDashboardPage() {
           gameTitle: g.title,
           toUid: g.authorUid,
           type: "improvement",
-          message: `🎉 Your game "${g.title}" was approved by admin! +2000 tokens earned.\n\nNext step: open the moon and win your own game 3 times in a row to turn the moon green.`,
+          message: `🎉 Your game "${g.title}" was approved by admin! +${tokenCfg.gameApproved} tokens earned.\n\nNext step: open the moon and win your own game 3 times in a row to turn the moon green.`,
           status: "open",
           replies: [],
           unreadForRecipient: true,
@@ -506,6 +511,8 @@ export default function AdminDashboardPage() {
     { key: "students", label: "Learners", icon: <GraduationCap className="size-4" /> },
     { key: "games", label: "Games", icon: <Gamepad2 className="size-4" /> },
     { key: "feedback", label: `Feedback${feedbackCount > 0 ? ` (${feedbackCount})` : ""}`, icon: <MessageCircle className="size-4" /> },
+    { key: "tokens", label: "Tokens", icon: <Coins className="size-4" /> },
+    { key: "broadcast", label: "Broadcast", icon: <Megaphone className="size-4" /> },
   ]
 
   return (
@@ -823,6 +830,12 @@ export default function AdminDashboardPage() {
                 <FeedbackInbox mode="received" />
               </div>
             )}
+
+            {/* Tokens Tab — edit the token economy */}
+            {tab === "tokens" && <TokenEconomyEditor />}
+
+            {/* Broadcast Tab — send message to all users */}
+            {tab === "broadcast" && <BroadcastPanel senderUid={profile?.uid || ""} senderName={profile?.name || "Admin"} />}
 
             {/* Games Tab */}
             {tab === "games" && (
@@ -1205,6 +1218,189 @@ function TokenTopupCard() {
       {error && (
         <p className="mt-3 text-red-400 text-sm">{error}</p>
       )}
+    </div>
+  )
+}
+
+function TokenEconomyEditor() {
+  const [config, setConfig] = useState<TokenConfig | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [gameApproved, setGameApproved] = useState(TOKEN_DEFAULTS.gameApproved)
+  const [skillMastered, setSkillMastered] = useState(TOKEN_DEFAULTS.skillMastered)
+
+  useEffect(() => {
+    getTokenConfig().then((c) => {
+      setConfig(c)
+      setGameApproved(c.gameApproved)
+      setSkillMastered(c.skillMastered)
+      setLoading(false)
+    })
+  }, [])
+
+  const handleSave = async () => {
+    setSaving(true)
+    setSaved(false)
+    try {
+      await saveTokenConfig({ gameApproved, skillMastered })
+      setConfig({ gameApproved, skillMastered })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const hasChanges = config && (config.gameApproved !== gameApproved || config.skillMastered !== skillMastered)
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6 max-w-xl">
+      <div>
+        <h2 className="text-lg font-semibold">Token Economy</h2>
+        <p className="text-sm text-zinc-400 mt-1">
+          Configure how many tokens learners earn. Changes apply to future awards only — existing tokens are not affected.
+        </p>
+      </div>
+
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
+        <div>
+          <label className="text-sm text-zinc-300 block mb-1.5">Tokens per approved game</label>
+          <p className="text-xs text-zinc-500 mb-2">Awarded when a guide or admin approves a learner&apos;s game.</p>
+          <input
+            type="number"
+            min={0}
+            step={100}
+            value={gameApproved}
+            onChange={(e) => setGameApproved(Math.max(0, parseInt(e.target.value) || 0))}
+            className="w-40 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-zinc-300 block mb-1.5">Tokens per mastered skill</label>
+          <p className="text-xs text-zinc-500 mb-2">Awarded when a learner wins 3 games by other learners on the same skill.</p>
+          <input
+            type="number"
+            min={0}
+            step={10}
+            value={skillMastered}
+            onChange={(e) => setSkillMastered(Math.max(0, parseInt(e.target.value) || 0))}
+            className="w-40 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+          />
+        </div>
+
+        <div className="flex items-center gap-3 pt-2">
+          <Button onClick={handleSave} disabled={saving || !hasChanges} size="sm">
+            {saving ? "Saving..." : "Save changes"}
+          </Button>
+          {saved && <span className="text-sm text-emerald-400">Saved!</span>}
+          {hasChanges && (
+            <span className="text-xs text-amber-400">Unsaved changes</span>
+          )}
+        </div>
+      </div>
+
+      {/* Token migration card — moved here from Overview */}
+      <TokenTopupCard />
+    </div>
+  )
+}
+
+function BroadcastPanel({ senderUid, senderName }: { senderUid: string; senderName: string }) {
+  const [message, setMessage] = useState("")
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState<{ count: number } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSend = async () => {
+    if (!message.trim()) return
+    setSending(true)
+    setError(null)
+    setSent(null)
+    try {
+      // Fetch all users (students + guides)
+      const usersSnap = await getDocs(
+        query(collection(db, "users"), where("role", "in", ["student", "guide"]))
+      )
+      const recipients = usersSnap.docs.map((d) => ({ uid: d.id, ...d.data() })) as any[]
+
+      // Create a feedback doc for each user
+      let count = 0
+      for (const user of recipients) {
+        const fbId = doc(collection(db, "feedback")).id
+        const now = Date.now()
+        await setDoc(doc(db, "feedback", fbId), {
+          id: fbId,
+          fromUid: senderUid,
+          fromName: senderName,
+          fromRole: "admin",
+          target: "game",
+          toUid: user.uid || user.id,
+          type: "improvement",
+          message: `📢 ${message.trim()}`,
+          status: "open",
+          replies: [],
+          unreadForRecipient: true,
+          unreadForSender: false,
+          createdAt: now,
+          updatedAt: now,
+        })
+        count++
+      }
+
+      setSent({ count })
+      setMessage("")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6 max-w-xl">
+      <div>
+        <h2 className="text-lg font-semibold">Broadcast Message</h2>
+        <p className="text-sm text-zinc-400 mt-1">
+          Send a message to all learners and guides. It will appear in their inbox.
+        </p>
+      </div>
+
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
+        <div>
+          <label className="text-sm text-zinc-300 block mb-1.5">Message</label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type your announcement here..."
+            rows={4}
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 resize-none"
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button onClick={handleSend} disabled={sending || !message.trim()} size="sm">
+            <Send className="size-3" data-icon="inline-start" />
+            {sending ? "Sending..." : "Send to everyone"}
+          </Button>
+        </div>
+
+        {sent && (
+          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-sm text-emerald-300">
+            Message sent to {sent.count} user{sent.count === 1 ? "" : "s"}.
+          </div>
+        )}
+        {error && <p className="text-red-400 text-sm">{error}</p>}
+      </div>
     </div>
   )
 }
