@@ -21,8 +21,8 @@ export async function POST(req: Request) {
       return Response.json({ ok: true, emailed: false })
     }
 
-    const subject = `[Diagonally] ${type === "bug" ? "Bug report" : "Suggestion"} from ${fromName}`
-    const body = `${fromName} sent a ${type === "bug" ? "bug report" : "suggestion"}:
+    const subject = `[Diagonally] ${type === "bug" ? "Fix request" : "Idea"} from ${fromName}`
+    const body = `${fromName} sent a ${type === "bug" ? "fix request" : "idea"}:
 
 ${message}
 

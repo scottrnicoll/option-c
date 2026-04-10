@@ -278,7 +278,7 @@ export function FeedbackInbox({ mode }: FeedbackInboxProps) {
                           : "bg-blue-500/20 text-blue-400"
                       }`}
                     >
-                      {item.type === "bug" ? "🐛 Fix" : "💡 Idea"}
+                      {item.type === "bug" ? "🔧 Fix" : "💡 Idea"}
                     </span>
                     {item.actionFlagged && (
                       <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-500/20 text-amber-300">
