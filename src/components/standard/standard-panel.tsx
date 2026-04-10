@@ -168,10 +168,11 @@ export function StandardPanel({
   ) : null
 
   return (
-    <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+    <>
+    <Sheet open={open && step !== "earn"} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <SheetContent
         side="right"
-        className={`${step === "earn" ? "w-full sm:w-full flex flex-col overflow-hidden" : "w-full sm:w-[75vw] lg:w-[60vw] overflow-y-auto"}`}
+        className="w-full sm:w-[75vw] lg:w-[60vw] overflow-y-auto"
       >
         <SheetHeader>
           <div className="flex items-center justify-between">
@@ -191,7 +192,7 @@ export function StandardPanel({
           </SheetDescription>
         </SheetHeader>
 
-        <div className={`px-4 pb-4 ${step === "earn" ? "flex-1 flex flex-col min-h-0" : ""}`}>
+        <div className="px-4 pb-4">
           {(step === "earn" || step === "demonstrate") && nodeStatus !== "locked" && nodeStatus !== "mastered" && (
             <button
               onClick={() => setStep("learn")}
@@ -320,40 +321,60 @@ export function StandardPanel({
                 </div>
               )}
 
-              {step === "earn" && pickedTemplate ? (
-                // Template path: structured chip-driven flow.
-                // Authentic + Essential are pre-checked by the template;
-                // the learner only fills in theme, action, win condition.
-                <TemplateChat
-                  template={pickedTemplate}
-                  standardDescription={standard.description}
-                  standardId={standard.id}
-                  planetId={`${standard.grade}.${standard.domainCode}`}
-                  onUnlock={() => {
-                    setStep("unlocked")
-                    onUnlock(standard.id)
-                  }}
-                  onBuildGame={(designDoc, history) => {
-                    if (onBuildGame) onBuildGame(designDoc, history)
-                  }}
-                />
-              ) : step === "earn" ? (
-                // Free-form path: full Genie chat with criteria checking
-                <GenieChat
-                  standardDescription={standard.description}
-                  standardId={standard.id}
-                  planetId={`${standard.grade}.${standard.domainCode}`}
-                  onUnlock={() => {
-                    setStep("unlocked")
-                    onUnlock(standard.id)
-                  }}
-                  onBuildGame={onBuildGame}
-                />
-              ) : null}
+              {/* Chat steps render as full-page overlay below */}
             </>
           )}
         </div>
       </SheetContent>
     </Sheet>
+
+    {/* Full-page game builder — renders OUTSIDE the sheet */}
+    {step === "earn" && standard && (
+      <div className="fixed inset-0 z-50 bg-zinc-950 flex flex-col">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-6 py-3 border-b border-zinc-800 bg-zinc-900 shrink-0">
+          <div>
+            <p className="text-xs text-blue-400 font-medium uppercase tracking-wide">{getPlanetLabel(standard)}</p>
+            <h2 className="text-lg font-bold text-white">{getMoonName(standard)}</h2>
+          </div>
+          <button
+            onClick={() => setStep("learn")}
+            className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors"
+          >
+            <ChevronLeft className="size-4" /> Back to concept
+          </button>
+        </div>
+        {/* Chat area — fills remaining space */}
+        <div className="flex-1 min-h-0 p-4">
+          {pickedTemplate ? (
+            <TemplateChat
+              template={pickedTemplate}
+              standardDescription={standard.description}
+              standardId={standard.id}
+              planetId={`${standard.grade}.${standard.domainCode}`}
+              onUnlock={() => {
+                setStep("unlocked")
+                onUnlock(standard.id)
+              }}
+              onBuildGame={(designDoc, history) => {
+                if (onBuildGame) onBuildGame(designDoc, history)
+              }}
+            />
+          ) : (
+            <GenieChat
+              standardDescription={standard.description}
+              standardId={standard.id}
+              planetId={`${standard.grade}.${standard.domainCode}`}
+              onUnlock={() => {
+                setStep("unlocked")
+                onUnlock(standard.id)
+              }}
+              onBuildGame={onBuildGame}
+            />
+          )}
+        </div>
+      </div>
+    )}
+  </>
   )
 }
