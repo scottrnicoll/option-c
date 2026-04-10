@@ -65,6 +65,7 @@ export function FeedbackInbox({ mode }: FeedbackInboxProps) {
       }
       const snap = await getDocs(q)
       const docs = snap.docs.map((d) => d.data() as FeedbackDoc)
+      console.log(`[inbox] mode=${mode} role=${activeProfile.role} uid=${activeProfile.uid} found=${docs.length}`, docs.map(d => ({ id: d.id, toUid: d.toUid, fromUid: d.fromUid, target: d.target, msg: d.message?.slice(0, 50) })))
       docs.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
       setItems(docs)
     } catch (err) {
