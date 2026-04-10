@@ -24,6 +24,7 @@ import { UserMenu } from "@/components/user-menu"
 import { GalaxySettingsPopover } from "./galaxy-settings-popover"
 import { RulesPopover } from "@/components/rules-popover"
 import { useTokenConfig } from "@/lib/token-config"
+import { InfoButton } from "@/components/info-button"
 import { useSearchParams } from "next/navigation"
 import { Search, X } from "lucide-react"
 import moonNamesData from "@/data/moon-names.json"
@@ -940,6 +941,24 @@ export function GraphPage({ data }: GraphPageProps) {
             </>
           )}
         </div>
+
+        {/* Info button — changes based on view */}
+        {viewMode === "galaxy" && (
+          <InfoButton title="Galaxy">
+            <p>The <span className="text-zinc-200">Galaxy</span> is your map of all math from Kindergarten to High School.</p>
+            <p>It contains <span className="text-blue-400 font-semibold">66 planets</span> (math concepts) and <span className="text-blue-400 font-semibold">535 moons</span> (individual skills).</p>
+            <p>Each planet groups related skills. Click a planet to zoom in and see its moons.</p>
+            <p className="text-zinc-500">Colors: blue = your grade, purple = previous grades, yellow = in progress, green = demonstrated.</p>
+          </InfoButton>
+        )}
+        {viewMode === "planet" && currentPlanetId && (
+          <InfoButton title="Planet">
+            <p>A <span className="text-zinc-200">Planet</span> is a math concept at one grade level (e.g. Geometry Grade 6).</p>
+            <p>Each glowing dot is a <span className="text-zinc-200">moon</span> — a specific math skill you can learn by building a game.</p>
+            <p>Click a moon to read about the concept, then design your game.</p>
+            <p className="text-zinc-500">Blue moons are ready to start. Grey moons are locked until you complete their prerequisites.</p>
+          </InfoButton>
+        )}
 
         {/* Rules / help */}
         <RulesPopover />

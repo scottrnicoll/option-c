@@ -15,6 +15,7 @@ import moonNames from "@/data/moon-names.json"
 import type { StandardsGraph } from "@/lib/graph-types"
 import { isClusterNode } from "@/lib/galaxy-utils"
 import { Logo } from "@/components/logo"
+import { InfoButton } from "@/components/info-button"
 
 const MOON_NAMES = moonNames as Record<string, string>
 const STANDARDS = standardsData as StandardsGraph
@@ -270,7 +271,15 @@ export default function LearnerDashboard() {
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Hey {activeProfile.name}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-white">Hey {activeProfile.name}</h1>
+            <InfoButton title="My Stuff">
+              <p><span className="text-zinc-200">My Stuff</span> is your personal dashboard.</p>
+              <p>Track your progress: skills demonstrated, skills mastered, and tokens earned.</p>
+              <p>See all planets and moons for your grade, color-coded by status.</p>
+              <p className="text-zinc-500">Your inbox shows messages from guides and other learners about your games.</p>
+            </InfoButton>
+          </div>
           {className && (
             <p className="text-xs text-zinc-500 mt-0.5">
               Class:{" "}

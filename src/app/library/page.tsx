@@ -3,6 +3,7 @@ import type { Game } from "@/lib/game-types"
 import Link from "next/link"
 import moonNames from "@/data/moon-names.json"
 import { LearnerNav } from "@/components/learner-nav"
+import { InfoButton } from "@/components/info-button"
 import { UserMenu } from "@/components/user-menu"
 import { getAdminDb } from "@/lib/firebase-admin"
 
@@ -74,7 +75,15 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
               </>
             ) : (
               <>
-                <h1 className="text-2xl font-bold">Game Library</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">Game Library</h1>
+                  <InfoButton title="Game Library">
+                    <p>The <span className="text-zinc-200">Game Library</span> has every game approved by a guide.</p>
+                    <p>Play other learners&apos; games to <span className="text-zinc-200">master</span> skills. Win 3 games on a skill to earn the gold star.</p>
+                    <p>Rate games after playing — your feedback helps creators improve.</p>
+                    <p className="text-zinc-500">Check the Ranking tab to see who&apos;s leading in tokens.</p>
+                  </InfoButton>
+                </div>
                 <p className="text-zinc-400 text-sm mt-1">
                   Games built by learners, for learners
                 </p>

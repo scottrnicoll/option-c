@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react"
 import type { GalaxyData, GalaxyNode } from "@/lib/galaxy-utils"
+import { InfoButton } from "@/components/info-button"
 
 interface MiniMapProps {
   galaxyData: GalaxyData
@@ -258,6 +259,16 @@ export function MiniMap({
 
           {/* Stats — high-contrast, larger so they're actually readable */}
           <div className="px-3 pb-3 pt-1 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-zinc-500 uppercase tracking-wide font-medium">Progress</p>
+              <InfoButton title="Mini-map" className="scale-90">
+                <p>The <span className="text-zinc-200">Mini-map</span> shows all planets at a glance.</p>
+                <p>Click any dot to fly to that planet. Colors match the galaxy legend.</p>
+                <p>Stats show how many skills you&apos;ve explored and mastered.</p>
+              </InfoButton>
+            </div>
+          </div>
+          <div className="px-3 pb-3 flex flex-col gap-1">
             {scopeLabel && (
               <p className="text-[10px] text-zinc-500 uppercase tracking-wide font-medium">
                 Counting {scopeLabel}

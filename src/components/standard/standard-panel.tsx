@@ -18,6 +18,7 @@ import { MasteryPlay } from "./mastery-play"
 import { GameIframe } from "@/components/game/game-iframe"
 import { useAuth } from "@/lib/auth"
 import { useTokenConfig } from "@/lib/token-config"
+import { InfoButton } from "@/components/info-button"
 import { db } from "@/lib/firebase"
 import { collection, query, where, getDocs } from "firebase/firestore"
 import type { Game } from "@/lib/game-types"
@@ -173,9 +174,17 @@ export function StandardPanel({
         className={`overflow-y-auto ${step === "earn" ? "w-full sm:w-[90vw] lg:w-[80vw]" : "w-full sm:w-[75vw] lg:w-[60vw]"}`}
       >
         <SheetHeader>
-          <p className="text-xs text-blue-400 font-medium uppercase tracking-wide">
-            {getPlanetLabel(standard)}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-blue-400 font-medium uppercase tracking-wide">
+              {getPlanetLabel(standard)}
+            </p>
+            <InfoButton title="Moon">
+              <p>A <span className="text-zinc-200">Moon</span> is a single math skill you can master.</p>
+              <p>Read the concept, then design a game that uses the math. The AI helps you build it.</p>
+              <p>Your guide reviews and approves your game. Then play it 3 times to demonstrate the skill.</p>
+              <p className="text-zinc-500">Moon colors: blue = ready, yellow = in progress, green = demonstrated, gold = mastered.</p>
+            </InfoButton>
+          </div>
           <SheetTitle className="text-xl leading-tight">{getMoonName(standard)}</SheetTitle>
           <SheetDescription>
             {standard.description}
