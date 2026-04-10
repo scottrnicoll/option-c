@@ -197,7 +197,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.warn("[auth] games migration failed:", err)
     }
 
-    // 3. Delete the old user doc so lookups by personalCode stay unique.
+    // 3. Migrate feedback/inbox messages sent TO the old uid
+    try {
+      const feedbackSnap = await getDocs(
+        query(collection(db, "feedback"), where("toUid", "==", oldUid))
+      )
+      const batch3 = writeBatch(db)
+      feedbackSnap.forEach((d) => {
+        batch3.update(d.ref, { toUid: newUid })
+      })
+      await batch3.commit()
+    } catch (err) {
+      console.warn("[auth] feedback migration failed:", err)
+    }
+
+    // 4. Delete the old user doc so lookups by personalCode stay unique.
     //    (We could also delete progress/{oldUid} but it costs reads; leave it.)
     try {
       await deleteDoc(doc(db, "users", oldUid))
