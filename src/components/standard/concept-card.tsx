@@ -72,13 +72,14 @@ function MechanicExample({ standard }: { standard: StandardNode }) {
 function GameTemplates({
   standard,
   onPick,
+  selectedTemplate,
+  onSelect,
   readOnly,
 }: {
   standard: StandardNode
-  // Click handler — receives the full template so the parent can
-  // route to the chip-driven TemplateChat (using the chip arrays)
-  // instead of the free-form GenieChat.
   onPick: (template: Template) => void
+  selectedTemplate: Template | null
+  onSelect: (template: Template | null) => void
   // readOnly = the moon is locked / in_review / already mastered. Show
   // the templates so the learner can SEE what's possible, but disable
   // the build buttons (rendered as a "Locked" pill instead).
@@ -158,51 +159,37 @@ function GameTemplates({
 
       <div className="space-y-2">
         {templates.map((t, i) => {
-          // On read-only moons (locked / in_review / already mastered)
-          // we render the same card but as a disabled div with a
-          // "Locked" pill instead of the Build → action.
-          const cardInner = (
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white">{t.title}</p>
-                <p className="text-xs text-zinc-300 mt-1 leading-snug">
-                  {t.description}
-                </p>
-                {t.examples.length > 0 && (
-                  <p className="text-[11px] text-zinc-500 mt-2 leading-snug">
-                    <span className="text-zinc-600">You could build:</span>{" "}
-                    {t.examples.join(" · ")}
-                  </p>
-                )}
-              </div>
-              {readOnly ? (
-                <div className="text-xs text-zinc-500 shrink-0 self-center whitespace-nowrap bg-zinc-800 border border-zinc-700/60 rounded-md px-2 py-1">
-                  🔒 Locked
-                </div>
-              ) : (
-                <div className="text-xs text-zinc-500 group-hover:text-blue-300 shrink-0 self-center whitespace-nowrap">
-                  Build →
-                </div>
-              )}
-            </div>
-          )
+          const isSelected = selectedTemplate?.title === t.title
           if (readOnly) {
             return (
-              <div
-                key={i}
-                className="w-full text-left bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 opacity-75"
-              >
-                {cardInner}
+              <div key={i} className="w-full text-left bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 opacity-75">
+                <p className="text-sm font-bold text-white">{t.title}</p>
+                <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.description}</p>
+                {t.examples.length > 0 && (
+                  <p className="text-[11px] text-zinc-500 mt-2 leading-snug">
+                    <span className="text-zinc-600">You could build:</span> {t.examples.join(" · ")}
+                  </p>
+                )}
               </div>
             )
           }
           return (
             <button
               key={i}
-              onClick={() => onPick(t)}
-              className="w-full text-left bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-blue-500/50 rounded-xl p-3 transition-colors group"
+              onClick={() => onSelect(isSelected ? null : t)}
+              className={`w-full text-left rounded-xl p-3 transition-all border-2 ${
+                isSelected
+                  ? "bg-blue-500/10 border-blue-500/60"
+                  : "bg-zinc-900 hover:bg-zinc-800 border-zinc-800 hover:border-zinc-700"
+              }`}
             >
-              {cardInner}
+              <p className={`text-sm font-bold ${isSelected ? "text-blue-300" : "text-white"}`}>{t.title}</p>
+              <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.description}</p>
+              {t.examples.length > 0 && (
+                <p className="text-[11px] text-zinc-500 mt-2 leading-snug">
+                  <span className="text-zinc-600">You could build:</span> {t.examples.join(" · ")}
+                </p>
+              )}
             </button>
           )
         })}
@@ -227,6 +214,7 @@ export function ConceptCard({ standard, onReady, readOnly }: ConceptCardProps) {
   const [explanation, setExplanation] = useState<Explanation | null>(null)
   const [loading, setLoading] = useState(true)
   const [labelFlipped, setLabelFlipped] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
   const [speaking, setSpeaking] = useState(false)
 
   const fetchExplanation = useCallback(async (level: ReadingLevel) => {
@@ -422,17 +410,25 @@ export function ConceptCard({ standard, onReady, readOnly }: ConceptCardProps) {
       <GameTemplates
         standard={standard}
         onPick={(template) => onReady(template)}
+        selectedTemplate={selectedTemplate}
+        onSelect={setSelectedTemplate}
         readOnly={readOnly}
       />
 
       {!readOnly && (
-        <Button
-          onClick={() => onReady()}
-          size="lg"
-          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
-        >
-          I have a game idea →
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => onReady(selectedTemplate || undefined)}
+            size="lg"
+            className={`flex-[2] text-white transition-all ${
+              selectedTemplate
+                ? "bg-emerald-600 hover:bg-emerald-500"
+                : "bg-emerald-600 hover:bg-emerald-500"
+            }`}
+          >
+            {selectedTemplate ? `Build "${selectedTemplate.title}" →` : "I have my own game idea →"}
+          </Button>
+        </div>
       )}
     </div>
   )

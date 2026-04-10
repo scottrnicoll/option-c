@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet"
-import { Lock, CheckCircle, ChevronLeft, Trophy, Play } from "lucide-react"
+import { Lock, CheckCircle, ChevronLeft, Trophy, Play, X } from "lucide-react"
 import Link from "next/link"
 import { ConceptCard } from "./concept-card"
 import { GenieChat } from "./genie-chat"
@@ -169,7 +169,7 @@ export function StandardPanel({
 
   return (
     <>
-    <Sheet open={open && step !== "earn"} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+    <Sheet open={open && step !== "earn" && step !== "learn"} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <SheetContent
         side="right"
         className="w-full sm:w-[75vw] lg:w-[60vw] overflow-y-auto"
@@ -372,6 +372,48 @@ export function StandardPanel({
               onBuildGame={onBuildGame}
             />
           )}
+        </div>
+      </div>
+    )}
+
+    {/* Full-page concept view — learn step */}
+    {step === "learn" && standard && open && (
+      <div className="fixed inset-0 z-50 bg-zinc-950 flex flex-col">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-zinc-800 bg-zinc-900 shrink-0">
+          <div>
+            <p className="text-xs text-blue-400 font-medium uppercase tracking-wide">{getPlanetLabel(standard)}</p>
+            <h2 className="text-lg font-bold text-white">{getMoonName(standard)}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-zinc-400 hover:text-white transition-colors p-2"
+            aria-label="Close"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-3xl mx-auto space-y-4">
+            <p className="text-sm text-zinc-400">{standard.description}</p>
+            {playToMasterButton}
+            <ConceptCard
+              standard={standard}
+              onReady={(template) => {
+                if (template && template.themeChips && template.actionChips && template.winChips && template.themeChips.length > 0) {
+                  setPickedTemplate({ title: template.title, description: template.description, themeChips: template.themeChips, actionChips: template.actionChips, winChips: template.winChips })
+                } else {
+                  setPickedTemplate(null)
+                }
+                setStep("earn")
+              }}
+            />
+            {onImportHtml && (
+              <button onClick={() => onImportHtml(standard)}
+                className="w-full py-3 rounded-lg border-2 border-dashed border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500 text-sm font-medium transition-colors">
+                Or paste your own HTML game →
+              </button>
+            )}
+          </div>
         </div>
       </div>
     )}

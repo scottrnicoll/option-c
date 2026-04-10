@@ -2,12 +2,8 @@
 
 import { Check, Circle } from "lucide-react"
 
-// 3-column layout for the game builder.
-// Left (wide): AI chat. Middle: 3 criteria. Right: game card.
-// Everything fits on one screen without scrolling.
-
 interface GameBuilderLayoutProps {
-  children: React.ReactNode // the chat UI goes here
+  children: React.ReactNode
   criteria: {
     playable: boolean
     authentic: boolean
@@ -65,17 +61,17 @@ export function GameBuilderLayout({
   const metCount = [criteria.playable, criteria.authentic, criteria.essential].filter(Boolean).length
 
   return (
-    <div className="flex gap-3 h-full">
+    <div className="flex gap-4 flex-1 min-h-0">
       {/* Left: chat (takes most space) */}
       <div className="flex-1 min-w-0 flex flex-col">
         {children}
       </div>
 
-      {/* Middle: criteria (narrow) */}
-      <div className="w-56 shrink-0 flex flex-col gap-2">
+      {/* Middle: criteria */}
+      <div className="w-64 shrink-0 flex flex-col gap-2.5">
         <div className="flex items-center justify-between">
-          <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wide">Criteria</p>
-          <p className="text-[10px] text-zinc-400">{metCount}/3</p>
+          <p className="text-xs text-zinc-400 font-semibold uppercase tracking-wide">Criteria</p>
+          <p className="text-xs text-zinc-300 font-bold">{metCount}/3</p>
         </div>
         {CRITERIA_INFO.map(({ key, icon, name, description }) => {
           const met = criteria[key]
@@ -84,35 +80,35 @@ export function GameBuilderLayout({
           return (
             <div
               key={key}
-              className={`rounded-lg border p-2 transition-all duration-500 ${
+              className={`rounded-xl border p-3 transition-all duration-500 ${
                 met
-                  ? "border-emerald-500/40 bg-emerald-500/10"
-                  : "border-zinc-800 bg-zinc-950/50"
+                  ? "border-emerald-500/50 bg-emerald-500/15"
+                  : "border-zinc-700 bg-zinc-900"
               }`}
             >
-              <div className="flex items-start gap-1.5">
+              <div className="flex items-start gap-2">
                 <div className="mt-0.5">
                   {met ? (
-                    <Check className="size-3.5 text-emerald-400" />
+                    <Check className="size-4 text-emerald-400" />
                   ) : (
-                    <Circle className="size-3.5 text-zinc-600" />
+                    <Circle className="size-4 text-zinc-500" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs">{icon}</span>
-                    <span className={`text-[11px] font-semibold ${met ? "text-emerald-400" : "text-zinc-400"}`}>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base">{icon}</span>
+                    <span className={`text-sm font-bold ${met ? "text-emerald-300" : "text-zinc-200"}`}>
                       {name}
                     </span>
                     {isPre && (
-                      <span className="text-[8px] text-emerald-300/70 uppercase tracking-wide bg-emerald-500/10 px-1 rounded">
+                      <span className="text-[9px] text-emerald-300/80 uppercase tracking-wide bg-emerald-500/15 px-1.5 py-0.5 rounded font-semibold">
                         auto
                       </span>
                     )}
                   </div>
-                  <p className="text-[10px] text-zinc-500 leading-snug">{description}</p>
+                  <p className="text-xs text-zinc-400 mt-1 leading-snug">{description}</p>
                   {met && reason && (
-                    <p className="text-[10px] text-emerald-300/80 mt-0.5 leading-snug italic">{reason}</p>
+                    <p className="text-xs text-emerald-300/90 mt-1 leading-snug italic">{reason}</p>
                   )}
                 </div>
               </div>
@@ -121,9 +117,9 @@ export function GameBuilderLayout({
         })}
       </div>
 
-      {/* Right: game card (narrow) */}
-      <div className="w-52 shrink-0 flex flex-col gap-2">
-        <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wide">Game Card</p>
+      {/* Right: game card */}
+      <div className="w-56 shrink-0 flex flex-col gap-2.5">
+        <p className="text-xs text-zinc-400 font-semibold uppercase tracking-wide">Game Card</p>
         <GameCardSlot label="Character" value={gameCard?.character} icon="🧑" />
         <GameCardSlot label="Theme" value={gameCard?.theme} icon="🎨" />
         <GameCardSlot label="Action" value={gameCard?.action} icon="🛠️" />
@@ -136,15 +132,15 @@ export function GameBuilderLayout({
 
 function GameCardSlot({ label, value, icon }: { label: string; value?: string; icon: string }) {
   return (
-    <div className={`rounded-lg p-2 transition-all duration-300 ${value ? "bg-zinc-800/60 border border-zinc-700/50" : "bg-zinc-950/30 border border-dashed border-zinc-800"}`}>
-      <div className="flex items-start gap-1.5">
-        <span className="text-xs leading-tight">{icon}</span>
+    <div className={`rounded-xl p-3 transition-all duration-300 ${value ? "bg-zinc-800 border border-zinc-700" : "bg-zinc-900 border border-dashed border-zinc-700"}`}>
+      <div className="flex items-start gap-2">
+        <span className="text-base leading-tight">{icon}</span>
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] text-zinc-500 uppercase tracking-wide">{label}</p>
+          <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-semibold">{label}</p>
           {value ? (
-            <p className="text-[11px] text-zinc-200 leading-snug">{value}</p>
+            <p className="text-sm text-zinc-100 mt-0.5 leading-snug">{value}</p>
           ) : (
-            <p className="text-[10px] text-zinc-600 italic">...</p>
+            <p className="text-xs text-zinc-600 mt-0.5">...</p>
           )}
         </div>
       </div>
