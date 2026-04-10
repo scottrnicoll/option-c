@@ -171,7 +171,7 @@ export function StandardPanel({
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <SheetContent
         side="right"
-        className={`overflow-y-auto ${step === "earn" ? "w-full sm:w-[90vw] lg:w-[80vw]" : "w-full sm:w-[75vw] lg:w-[60vw]"}`}
+        className={`${step === "earn" ? "w-full sm:w-full flex flex-col overflow-hidden" : "w-full sm:w-[75vw] lg:w-[60vw] overflow-y-auto"}`}
       >
         <SheetHeader>
           <div className="flex items-center justify-between">
@@ -191,7 +191,7 @@ export function StandardPanel({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="px-4 pb-4">
+        <div className={`px-4 pb-4 ${step === "earn" ? "flex-1 flex flex-col min-h-0" : ""}`}>
           {(step === "earn" || step === "demonstrate") && nodeStatus !== "locked" && nodeStatus !== "mastered" && (
             <button
               onClick={() => setStep("learn")}
