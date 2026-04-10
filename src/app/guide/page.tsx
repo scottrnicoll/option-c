@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth"
 import { db } from "@/lib/firebase"
 import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, arrayUnion, increment } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
-import { Copy, Check, Users, GamepadIcon, Clock, Plus, ChevronDown, Eye, Play, X } from "lucide-react"
+import { Copy, Check, Users, GamepadIcon, Clock, Plus, ChevronDown, Eye, Play, X, Wrench } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { Game } from "@/lib/game-types"
 import { getTokenConfig } from "@/lib/token-config"
@@ -669,7 +669,7 @@ export default function GuideDashboard() {
                             className="text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
                             onClick={() => setFeedbackGameId(feedbackGameId === g.id ? null : g.id)}
                           >
-                            Needs Work
+                            <Wrench className="size-3.5" data-icon="inline-start" /> Fix
                           </Button>
                           <Button
                             size="sm"
