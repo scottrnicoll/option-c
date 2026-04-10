@@ -94,36 +94,6 @@ export function GalaxySettingsPopover({
                 </div>
               </div>
 
-              {/* Grade filter — only meaningful in "By progress" mode */}
-              {showGradeFilter && colorMode === "mastery" && (
-                <div className="space-y-1.5">
-                  <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wide">
-                    Show
-                  </p>
-                  <div className="bg-zinc-800 rounded-md flex overflow-hidden border border-zinc-700">
-                    <button
-                      onClick={() => onGradeFilterChange("myGrade")}
-                      className={`flex-1 px-2 py-1 text-xs transition-colors ${
-                        gradeFilter === "myGrade"
-                          ? "bg-zinc-700 text-white"
-                          : "text-zinc-300 hover:text-white"
-                      }`}
-                    >
-                      My grade
-                    </button>
-                    <button
-                      onClick={() => onGradeFilterChange("all")}
-                      className={`flex-1 px-2 py-1 text-xs transition-colors ${
-                        gradeFilter === "all"
-                          ? "bg-zinc-700 text-white"
-                          : "text-zinc-300 hover:text-white"
-                      }`}
-                    >
-                      All grades
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* BOTTOM — legend */}
@@ -139,9 +109,7 @@ export function GalaxySettingsPopover({
                   <LegendRow color="bg-yellow-700" label="In review" />
                   <LegendRow color="bg-emerald-500" label="Demonstrated" />
                   <LegendRow color="bg-amber-500" label="Mastered" />
-                  {showOtherGradeSwatch && (
-                    <LegendRow color="bg-purple-600" label="Other grade" />
-                  )}
+                  <LegendRow color="bg-purple-600" label="Other grade" />
                   <LegendRow color="bg-zinc-500" label="Locked" />
                 </div>
               )}

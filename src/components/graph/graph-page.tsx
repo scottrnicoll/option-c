@@ -122,7 +122,7 @@ export function GraphPage({ data }: GraphPageProps) {
   // Grade filter — controls whether the galaxy view dims everything outside
   // the student's grade. Default is "myGrade" so a brand-new student walks
   // in to a focused view. Hidden entirely if the student hasn't picked a grade.
-  const [gradeFilter, setGradeFilter] = useState<"all" | "myGrade">("myGrade")
+  const [gradeFilter, setGradeFilter] = useState<"all" | "myGrade">("all")
   const [showWaveEffect, setShowWaveEffect] = useState(false)
   const [waveColor, setWaveColor] = useState("#22c55e")
   const [lockedMessage, setLockedMessage] = useState<string | null>(null)
