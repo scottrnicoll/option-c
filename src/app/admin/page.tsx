@@ -806,8 +806,9 @@ export default function AdminDashboardPage() {
                             <td className="px-4 py-3 text-right">
                               <button
                                 onClick={() => setEditingLearner(s)}
-                                className="text-xs text-blue-400 hover:text-blue-300 hover:underline"
+                                className="flex items-center gap-1.5 ml-auto text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg px-2.5 py-1.5 transition-colors"
                               >
+                                <Pencil className="size-3.5" />
                                 Edit
                               </button>
                             </td>
