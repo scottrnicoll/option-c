@@ -905,7 +905,13 @@ export function GraphPage({ data }: GraphPageProps) {
           )}
         </div>
 
-        {/* Settings popover — toggles + legend live in here */}
+        {/* Rules / help */}
+        <RulesPopover />
+
+        {/* User menu (name + sign out) */}
+        <UserMenu />
+
+        {/* Settings popover — last so its dropdown hugs the right edge */}
         {viewMode === "galaxy" && (
           <GalaxySettingsPopover
             colorMode={colorMode}
@@ -916,12 +922,6 @@ export function GraphPage({ data }: GraphPageProps) {
             showOtherGradeSwatch={!!studentData?.grade && gradeFilter === "all"}
           />
         )}
-
-        {/* Rules / help */}
-        <RulesPopover />
-
-        {/* User menu (name + sign out) */}
-        <UserMenu />
       </div>
 
       {/* Rotate hint — show once, dismissable */}
