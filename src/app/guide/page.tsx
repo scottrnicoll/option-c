@@ -13,6 +13,7 @@ import { GameIframe } from "@/components/game/game-iframe"
 import { UserMenu } from "@/components/user-menu"
 import { LearnerEditModal } from "@/components/learner-edit-modal"
 import { Pencil } from "lucide-react"
+import { Logo } from "@/components/logo"
 
 interface StudentSummary {
   uid: string
@@ -367,9 +368,21 @@ export default function GuideDashboard() {
   if (!profile) return null
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-4 md:p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* Header */}
+    <div className="min-h-screen bg-zinc-950">
+      <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Logo size={28} className="text-blue-400" />
+            <h1 className="text-lg font-bold text-white">Diagonally</h1>
+            <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-medium">
+              Guide
+            </span>
+          </div>
+          <UserMenu />
+        </div>
+      </header>
+      <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
+        {/* Class header */}
         <div className="flex items-center justify-between">
           <div className="relative">
             <button
@@ -450,7 +463,6 @@ export default function GuideDashboard() {
               <GamepadIcon className="size-4" />
               Game Library
             </a>
-            <UserMenu />
           </div>
         </div>
 

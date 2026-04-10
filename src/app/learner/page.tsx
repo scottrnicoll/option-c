@@ -14,6 +14,7 @@ import standardsData from "@/data/standards.json"
 import moonNames from "@/data/moon-names.json"
 import type { StandardsGraph } from "@/lib/graph-types"
 import { isClusterNode } from "@/lib/galaxy-utils"
+import { Logo } from "@/components/logo"
 
 const MOON_NAMES = moonNames as Record<string, string>
 const STANDARDS = standardsData as StandardsGraph
@@ -253,7 +254,20 @@ export default function LearnerDashboard() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="min-h-screen bg-zinc-950">
+      <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Logo size={28} className="text-blue-400" />
+            <h1 className="text-lg font-bold text-white">Diagonally</h1>
+            <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full font-medium">
+              Learner
+            </span>
+          </div>
+          <UserMenu />
+        </div>
+      </header>
+      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Hey {activeProfile.name}</h1>
@@ -264,7 +278,6 @@ export default function LearnerDashboard() {
             </p>
           )}
         </div>
-        <UserMenu />
       </div>
 
       {/* Personal code — so the learner can write it down if they forgot */}
@@ -428,6 +441,7 @@ export default function LearnerDashboard() {
         />
       )}
 
+      </div>
     </div>
   )
 }
