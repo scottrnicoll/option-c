@@ -115,7 +115,8 @@ export function GraphPage({ data }: GraphPageProps) {
   const [progressMap, setProgressMap] = useState<Map<string, NodeStatus>>(initialProgress)
   const [selectedStandard, setSelectedStandard] = useState<StandardNode | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
-  const [onboardingComplete, setOnboardingComplete] = useState(false)
+  // Initialize from profile — if they have a grade, skip onboarding immediately
+  const [onboardingComplete, setOnboardingComplete] = useState(() => !!activeProfile?.grade)
   const [studentData, setStudentData] = useState<OnboardingData | null>(null)
   const [tutorialStep, setTutorialStep] = useState(0)
 

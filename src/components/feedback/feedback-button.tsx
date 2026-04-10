@@ -109,7 +109,8 @@ export function FeedbackButton({ targetGame }: FeedbackButtonProps) {
         updatedAt: now,
         pageUrl: pageUrl || null,
       }
-      if (screenshot) baseDoc.screenshot = screenshot
+      // Screenshot excluded from Firestore doc to avoid 1MB limit.
+      // TODO: upload to Cloud Storage and store URL instead.
 
       if (isGameMessage) {
         // 1) creator-facing copy (target=game, toUid=authorUid)
