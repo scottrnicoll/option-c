@@ -188,74 +188,78 @@ Win condition: ${picks.win}`
         win: picks.win || undefined,
       }}
     >
-      <div className="flex flex-col gap-3 h-full">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-zinc-300">
-            {step === "confirm" ? "Ready to build" : `Step ${stepIndex(step)}/3`}
-          </p>
-        </div>
-
-        {/* Chat history */}
-        <div
-          ref={scrollRef}
-          className="flex flex-1 flex-col gap-2 overflow-y-auto rounded-lg border border-zinc-800 p-3 min-h-0"
-        >
-          {history.map((turn, i) => (
-            <div
-              key={i}
-              className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-                turn.role === "user"
-                  ? "self-end bg-zinc-800 text-zinc-100"
-                  : "self-start bg-zinc-900 text-zinc-300"
-              }`}
-            >
-              {turn.text}
-            </div>
-          ))}
-        </div>
-
-        {/* Chip menu (steps 1-3) OR confirm summary (step 4) */}
-        {currentChips && (
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {currentChips.map((chip) => (
-                <button
-                  key={chip}
-                  onClick={() => handlePick(chip)}
-                  className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-blue-500/50 text-zinc-200 text-xs font-medium rounded-full px-3 py-1.5 transition-colors"
-                >
-                  {chip}
-                </button>
-              ))}
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handlePick(customInput)
-              }}
-              className="flex gap-2"
-            >
-              <input
-                type="text"
-                value={customInput}
-                onChange={(e) => setCustomInput(e.target.value)}
-                placeholder="Or type your own..."
-                className="flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={!customInput.trim()}
-                className="rounded-lg bg-zinc-800 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 disabled:opacity-30 transition-colors"
-              >
-                OK
-              </button>
-            </form>
+      <div className="flex flex-col h-full">
+        {/* Scrollable area: chat + chips together */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto rounded-lg border border-zinc-800 p-3 min-h-0 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-zinc-300">
+              {step === "confirm" ? "Ready to build" : `Step ${stepIndex(step)}/3`}
+            </p>
           </div>
+
+          {/* Chat history */}
+          <div className="flex flex-col gap-2">
+            {history.map((turn, i) => (
+              <div
+                key={i}
+                className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                  turn.role === "user"
+                    ? "self-end bg-zinc-800 text-zinc-100"
+                    : "self-start bg-zinc-900 text-zinc-300"
+                }`}
+              >
+                {turn.text}
+              </div>
+            ))}
+          </div>
+
+          {/* Chip menu (steps 1-3) — right below the last message */}
+          {currentChips && (
+            <div className="space-y-2 pt-1">
+              <div className="flex flex-wrap gap-2">
+                {currentChips.map((chip) => (
+                  <button
+                    key={chip}
+                    onClick={() => handlePick(chip)}
+                    className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-blue-500/50 text-zinc-200 text-xs font-medium rounded-full px-3 py-1.5 transition-colors"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input — always visible at the bottom */}
+        {currentChips && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handlePick(customInput)
+            }}
+            className="flex gap-2 mt-2 shrink-0"
+          >
+            <input
+              type="text"
+              value={customInput}
+              onChange={(e) => setCustomInput(e.target.value)}
+              placeholder="Or type your own idea..."
+              className="flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!customInput.trim()}
+              className="rounded-lg bg-blue-600 hover:bg-blue-500 px-4 py-2 text-sm text-white font-medium disabled:opacity-30 transition-colors"
+            >
+              Send
+            </button>
+          </form>
         )}
 
         {/* Confirm step */}
         {step === "confirm" && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-2 shrink-0">
             <button
               onClick={() => {
                 setPicks({ theme: null, action: null, win: null })
