@@ -2,9 +2,9 @@
 // Provides: game juice (particles, shake, combos, pop-ups),
 // win/lose protocol, help button, round management, SVG helpers.
 
-import type { ThemeConfig } from "./engine-types"
+import type { ThemeConfig, GameVariant } from "./engine-types"
 
-export function baseTemplate(config: ThemeConfig, gameContent: string): string {
+export function baseTemplate(config: ThemeConfig, gameContent: string, variant: GameVariant = "classic", timerSeconds: number = 45): string {
   const c = config.colors
   const isLight = config.vibe === "kawaii"
   const fontImport = config.vibe === "kawaii"
@@ -340,6 +340,28 @@ function resetFails() { failCount = 0; }
 <div id="timerDisplay" style="display: none; position: fixed; top: 8px; left: 50%; transform: translateX(-50%); font-size: 28px; font-weight: 700; color: ${c.accent}; z-index: 40; transition: all 0.3s;"></div>
 
 ${gameContent}
+
+${variant === "timed" ? `
+<script>
+// TIMED VARIANT — wrap startGame to add countdown
+const _originalStartGame = window.startGame || startGame;
+window.startGame = startGame = function() {
+  _originalStartGame();
+  startTimer(${timerSeconds});
+};
+// Stop timer on victory
+const _originalShowVictory = showVictory;
+showVictory = function(msg) { stopTimer(); _originalShowVictory(msg); };
+</script>
+` : ""}
+
+${variant === "challenge" ? `
+<script>
+// CHALLENGE VARIANT — harder rules applied by each engine
+// Flag available for engine code to check
+window.challengeMode = true;
+</script>
+` : ""}
 
 </body>
 </html>`

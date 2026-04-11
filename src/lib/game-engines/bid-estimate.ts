@@ -129,5 +129,5 @@ function startGame() {
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter') placeBid(); });
 </script>`
 
-  return baseTemplate(config, gameContent)
+  return baseTemplate(config, gameContent, variant, 40)
 }

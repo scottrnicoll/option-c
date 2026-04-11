@@ -283,8 +283,6 @@ function startRound() { resetFails();
 }
 
 function startGame() {
-  // Start timer for timed variant
-  ${variant === "timed" ? "startTimer(60);" : ""}
   // Create round dots
   const dotsContainer = document.getElementById('roundDots');
   dotsContainer.innerHTML = '';
@@ -298,5 +296,5 @@ function startGame() {
 </script>
 `
 
-  return baseTemplate(config, gameContent)
+  return baseTemplate(config, gameContent, variant, 60)
 }

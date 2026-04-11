@@ -199,5 +199,5 @@ document.addEventListener('keydown', (e) => {
 </script>
 `
 
-  return baseTemplate(config, gameContent)
+  return baseTemplate(config, gameContent, variant, 45)
 }

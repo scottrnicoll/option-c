@@ -165,5 +165,5 @@ function startGame() {
 }
 </script>`
 
-  return baseTemplate(config, gameContent)
+  return baseTemplate(config, gameContent, variant, 40)
 }

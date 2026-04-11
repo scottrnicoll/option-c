@@ -86,7 +86,7 @@ function startRound() { resetFails();
   document.getElementById('feedback').textContent = '';
   const dots = document.querySelectorAll('.round-dot'); dots.forEach((d,i)=>{d.classList.remove('current'); if(i===currentRound)d.classList.add('current');});
 }
-function startGame(){const dc=document.getElementById('roundDots');dc.innerHTML='';for(let i=0;i<TOTAL_ROUNDS;i++){const d=document.createElement('div');d.className='round-dot';dc.appendChild(d);}startRound();}
+function startGame(){
 </script>`
-  return baseTemplate(config, gameContent)
+  return baseTemplate(config, gameContent, variant, 40)
 }
