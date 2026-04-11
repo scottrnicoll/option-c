@@ -60,7 +60,41 @@ locked -> available (blue) -> in_progress (yellow) -> in_review -> approved_unpl
 
 <!-- Update this section at the end of each work session -->
 
-**Last session (2026-04-09):**
-Committed and pushed: learner edit modal, build-wait mini-game (math facts during game generation), leaderboard (top-3 podium + per-grade top 10), visual-concept API improvements, planet view polish, auth token support.
-
-All 6 original chunks complete. Recent work focused on: game chat UX (chip-driven flow, criteria tooltips), self-test loop for generation, Google auth popup, bird logo, admin/guide features.
+**Last session (2026-04-10):**
+Major session — many features shipped:
+- Admin: token economy editor, broadcast messaging, learner class assignment
+- Galaxy: moon dots on planets, search bar, color fixes (blue=my grade, purple=previous)
+- Game builder: split-screen redesign (chat left, criteria + game card right)
+- Library: ranking tab, grade label fix, removed pending games
+- Login: "How Diagonally works" bullets
+- Feedback: bug icon for Fix, inbox query fix, UID migration for feedback docs
+- Build screen: compact layout (no scroll needed)
+- Logo header added to guide + learner pages
+- Teleprompter page for demo recording at /teleprompter.html
+- Demo prep for Worldwide Venture Fellowship (Friday April 10 at 1pm)
+- Info buttons added throughout app
+- Screenshot + URL on feedback submissions
+- Guide page fully restructured to match admin (tabs, games sub-tabs, learner progress grid, weekly progress charts)
+- Admin page: play-first flow, Needs Fix + Approve in player top bar, approval records
+- WeeklyProgressChart component (reusable, SVG line chart, cumulative + per-week)
+- LearnerProgressGrid component (reusable, planet/moon status view)
+- Game Card Builder replaces TemplateChat — visual card with 5 slots, 3 options each + mad libs
+- Mechanic selection with stick figures (no AI-generated templates)
+- 19 mechanics with hardcoded creative options per slot
+- Game generation: SVG-only characters (no emoji) + game juice effects
+- HTML sanitizer for security on pasted games
+- Mechanic descriptions added to all 19 animations
+- Card slots redesigned: 3 pre-made buttons + "Write your own" mad-lib (mutually exclusive)
+- Criteria renamed: Playable Game, Math Well Applied, Math Essential
+- Cascading AI-enhanced card builder (slots reveal one at a time, AI themes each pick)
+- Hint Card play mode (practice vs real play)
+- Game naming + dare after generation
+- Generation prompt fixed to honor learner's theme/character/win choices
+- NEXT: Building 19 pre-built game engines (one per mechanic) to replace AI-generated HTML
+  - Each engine: 5 rounds, progressive difficulty, game juice, SVG characters
+  - AI only generates theme config JSON (names, colors) — no game logic
+  - 3 variants per engine (classic/timed/challenge) — infrastructure done
+  - Fail tracking: 3 wrong answers = game over (triggers Hint Card)
+  - Theme fidelity: card builder choices pass directly to engine API
+  - Hint Card content cached in Firestore
+  - Diagonally Blueprint updated with all specs
