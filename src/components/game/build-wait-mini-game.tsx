@@ -48,69 +48,11 @@ export function BuildWaitMiniGame({ grade }: BuildWaitMiniGameProps) {
 
   // Generate a fresh problem matching the learner's grade.
   const newProblem = useCallback((): Problem => {
-    const g = (grade ?? "").toUpperCase()
-    const isEarly = ["K", "1", "2"].includes(g)
-    const isMid = ["3", "4"].includes(g)
-    const isUpper = ["5", "6", "7"].includes(g)
-    const isHigh = ["8", "HS"].includes(g)
-
-    let a: number, b: number, op: "+" | "-" | "×", answer: number
-
-    if (isEarly) {
-      // Sums up to 20
-      a = Math.floor(Math.random() * 11) + 1 // 1-11
-      b = Math.floor(Math.random() * 9) + 1  // 1-9
-      op = Math.random() < 0.5 ? "+" : "-"
-      // For subtraction, ensure a >= b so result is non-negative
-      if (op === "-" && a < b) [a, b] = [b, a]
-      answer = op === "+" ? a + b : a - b
-    } else if (isMid) {
-      // Addition/subtraction up to 100, OR small multiplication tables
-      const choice = Math.random()
-      if (choice < 0.4) {
-        a = Math.floor(Math.random() * 90) + 10 // 10-99
-        b = Math.floor(Math.random() * 90) + 10
-        op = "+"
-        answer = a + b
-      } else if (choice < 0.7) {
-        a = Math.floor(Math.random() * 90) + 10
-        b = Math.floor(Math.random() * a) + 1 // ensure non-negative
-        op = "-"
-        answer = a - b
-      } else {
-        // Small multiplication table
-        a = Math.floor(Math.random() * 9) + 2 // 2-10
-        b = Math.floor(Math.random() * 9) + 2 // 2-10
-        op = "×"
-        answer = a * b
-      }
-    } else if (isUpper) {
-      // Multiplication tables 2-12
-      a = Math.floor(Math.random() * 11) + 2 // 2-12
-      b = Math.floor(Math.random() * 11) + 2 // 2-12
-      op = "×"
-      answer = a * b
-    } else if (isHigh) {
-      // Multiplication tables 2-15 OR larger addition
-      const choice = Math.random()
-      if (choice < 0.7) {
-        a = Math.floor(Math.random() * 14) + 2 // 2-15
-        b = Math.floor(Math.random() * 14) + 2 // 2-15
-        op = "×"
-        answer = a * b
-      } else {
-        a = Math.floor(Math.random() * 900) + 100 // 100-999
-        b = Math.floor(Math.random() * 900) + 100
-        op = "+"
-        answer = a + b
-      }
-    } else {
-      // No grade set — default to easy addition
-      a = Math.floor(Math.random() * 10) + 1
-      b = Math.floor(Math.random() * 10) + 1
-      op = "+"
-      answer = a + b
-    }
+    // Always times tables 1-10 — the essential multiplication facts
+    const a = Math.floor(Math.random() * 10) + 1 // 1-10
+    const b = Math.floor(Math.random() * 10) + 1 // 1-10
+    const op: "+" | "-" | "×" = "×"
+    const answer = a * b
 
     // Generate 3 wrong choices that are plausible distractors:
     // close to the right answer but not equal. Avoid duplicates.

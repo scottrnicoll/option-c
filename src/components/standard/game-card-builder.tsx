@@ -6,12 +6,21 @@ import type { MechanicAnimation } from "@/lib/mechanic-animations"
 import { MECHANIC_OPTIONS_MAP } from "@/lib/mechanic-card-options"
 import type { GameDesignDoc } from "@/lib/game-types"
 
+type Vibe = "arcade" | "c64" | "kawaii" | "stickman"
+
+const VIBE_OPTIONS: { id: Vibe; label: string; desc: string }[] = [
+  { id: "arcade", label: "🕹️ Arcade", desc: "Neon glow, dark background" },
+  { id: "kawaii", label: "🎀 Kawaii", desc: "Soft pastels, chubby characters" },
+  { id: "stickman", label: "✏️ Stick Man", desc: "Hand-drawn notebook style" },
+  { id: "c64", label: "👾 Pixel Art", desc: "Blocky retro pixel look" },
+]
+
 interface GameCardBuilderProps {
   mechanic: MechanicAnimation
   standardId: string
   standardDescription: string
   planetId: string
-  onBuildGame: (designDoc: GameDesignDoc, summary: string) => void
+  onBuildGame: (designDoc: GameDesignDoc, summary: string, vibe: string) => void
   onBack: () => void
 }
 
@@ -20,6 +29,7 @@ interface SlotState {
   character: string
   action: string
   win: string
+  vibe: Vibe | ""
 }
 
 // One slot: 3 option buttons + "Write your own" — mutually exclusive.
@@ -164,12 +174,13 @@ export function GameCardBuilder({
     character: "",
     action: "",
     win: "",
+    vibe: "",
   })
   const [building, setBuilding] = useState(false)
 
   const options = MECHANIC_OPTIONS_MAP.get(mechanic.id)
-  const allFilled = slots.theme && slots.character && slots.action && slots.win
-  const filledCount = [slots.theme, slots.character, slots.action, slots.win].filter(Boolean).length
+  const allFilled = slots.theme && slots.character && slots.action && slots.win && slots.vibe
+  const filledCount = [slots.theme, slots.character, slots.action, slots.win, slots.vibe].filter(Boolean).length
 
   const handleBuild = async () => {
     if (!allFilled) return
@@ -193,7 +204,7 @@ Math concept: ${standardDescription}`
         }),
       })
       const designDoc = (await res.json()) as GameDesignDoc
-      onBuildGame(designDoc, summary)
+      onBuildGame(designDoc, summary, slots.vibe)
     } catch {
       // Fallback design doc
       onBuildGame({
@@ -207,7 +218,7 @@ Math concept: ${standardDescription}`
         mathRole: options?.mathRole || mechanic.mathDomain,
         designChoices: {},
         visualConcept: [],
-      } as GameDesignDoc, "")
+      } as GameDesignDoc, "", slots.vibe)
     } finally {
       setBuilding(false)
     }
@@ -238,9 +249,9 @@ Math concept: ${standardDescription}`
           <p className="text-sm text-zinc-400">{mechanic.mathDomain}</p>
         </div>
         <div className="ml-auto text-right">
-          <p className="text-xs text-zinc-500">{filledCount}/4 filled</p>
+          <p className="text-xs text-zinc-500">{filledCount}/5 filled</p>
           <div className="flex gap-1 mt-1">
-            {[slots.theme, slots.character, slots.action, slots.win].map((v, i) => (
+            {[slots.theme, slots.character, slots.action, slots.win, slots.vibe].map((v, i) => (
               <div key={i} className={`w-3 h-3 rounded-full ${v ? "bg-emerald-500" : "bg-zinc-700"}`} />
             ))}
           </div>
@@ -290,6 +301,31 @@ Math concept: ${standardDescription}`
           onChange={() => {}}
           autoFill={options.mathRole}
         />
+
+        {/* Vibe picker */}
+        <div className={`rounded-xl border-2 p-4 transition-all ${slots.vibe ? "border-emerald-500/40 bg-emerald-500/5" : "border-zinc-700 bg-zinc-900"}`}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">🎨</span>
+            <span className="text-xs text-zinc-400 uppercase tracking-wide font-semibold">Game Style</span>
+            {slots.vibe && <span className="text-emerald-400 text-xs">✓</span>}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {VIBE_OPTIONS.map((v) => (
+              <button
+                key={v.id}
+                onClick={() => setSlots(prev => ({ ...prev, vibe: v.id }))}
+                className={`px-3 py-2 rounded-lg text-sm transition-all border ${
+                  slots.vibe === v.id
+                    ? "bg-blue-500/20 border-blue-500/60 text-blue-300 font-semibold"
+                    : "bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white"
+                }`}
+              >
+                <span className="block">{v.label}</span>
+                <span className="block text-[10px] text-zinc-500 mt-0.5">{v.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Build button */}
@@ -313,7 +349,7 @@ Math concept: ${standardDescription}`
           ) : allFilled ? (
             "Build my game →"
           ) : (
-            `Fill all 4 slots to build (${filledCount}/4)`
+            `Fill all 5 slots to build (${filledCount}/5)`
           )}
         </button>
       </div>

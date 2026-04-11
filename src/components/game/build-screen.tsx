@@ -14,6 +14,8 @@ interface BuildScreenProps {
     designChoices: Record<string, string>,
     visualConcept: string[]
   ) => void
+  // If provided, skip narration/visualConcept/vibe phases and go straight to generating
+  preSelectedVibe?: string
 }
 
 interface NarrationItem {
@@ -46,23 +48,25 @@ interface GameCard {
   watchOut: string
 }
 
-export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
+export function BuildScreen({ designDoc, onComplete, preSelectedVibe }: BuildScreenProps) {
   const { activeProfile } = useAuth()
   const narrationSequence = buildNarrationSequence(designDoc)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [progress, setProgress] = useState(0)
-  const [phase, setPhase] = useState<Phase>("narration")
+  // If vibe is pre-selected from card builder, skip straight to generating
+  const [phase, setPhase] = useState<Phase>(preSelectedVibe ? "generating" : "narration")
   const [visualBullets, setVisualBullets] = useState<string[]>([])
   const [gameCard, setGameCard] = useState<GameCard | null>(null)
   const [conceptLoading, setConceptLoading] = useState(false)
   const [conceptError, setConceptError] = useState<string | null>(null)
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null)
-  const [vibe, setVibe] = useState<Vibe | null>(null)
+  const [vibe, setVibe] = useState<Vibe | null>((preSelectedVibe as Vibe) || null)
   const visualBulletsRef = useRef<string[]>([])
   const designChoicesRef = useRef<Record<string, string>>({})
   const startGenTimeRef = useRef<number>(0)
 
   const currentItem = narrationSequence[currentIndex] ?? null
+  const autoStartedRef = useRef(false)
 
   // Fetch the visual concept (now: Game Card) for the learner to approve.
   // The API returns BOTH the structured card (for UI rendering) AND a
@@ -136,6 +140,19 @@ export function BuildScreen({ designDoc, onComplete }: BuildScreenProps) {
       }, 600)
     }
   }, [designDoc])
+
+  // Auto-start generation if vibe was pre-selected from card builder
+  useEffect(() => {
+    if (preSelectedVibe && !autoStartedRef.current) {
+      autoStartedRef.current = true
+      const bullets = [
+        designDoc.howItWorks || "",
+        designDoc.winCondition ? `Win condition: ${designDoc.winCondition}` : "",
+        designDoc.mathRole ? `Math role: ${designDoc.mathRole}` : "",
+      ].filter(Boolean)
+      startGeneration(bullets, preSelectedVibe as Vibe)
+    }
+  }, [preSelectedVibe, designDoc, startGeneration])
 
   // Auto-advance narration → after the last narration item, fetch the
   // visual concept and move to the approval phase.

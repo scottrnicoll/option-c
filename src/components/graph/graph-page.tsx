@@ -618,9 +618,13 @@ export function GraphPage({ data }: GraphPageProps) {
     }, 1500)
   }, [data, planets, saveProgress, progressMap])
 
-  // Handle "Build my Game" from Genie chat
-  const handleBuildGame = useCallback((designDoc: GameDesignDoc) => {
+  // Vibe selected from the card builder (or null for GenieChat path)
+  const [selectedVibe, setSelectedVibe] = useState<string | null>(null)
+
+  // Handle "Build my Game" from card builder or Genie chat
+  const handleBuildGame = useCallback((designDoc: GameDesignDoc, _chatHistory?: string, vibe?: string) => {
     setCurrentDesignDoc(designDoc)
+    setSelectedVibe(vibe || null)
     setPanelOpen(false)
     setBuildMode("building")
     // Mark as in_progress now that they're actually building
@@ -821,6 +825,7 @@ export function GraphPage({ data }: GraphPageProps) {
         <BuildScreen
           designDoc={currentDesignDoc}
           onComplete={handleBuildComplete}
+          preSelectedVibe={selectedVibe || undefined}
         />
       )}
 
@@ -924,6 +929,22 @@ export function GraphPage({ data }: GraphPageProps) {
 
       {/* Top-right toolbar — single horizontal strip */}
       <div className={`absolute ${impersonating ? "top-14" : "top-4"} right-4 z-10 flex items-center gap-2`}>
+        {/* Info button — to the left of stats */}
+        {viewMode === "galaxy" && (
+          <InfoButton title="Read Me!">
+            <p>The <span className="text-zinc-200">Galaxy</span> is your map of all math from Kindergarten to High School.</p>
+            <p>It contains <span className="text-blue-400 font-semibold">66 planets</span> (math domains) and <span className="text-blue-400 font-semibold">535 moons</span> (math skills — one per Common Core standard).</p>
+            <p>Each planet groups related skills. Click a planet to zoom in and see its moons.</p>
+          </InfoButton>
+        )}
+        {viewMode === "planet" && currentPlanetId && (
+          <InfoButton title="Read Me!">
+            <p>A <span className="text-zinc-200">Planet</span> is a math domain at one grade level (e.g. Geometry Grade 6).</p>
+            <p>Each glowing dot is a <span className="text-zinc-200">moon</span> — a specific math skill (Common Core standard) you can learn by building a game.</p>
+            <p>Click a moon to read about it, then design your game.</p>
+          </InfoButton>
+        )}
+
         {/* Compact status strip — plain text, no boxes */}
         <div className="hidden md:flex items-center gap-3 bg-zinc-900/85 backdrop-blur-sm border border-zinc-700 rounded-lg px-4 py-2 text-sm">
           <span className="flex items-center gap-1.5">
@@ -942,24 +963,6 @@ export function GraphPage({ data }: GraphPageProps) {
             </>
           )}
         </div>
-
-        {/* Info button — changes based on view */}
-        {viewMode === "galaxy" && (
-          <InfoButton title="Galaxy">
-            <p>The <span className="text-zinc-200">Galaxy</span> is your map of all math from Kindergarten to High School.</p>
-            <p>It contains <span className="text-blue-400 font-semibold">66 planets</span> (math concepts) and <span className="text-blue-400 font-semibold">535 moons</span> (individual skills).</p>
-            <p>Each planet groups related skills. Click a planet to zoom in and see its moons.</p>
-            <p className="text-zinc-500">Colors: blue = your grade, purple = previous grades, yellow = in progress, green = demonstrated.</p>
-          </InfoButton>
-        )}
-        {viewMode === "planet" && currentPlanetId && (
-          <InfoButton title="Planet">
-            <p>A <span className="text-zinc-200">Planet</span> is a math concept at one grade level (e.g. Geometry Grade 6).</p>
-            <p>Each glowing dot is a <span className="text-zinc-200">moon</span> — a specific math skill you can learn by building a game.</p>
-            <p>Click a moon to read about the concept, then design your game.</p>
-            <p className="text-zinc-500">Blue moons are ready to start. Grey moons are locked until you complete their prerequisites.</p>
-          </InfoButton>
-        )}
 
         {/* Rules / help */}
         <RulesPopover />

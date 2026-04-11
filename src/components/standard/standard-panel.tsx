@@ -107,7 +107,7 @@ interface StandardPanelProps {
   onClose: () => void
   onUnlock: (standardId: string) => void
   onDemonstrated?: (standardId: string) => void
-  onBuildGame?: (designDoc: import("@/lib/game-types").GameDesignDoc, chatHistory: string) => void
+  onBuildGame?: (designDoc: import("@/lib/game-types").GameDesignDoc, chatHistory: string, vibe?: string) => void
   // Called when the learner clicks "Paste my own HTML" — opens the import flow.
   onImportHtml?: (standard: StandardNode) => void
   nodeStatus?: "locked" | "available" | "in_progress" | "in_review" | "approved_unplayed" | "unlocked" | "mastered"
@@ -180,11 +180,10 @@ export function StandardPanel({
             <p className="text-xs text-blue-400 font-medium uppercase tracking-wide">
               {getPlanetLabel(standard)}
             </p>
-            <InfoButton title="Moon">
-              <p>A <span className="text-zinc-200">Moon</span> is a single math skill you can master.</p>
-              <p>Read the concept, then design a game that uses the math. The AI helps you build it.</p>
+            <InfoButton title="Read Me!">
+              <p>A <span className="text-zinc-200">Moon</span> is a single math skill — one Common Core standard.</p>
+              <p>Read the skill, then design a game that uses the math. The AI helps you build it.</p>
               <p>Your guide reviews and approves your game. Then play it 3 times to demonstrate the skill.</p>
-              <p className="text-zinc-500">Moon colors: blue = ready, yellow = in progress, green = demonstrated, gold = mastered.</p>
             </InfoButton>
           </div>
           <SheetTitle className="text-xl leading-tight">{getMoonName(standard)}</SheetTitle>
@@ -337,8 +336,8 @@ export function StandardPanel({
               standardDescription={standard.description}
               standardId={standard.id}
               planetId={`${standard.grade}.${standard.domainCode}`}
-              onBuildGame={(designDoc, summary) => {
-                if (onBuildGame) onBuildGame(designDoc, summary)
+              onBuildGame={(designDoc, summary, vibe) => {
+                if (onBuildGame) onBuildGame(designDoc, summary, vibe)
               }}
               onBack={() => setStep("learn")}
             />

@@ -8,7 +8,7 @@ export function WelcomeOverlay({ availableCount, onDismiss }: { availableCount: 
       <div className="max-w-md text-center space-y-4 p-8">
         <h1 className="text-2xl font-bold text-zinc-100">Welcome to your galaxy</h1>
         <p className="text-zinc-400 text-sm leading-relaxed">
-          Every dot is a math concept. The bright ones are yours to explore —
+          Every dot is a math domain. The bright ones are yours to explore —
           pick one, learn it, then prove you can use it by designing a game.
         </p>
         <p className="text-zinc-500 text-xs">

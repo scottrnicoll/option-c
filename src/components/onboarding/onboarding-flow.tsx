@@ -101,7 +101,7 @@ function WelcomeChoiceStep({
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <span className="text-lg leading-tight">🌌</span>
-            <p className="text-sm text-zinc-400"><span className="text-zinc-200 font-medium">Explore the galaxy.</span> Math concepts are planets. Each skill is a moon orbiting its planet.</p>
+            <p className="text-sm text-zinc-400"><span className="text-zinc-200 font-medium">Explore the galaxy.</span> Math domains are planets. Each skill is a moon orbiting its planet.</p>
           </div>
           <div className="flex items-start gap-3">
             <span className="text-lg leading-tight">🎮</span>
@@ -364,7 +364,7 @@ function IntroStep({
       </p>
       <div className="w-full flex flex-col gap-2">
         {[
-          "Explore math concepts on your galaxy map",
+          "Explore math domains on your galaxy map",
           "Design a game for a concept you want to master",
           "Other learners play and rate your game",
           "Get approved → earn tokens → unlock more",
