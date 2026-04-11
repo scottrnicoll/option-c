@@ -10,23 +10,19 @@
   h1 { font-size: 28px; color: #fff; margin-bottom: 4px; }
   h2 { font-size: 20px; color: #60a5fa; margin-top: 40px; margin-bottom: 12px; border-bottom: 1px solid #27272a; padding-bottom: 8px; }
   h3 { font-size: 16px; color: #fbbf24; margin-top: 24px; margin-bottom: 8px; }
-  .date { color: #71717a; font-size: 13px; margin-bottom: 32px; }
+  .date { color: #71717a; font-size: 13px; margin-bottom: 8px; }
+  .latest-update { background: #1a2e1a; border: 1px solid #22c55e40; border-radius: 8px; padding: 12px 16px; margin-bottom: 32px; }
+  .latest-update strong { color: #4ade80; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .latest-update p { font-size: 13px; color: #d4d4d8; margin-top: 4px; }
   p { margin-bottom: 12px; font-size: 14px; color: #a1a1aa; }
   strong { color: #e4e4e7; }
   table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13px; }
   th { text-align: left; padding: 8px 12px; background: #18181b; color: #60a5fa; border: 1px solid #27272a; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
   td { padding: 8px 12px; border: 1px solid #27272a; color: #d4d4d8; vertical-align: top; }
   td:first-child { color: #fff; font-weight: 600; white-space: nowrap; }
-  .tag { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
-  .tag-blue { background: #1e3a5f; color: #60a5fa; }
-  .tag-green { background: #14532d; color: #4ade80; }
-  .tag-amber { background: #451a03; color: #fbbf24; }
-  .tag-purple { background: #3b0764; color: #c084fc; }
   code { background: #18181b; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #fbbf24; }
-  .section { margin-bottom: 32px; }
   .status { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
   .done { background: #14532d; color: #4ade80; }
-  .wip { background: #451a03; color: #fbbf24; }
   .pending { background: #18181b; color: #71717a; }
   ul { margin: 8px 0 16px 20px; font-size: 14px; color: #a1a1aa; }
   li { margin-bottom: 4px; }
@@ -36,223 +32,227 @@
 
 <h1>Diagonally Blueprint</h1>
 <p style="color: #f87171; font-size: 12px; margin-bottom: 4px;">INTERNAL — DO NOT SHARE OUTSIDE THE TEAM</p>
-<p class="date">Last updated: April 11, 2026</p>
-<p>This document explains everything about how Diagonally works — what every part is called, how the pieces fit together, and what happens behind the scenes. Written for anyone on the team, no coding required.</p>
+<p class="date">Last updated: April 11, 2026, 11:45 PM ET</p>
+
+<div class="latest-update">
+  <strong>Latest update</strong>
+  <p>All 19 game engines completed and wired into the generation pipeline. Games now generate in ~3 seconds (was 30-90s). AI only generates theme config JSON — no game code.</p>
+</div>
+
+<p>This document explains how Diagonally works — what every part is called, how the pieces fit together, and what happens behind the scenes. Written for the team, no coding required.</p>
 
 <!-- ============================================ -->
-<h2>1. Glossary — Official Names</h2>
+<h2>1. Glossary — The Galaxy</h2>
+<p>These terms describe the learner's map and how they navigate math.</p>
 <!-- ============================================ -->
 
-<p>Every part of the app has a formal name. Use these consistently across code, docs, and conversation.</p>
-
-<h3>Galaxy & Navigation</h3>
 <table>
-  <tr><th>Term</th><th>Definition</th><th>In Common Core</th></tr>
+  <tr><th>Term</th><th>Definition</th><th>Common Core equivalent</th></tr>
   <tr><td>Galaxy</td><td>The 3D map of all math from K to 12. Contains 66 planets and 535 moons.</td><td>—</td></tr>
-  <tr><td>Planet</td><td>A math domain at one grade level (e.g. "Geometry Grade 6"). Groups related skills.</td><td>Domain</td></tr>
-  <tr><td>Moon</td><td>A single math skill. One moon = one Common Core standard.</td><td>Standard</td></tr>
-  <tr><td>Moon Card</td><td>The full-page view when you click a moon. Shows the concept explanation, stick figure animation, and game mechanic options.</td><td>—</td></tr>
-  <tr><td>Explore Card</td><td>The concept explanation section within the Moon Card: "What is this?", formula, "Watch out for", "Where you'll use this".</td><td>—</td></tr>
-  <tr><td>Mini-map</td><td>The small overview panel showing all planets at a glance. Click to fly to a planet.</td><td>—</td></tr>
-  <tr><td>Search</td><td>The search bar (top-left of galaxy) that finds moons by name, standard ID, or domain.</td><td>—</td></tr>
-  <tr><td>Read Me!</td><td>The info button (ⓘ) that explains what the current view is.</td><td>—</td></tr>
-</table>
-
-<h3>Game Design Flow</h3>
-<table>
-  <tr><th>Term</th><th>Definition</th></tr>
-  <tr><td>Game Mechanic</td><td>The core gameplay pattern tied to a math domain. There are 19 mechanics total (e.g. "Balance & Equalize", "Split & Share"). Each has a stick figure animation. The mechanic determines HOW the player interacts with the math.</td></tr>
-  <tr><td>Game Card</td><td>The visual card the learner builds by making 5 choices. Contains: Theme, Character, Player Action, Win Condition, and Game Style. The Game Card defines WHAT the game looks and feels like.</td></tr>
-  <tr><td>Game Card Components</td><td>The 5 slots on the Game Card:
-    <br>1. <strong>Theme</strong> — the world/setting (e.g. "haunted castle")
-    <br>2. <strong>Character</strong> — who the player is (e.g. "ghost hunter")
-    <br>3. <strong>Player Action</strong> — what the player does on screen (e.g. "stack cursed bricks")
-    <br>4. <strong>Win Condition</strong> — how the player wins (e.g. "complete 5 rounds")
-    <br>5. <strong>Game Style</strong> — visual look (Cute, Stick Man, or Retro)
-  </td></tr>
-  <tr><td>Math Role</td><td>Auto-filled from the Game Mechanic. Describes how math fits into the game (e.g. "Add and remove to make both sides match").</td></tr>
-  <tr><td>Game Engine</td><td>The pre-built game code for a mechanic. Handles all game logic (rounds, scoring, win/lose, difficulty). There are 19 engines (one per mechanic). The engine is the MACHINE that runs the game.</td></tr>
-  <tr><td>Theme Config</td><td>A JSON object generated from the Game Card. Contains names, colors, and messages that skin the Game Engine. The config is the PAINT on the machine.</td></tr>
-  <tr><td>Game Style / Vibe</td><td>The visual palette and font. Three options:
-    <br>• <strong>Cute</strong> (soft pastels, chubby SVG characters, Quicksand font)
-    <br>• <strong>Stick Man</strong> (dark zinc, white line art, Patrick Hand font)
-    <br>• <strong>Retro</strong> (blue pixel art, blocky SVG, VT323 font)
-  </td></tr>
-</table>
-
-<h3>Game Criteria</h3>
-<table>
-  <tr><th>Criterion</th><th>Definition</th><th>When it lights up</th></tr>
-  <tr><td>🎮 Playable Game</td><td>Clear idea, clear goal, clear win/lose. A kid can understand and play it.</td><td>When all 4 Game Card slots are filled</td></tr>
-  <tr><td>🧠 Math Well Applied</td><td>The math skill is used like in the real world — not simplified, not faked.</td><td>Auto — when a Game Mechanic is selected (the math is built into the mechanic)</td></tr>
-  <tr><td>💎 Math Essential</td><td>Knowing the math skill is essential to win. Remove the math and the game breaks.</td><td>Auto — when a Game Mechanic is selected</td></tr>
-</table>
-
-<h3>Gameplay & Progress</h3>
-<table>
-  <tr><th>Term</th><th>Definition</th></tr>
+  <tr><td>Planet</td><td>A math domain at one grade level (e.g. "Geometry Grade 6"). Groups related skills. Shown as a glowing sphere in the galaxy.</td><td>Domain</td></tr>
+  <tr><td>Moon</td><td>A single math skill. One moon = one learning objective. Shown as a small dot orbiting a planet.</td><td>Standard</td></tr>
   <tr><td>Moon Status</td><td>The progression state of a skill:
     <br>• <strong>Locked</strong> (grey) — prerequisites not met
     <br>• <strong>Available</strong> (blue) — ready to start, at learner's grade
     <br>• <strong>In Progress</strong> (yellow) — learner started building a game
     <br>• <strong>In Review</strong> (yellow) — game submitted, waiting for guide
     <br>• <strong>Approved</strong> (yellow) — guide approved, needs to play 3x
-    <br>• <strong>Demonstrated / Unlocked</strong> (green) — won own game 3x in a row
+    <br>• <strong>Demonstrated</strong> (green) — won own game 3x in a row
     <br>• <strong>Mastered</strong> (gold) — won 3 games by other learners
-  </td></tr>
-  <tr><td>Tokens</td><td>In-app currency. +2000 per approved game (configurable). +100 per mastered skill (configurable). Shown in top bar.</td></tr>
-  <tr><td>Hint Card</td><td>Practice mode. When playing a game, learner can choose "Play with Hint Card" — a side panel shows the math concept, steps, and encouragement. Wins don't count toward mastery/tokens.</td></tr>
-  <tr><td>Game Dare</td><td>Optional challenge text the learner writes after building a game (e.g. "I dare you to beat this in under 30 seconds!"). Shown in the Game Library.</td></tr>
-</table>
-
-<h3>Roles & Views</h3>
-<table>
-  <tr><th>Term</th><th>Definition</th></tr>
-  <tr><td>Learner</td><td>A student. Builds games, plays games, earns tokens. Sees: Galaxy, Game Library, My Stuff.</td></tr>
-  <tr><td>Guide</td><td>A teacher. Reviews/approves games, manages class, views learner progress. Sees: Overview, Learners, Games (To Review / Awaiting Fix / Approved), Feedback.</td></tr>
-  <tr><td>Admin</td><td>Platform admin. Manages guides, classes, tokens, broadcasts. Sees: Overview, Guides, Classes, Learners, Games, Feedback, Tokens, Broadcast.</td></tr>
-  <tr><td>My Stuff</td><td>Learner's personal dashboard. Shows: progress stats, personal code, weekly progress chart, planet/moon grid, inbox.</td></tr>
-  <tr><td>Game Library</td><td>All approved games. Tabs: For My Grade, All Games, Ranking. Learners play others' games to master skills.</td></tr>
-  <tr><td>Ranking / Leaderboard</td><td>Top learners by token count. Top-3 podium + per-grade top 10.</td></tr>
-</table>
-
-<h3>Feedback System</h3>
-<table>
-  <tr><th>Term</th><th>Definition</th></tr>
-  <tr><td>💡 Idea</td><td>A suggestion for improvement. Sent via the "Suggest a fix or idea" button.</td></tr>
-  <tr><td>🐛 Fix</td><td>A bug report. Sent via the same button. Shows bug icon.</td></tr>
-  <tr><td>Inbox</td><td>Where learners/guides see messages. Shows game approval notifications, fix requests, and replies.</td></tr>
-  <tr><td>Broadcast</td><td>Admin-only. Sends a message to ALL learners and guides.</td></tr>
+  </td><td>—</td></tr>
+  <tr><td>Mini-map</td><td>Small overview panel showing all planets at a glance. Click a dot to fly to that planet.</td><td>—</td></tr>
+  <tr><td>Search</td><td>Search bar (top-left of galaxy) that finds moons by name, standard ID, or domain.</td><td>—</td></tr>
+  <tr><td>Read Me!</td><td>Info button that explains what the current screen element is.</td><td>—</td></tr>
 </table>
 
 <!-- ============================================ -->
-<h2>2. Tech Stack</h2>
+<h2>2. Glossary — Math & Game Mechanics</h2>
+<p>These terms describe how math is organized and turned into gameplay.</p>
+<!-- ============================================ -->
+
+<table>
+  <tr><th>Term</th><th>Definition</th></tr>
+  <tr><td>Game Mechanic</td><td>The core gameplay pattern tied to a math domain. There are <strong>19 mechanics</strong> (e.g. "Balance & Equalize", "Split & Share"). Each has a stick figure animation that demonstrates the mechanic. The mechanic determines HOW the player interacts with the math.</td></tr>
+  <tr><td>Math Role</td><td>Auto-filled from the Game Mechanic. Describes how math fits into the game (e.g. "Add and remove to make both sides match"). The learner doesn't choose this — it comes from the mechanic.</td></tr>
+  <tr><td>Game Engine</td><td>The pre-built game code for a mechanic. Handles all game logic (rounds, scoring, win/lose, difficulty). There are <strong>19 engines</strong> (one per mechanic). The engine is the MACHINE that runs the game. Engines are tested and guaranteed to work.</td></tr>
+  <tr><td>Theme Config</td><td>A JSON object generated by AI from the learner's Game Card choices. Contains names, colors, and messages that skin the Game Engine. The config is the PAINT on the machine. AI generates it in ~2 seconds.</td></tr>
+</table>
+
+<h3>Game Criteria</h3>
+<p>Every game must meet 3 criteria. Two are auto-checked when a mechanic is selected.</p>
+<table>
+  <tr><th>Criterion</th><th>Definition</th><th>When it lights up</th></tr>
+  <tr><td>🎮 Playable Game</td><td>Clear idea, clear goal, clear win/lose. A kid can understand and play it.</td><td>When all 4 Game Card slots are filled</td></tr>
+  <tr><td>🧠 Math Well Applied</td><td>The math skill is used like in the real world — not simplified, not faked.</td><td>Auto — when a Game Mechanic is selected</td></tr>
+  <tr><td>💎 Math Essential</td><td>Knowing the math skill is essential to win. Remove the math and the game breaks.</td><td>Auto — when a Game Mechanic is selected</td></tr>
+</table>
+
+<!-- ============================================ -->
+<h2>3. Glossary — Game Design & Visuals</h2>
+<p>These terms describe how the learner customizes what their game looks and feels like.</p>
+<!-- ============================================ -->
+
+<table>
+  <tr><th>Term</th><th>Definition</th></tr>
+  <tr><td>Game Card</td><td>The visual card the learner builds by making choices. It defines WHAT the game looks and feels like. Built step by step in the Game Card Builder.</td></tr>
+  <tr><td>Game Card Components</td><td>The slots on the Game Card, filled one at a time. Each choice shapes the next options (cascading AI):
+    <br>1. <strong>Theme</strong> — the world/setting (e.g. "haunted castle")
+    <br>2. <strong>Character</strong> — who the player is (e.g. "ghost hunter") — options adapt to the theme
+    <br>3. <strong>Player Action</strong> — what the player does on screen (e.g. "stack cursed bricks") — adapts to theme + character
+    <br>4. <strong>Win Condition</strong> — how the player wins (e.g. "complete 5 rounds") — adapts to all above
+    <br>5. <strong>Game Style</strong> — visual look (Cute, Stick Man, or Retro)
+  </td></tr>
+  <tr><td>Game Style / Vibe</td><td>The visual palette, font, and character rendering style. Three options:
+    <br>• <strong>🎀 Cute</strong> — soft pastels, chubby SVG characters, Quicksand font
+    <br>• <strong>✏️ Stick Man</strong> — dark zinc background, white line art, Patrick Hand font
+    <br>• <strong>👾 Retro</strong> — blue pixel art, blocky SVG, VT323 font
+  </td></tr>
+  <tr><td>Moon Card</td><td>The full-page view when you click a moon. Shows: concept explanation, stick figure animation, game mechanic options, and "I have my own idea" button.</td></tr>
+  <tr><td>Explore Card</td><td>The concept explanation section within the Moon Card: "What is this?", formula, "Watch out for", "Where you'll use this".</td></tr>
+  <tr><td>Game Naming</td><td>After a game generates, the learner names it and writes an optional dare before testing it.</td></tr>
+  <tr><td>Game Dare</td><td>Optional challenge text (e.g. "I dare you to beat this in under 30 seconds!"). Shows in the Game Library when others play it.</td></tr>
+</table>
+
+<!-- ============================================ -->
+<h2>4. Glossary — Gameplay & Progress</h2>
+<p>These terms describe how learners play, earn, and progress.</p>
+<!-- ============================================ -->
+
+<table>
+  <tr><th>Term</th><th>Definition</th></tr>
+  <tr><td>Tokens</td><td>In-app currency. +2000 per approved game (configurable by admin). +100 per mastered skill (configurable). Shown in top bar.</td></tr>
+  <tr><td>Hint Card</td><td>Practice mode. When playing a game, the learner chooses "Play with Hint Card" — a side panel shows the math concept, steps, and encouragement. Wins don't count toward mastery/tokens. After winning, prompted: "Ready to play for real?"</td></tr>
+  <tr><td>Game Library</td><td>All approved games. Tabs: For My Grade, All Games, Ranking. Learners play others' games to master skills.</td></tr>
+  <tr><td>Ranking / Leaderboard</td><td>Top learners by token count. Top-3 podium + per-grade top 10.</td></tr>
+  <tr><td>Weekly Progress Chart</td><td>Line graph showing skills demonstrated over time. Available on guide's Learners tab (all learners) and learner's My Stuff (self vs classmates).</td></tr>
+</table>
+
+<!-- ============================================ -->
+<h2>5. Glossary — Roles & Views</h2>
+<!-- ============================================ -->
+
+<table>
+  <tr><th>Term</th><th>Definition</th></tr>
+  <tr><td>Learner</td><td>A student. Builds games, plays games, earns tokens. Views: Galaxy, Game Library, My Stuff.</td></tr>
+  <tr><td>Guide</td><td>A teacher. Reviews/approves games, manages class, views learner progress. Tabs: Overview, Learners (with progress grid + weekly chart), Games (To Review / Awaiting Fix / Approved), Feedback.</td></tr>
+  <tr><td>Admin</td><td>Platform admin. Manages guides, classes, tokens, broadcasts. Tabs: Overview, Guides, Classes, Learners, Games, Feedback, Tokens, Broadcast.</td></tr>
+  <tr><td>My Stuff</td><td>Learner's personal dashboard: progress stats, personal code, weekly progress chart (vs classmates), planet/moon grid, inbox.</td></tr>
+</table>
+
+<!-- ============================================ -->
+<h2>6. Glossary — Feedback System</h2>
+<!-- ============================================ -->
+
+<table>
+  <tr><th>Term</th><th>Definition</th></tr>
+  <tr><td>💡 Idea</td><td>A suggestion for improvement. Sent via the "Suggest a fix or idea" button.</td></tr>
+  <tr><td>🐛 Fix</td><td>A bug report. Sent via the same button.</td></tr>
+  <tr><td>Inbox</td><td>Where learners/guides see messages: game approval notifications, fix requests, replies.</td></tr>
+  <tr><td>Broadcast</td><td>Admin-only. Sends a message to ALL learners and guides at once.</td></tr>
+</table>
+
+<!-- ============================================ -->
+<h2>7. All 19 Game Engines</h2>
+<!-- ============================================ -->
+
+<p>Every Game Mechanic has a pre-built Game Engine. The engine handles all game logic. AI only generates the Theme Config (names, colors, messages) — not game code. Generation takes ~3 seconds.</p>
+
+<table>
+  <tr><th>#</th><th>Mechanic</th><th>Engine</th><th>How it plays</th><th>Math domain</th><th>Status</th></tr>
+  <tr><td>1</td><td>Collect & Manage</td><td>Click to collect</td><td>Click items to collect exact target sum</td><td>Arithmetic</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>2</td><td>Split & Share</td><td>Cut the bar</td><td>Cut a bar into equal parts, shade the fraction</td><td>Fractions</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>3</td><td>Balance & Equalize</td><td>Balance scale</td><td>Drag tokens onto scale to make sides equal</td><td>Equations</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>4</td><td>Fit & Rotate</td><td>Rotate to match</td><td>Rotate shapes to match target orientation</td><td>Geometry</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>5</td><td>Roll & Predict</td><td>Data analyzer</td><td>Identify mode, median, or mean from data</td><td>Statistics</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>6</td><td>Navigate & Optimize</td><td>Shortest route</td><td>Pick shortest route by adding distances</td><td>Graph reasoning</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>7</td><td>Build & Measure</td><td>Stack to target</td><td>Stack blocks to match target height</td><td>Area/volume</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>8</td><td>Race & Calculate</td><td>Launch simulator</td><td>Set speed to hit target distance (speed × time)</td><td>Rates/slopes</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>9</td><td>Solve & Eliminate</td><td>Elimination grid</td><td>Use clues to eliminate wrong answers</td><td>Logic</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>10</td><td>Grow & Compound</td><td>Investment sim</td><td>Multiply strategically to reach target</td><td>Exponents</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>11</td><td>Measure & Compare</td><td>Size picker</td><td>Compare two items, pick bigger/smaller</td><td>Measurement</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>12</td><td>Score & Rank</td><td>Sorting lane</td><td>Drag items into ascending order</td><td>Ordering</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>13</td><td>Pattern & Repeat</td><td>Sequence builder</td><td>Find the next number in a sequence</td><td>Patterns</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>14</td><td>Scale & Transform</td><td>Resize tool</td><td>Drag slider to resize to target ratio</td><td>Proportions</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>15</td><td>Craft & Combine</td><td>Recipe mixer</td><td>Set ingredient amounts to match recipe</td><td>Addition</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>16</td><td>Plot & Explore</td><td>Coordinate hunter</td><td>Click coordinates on a grid to find targets</td><td>Coordinates</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>17</td><td>Bid & Estimate</td><td>Auction house</td><td>Estimate values and bid within 20%</td><td>Estimation</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>18</td><td>Rise & Fall</td><td>Depth navigator</td><td>Navigate vertical number line to target</td><td>Signed numbers</td><td><span class="status done">Done</span></td></tr>
+  <tr><td>19</td><td>Build a Structure</td><td>Shape matcher</td><td>Pick shapes to match a blueprint</td><td>Shapes</td><td><span class="status done">Done</span></td></tr>
+</table>
+
+<h3>Engine Features (all 19 engines share these)</h3>
+<ul>
+  <li>5 rounds with progressive difficulty</li>
+  <li>Randomized values every playthrough</li>
+  <li>Game juice: particle bursts, screen shake, combo counter, score pop-ups</li>
+  <li>SVG-drawn characters (no emoji)</li>
+  <li>Intro screen explaining how to play</li>
+  <li>Help button (?) with math explanation + valid/invalid examples</li>
+  <li>gameWin() / gameLose() protocol for parent app integration</li>
+  <li>Mouse, touch, and keyboard input</li>
+  <li>Three visual styles: Cute, Stick Man, Retro</li>
+</ul>
+
+<!-- ============================================ -->
+<h2>8. How Game Generation Works</h2>
+<!-- ============================================ -->
+
+<p>When a learner builds a game, here's what happens step by step:</p>
+
+<table>
+  <tr><th>Step</th><th>What happens</th><th>Who does it</th><th>Time</th></tr>
+  <tr><td>1. Pick a moon</td><td>Learner clicks a blue moon on the galaxy or searches for a skill</td><td>Learner</td><td>—</td></tr>
+  <tr><td>2. Read the concept</td><td>Explore Card shows: what the math is, where it's used, common mistakes</td><td>Cached / AI (first time only)</td><td>Instant (cached) or ~2s</td></tr>
+  <tr><td>3. Pick a mechanic</td><td>1-3 Game Mechanics shown with stick figure animations. Learner picks one.</td><td>Learner</td><td>—</td></tr>
+  <tr><td>4. Fill the Game Card</td><td>5 slots filled one at a time (Theme → Character → Action → Win → Style). AI enhances each pick and generates themed options for the next slot.</td><td>Learner + AI (Haiku)</td><td>~1-2s per slot</td></tr>
+  <tr><td>5. Build the game</td><td>Game Engine generates HTML from the Theme Config. No AI writes game code.</td><td>Engine + AI (Haiku for config)</td><td>~3 seconds</td></tr>
+  <tr><td>6. Name it</td><td>Learner names their game and writes an optional dare.</td><td>Learner</td><td>—</td></tr>
+  <tr><td>7. Test & submit</td><td>Learner plays the game in the Workshop. Must win at least once before submitting for review.</td><td>Learner</td><td>—</td></tr>
+  <tr><td>8. Guide review</td><td>Guide plays the game, then approves or sends back with feedback ("Needs Fix").</td><td>Guide</td><td>—</td></tr>
+  <tr><td>9. Demonstrate</td><td>After approval, learner must win their own game 3 times in a row → moon turns green.</td><td>Learner</td><td>—</td></tr>
+  <tr><td>10. Master</td><td>Play and win 3 games by OTHER learners on the same skill → moon turns gold.</td><td>Learner</td><td>—</td></tr>
+</table>
+
+<!-- ============================================ -->
+<h2>9. Tech Stack</h2>
 <!-- ============================================ -->
 
 <table>
   <tr><th>Layer</th><th>Technology</th></tr>
   <tr><td>Framework</td><td>Next.js 16 (App Router) + TypeScript</td></tr>
   <tr><td>Styling</td><td>Tailwind CSS 4</td></tr>
-  <tr><td>UI Components</td><td>shadcn/ui + custom components</td></tr>
   <tr><td>3D Galaxy</td><td>react-force-graph-3d + Three.js</td></tr>
   <tr><td>Database</td><td>Firebase Firestore</td></tr>
-  <tr><td>Auth</td><td>Firebase Auth (anonymous + email/password + Google OAuth)</td></tr>
-  <tr><td>AI</td><td>Anthropic Claude API (Sonnet for generation, Haiku for card enhancement)</td></tr>
-  <tr><td>Hosting</td><td>Vercel (auto-deploy from GitHub main branch)</td></tr>
+  <tr><td>Auth</td><td>Firebase Auth (anonymous + email/password + Google)</td></tr>
+  <tr><td>AI</td><td>Anthropic Claude (Haiku for card enhancement + theme config, Sonnet as fallback for HTML generation)</td></tr>
+  <tr><td>Hosting</td><td>Vercel (auto-deploy from GitHub)</td></tr>
   <tr><td>Repo</td><td>github.com/mrdavola/option-c</td></tr>
-  <tr><td>Local dev</td><td><code>cd C:/projects/option-c && npm run dev</code> → localhost:3000</td></tr>
 </table>
 
 <!-- ============================================ -->
-<h2>3. Game Engine Architecture</h2>
+<h2>10. Data Model</h2>
 <!-- ============================================ -->
 
-<p>Games are built using <strong>pre-built game engines</strong> — one per Game Mechanic. The AI generates a Theme Config (names, colors, messages) but does NOT write game code. This guarantees games always work.</p>
-
-<h3>How it works</h3>
-<ul>
-  <li><strong>Learner</strong> fills the Game Card (Theme → Character → Action → Win → Style)</li>
-  <li><strong>AI (Haiku)</strong> enhances each pick and generates a Theme Config JSON</li>
-  <li><strong>Game Engine</strong> takes the Theme Config + math parameters and outputs complete HTML</li>
-  <li>HTML includes: game juice (particles, shake, combos), SVG characters, help button, round management, win/lose protocol</li>
-</ul>
-
-<h3>All 19 Game Engines</h3>
-<table>
-  <tr><th>#</th><th>Mechanic</th><th>Engine Type</th><th>How it plays</th><th>Status</th></tr>
-  <tr><td>1</td><td>Collect & Manage</td><td>Drag to containers</td><td>Items with values appear. Drag into bins to hit target sums.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>2</td><td>Split & Share</td><td>Cut the shape</td><td>Shape displays. Click/drag cut lines to divide into equal parts.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>3</td><td>Balance & Equalize</td><td>Balance scale</td><td>Two-sided scale. Drag tokens to make both sides equal.</td><td><span class="status done">Done</span></td></tr>
-  <tr><td>4</td><td>Fit & Rotate</td><td>Tangram puzzle</td><td>Rotate and drag shapes to fit into outlined target.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>5</td><td>Roll & Predict</td><td>Bet & spin</td><td>See data. Choose outcome to bet on. Spin to reveal.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>6</td><td>Navigate & Optimize</td><td>Path drawer</td><td>Map with nodes. Draw shortest path between start and end.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>7</td><td>Build & Measure</td><td>Stack to target</td><td>Target shown. Place blocks. Match the target exactly.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>8</td><td>Race & Calculate</td><td>Launch simulator</td><td>Set speed/angle with sliders. Launch to hit target zone.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>9</td><td>Solve & Eliminate</td><td>Elimination grid</td><td>Grid of possibilities. Click to eliminate using clues.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>10</td><td>Grow & Compound</td><td>Investment sim</td><td>Start with a number. Choose reinvestment each round.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>11</td><td>Measure & Compare</td><td>Ruler matcher</td><td>Two objects. Drag ruler to compare. Pick the right one.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>12</td><td>Score & Rank</td><td>Sorting lane</td><td>Items with values. Drag into correct order.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>13</td><td>Pattern & Repeat</td><td>Sequence builder</td><td>Pattern with gap. Pick/place the next element.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>14</td><td>Scale & Transform</td><td>Resize tool</td><td>Object at one size. Drag to resize to match target ratio.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>15</td><td>Craft & Combine</td><td>Recipe mixer</td><td>Recipe shows amounts. Drag ingredients to combine.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>16</td><td>Plot & Explore</td><td>Coordinate hunter</td><td>Grid. Click (x,y) to find targets.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>17</td><td>Bid & Estimate</td><td>Auction house</td><td>Item with clues. Estimate value. Bid.</td><td><span class="status pending">Pending</span></td></tr>
-  <tr><td>18</td><td>Rise & Fall</td><td>Depth navigator</td><td>Vertical number line. Move to target (positive/negative).</td><td><span class="status done">Done</span></td></tr>
-  <tr><td>19</td><td>Build a Structure</td><td>Snap builder</td><td>Blueprint shown. Drag shapes to match it.</td><td><span class="status pending">Pending</span></td></tr>
-</table>
-
-<h3>Engine Features (all engines)</h3>
-<ul>
-  <li>5 rounds with progressive difficulty</li>
-  <li>Randomized values every playthrough</li>
-  <li>Game juice: particle bursts, screen shake, combo counter, score pop-ups</li>
-  <li>SVG-drawn characters (no emoji)</li>
-  <li>Intro screen with "How to play"</li>
-  <li>Help button (?) with math explanation + valid/invalid examples</li>
-  <li>gameWin() / gameLose() protocol for parent app</li>
-  <li>Mouse, touch, and keyboard input</li>
-  <li>Three visual styles: Cute, Stick Man, Retro</li>
-</ul>
-
-<!-- ============================================ -->
-<h2>4. Data Model</h2>
-<!-- ============================================ -->
-
-<h3>Firestore Collections</h3>
 <table>
   <tr><th>Collection</th><th>Key Fields</th></tr>
-  <tr><td><code>users</code></td><td>uid, name, role (student/guide/admin), grade, classId, tokens, personalCode</td></tr>
+  <tr><td><code>users</code></td><td>uid, name, role, grade, classId, tokens, personalCode</td></tr>
   <tr><td><code>classes</code></td><td>name, code, guideUid</td></tr>
-  <tr><td><code>games</code></td><td>title, authorUid, classId, standardId, planetId, status (draft/pending_review/published/needs_work), gameHtml, designDoc, playCount, ratingSum, ratingCount, approvedBy, approvedByName, approvedAt, dare</td></tr>
-  <tr><td><code>progress/{uid}/standards/{stdId}</code></td><td>status, ownGameWinStreak, othersGameWins, approvedAt, masteredAt</td></tr>
-  <tr><td><code>feedback</code></td><td>fromUid, fromName, toUid, target (admin/game), type (improvement/bug), message, pageUrl, replies[], status</td></tr>
+  <tr><td><code>games</code></td><td>title, authorUid, classId, standardId, status, gameHtml, designDoc, playCount, ratingSum, approvedBy, approvedAt, dare</td></tr>
+  <tr><td><code>progress/{uid}/standards/{id}</code></td><td>status, ownGameWinStreak, othersGameWins, approvedAt, masteredAt</td></tr>
+  <tr><td><code>feedback</code></td><td>fromUid, toUid, target, type, message, pageUrl, replies[], status</td></tr>
   <tr><td><code>config/tokens</code></td><td>gameApproved (default 2000), skillMastered (default 100)</td></tr>
   <tr><td><code>explanations</code></td><td>Cached concept explanations by standardId + readingLevel</td></tr>
 </table>
 
-<h3>Standards Data</h3>
-<table>
-  <tr><th>File</th><th>Purpose</th></tr>
-  <tr><td><code>src/data/standards.json</code></td><td>535 Common Core math standards (nodes) + prerequisite edges</td></tr>
-  <tr><td><code>src/data/moon-names.json</code></td><td>Friendly short names for each standard (e.g. "Solving One-Step Equations")</td></tr>
-</table>
-
 <!-- ============================================ -->
-<h2>5. Key Files</h2>
+<h2>11. Pending Work</h2>
 <!-- ============================================ -->
 
-<table>
-  <tr><th>Path</th><th>What it does</th></tr>
-  <tr><td><code>src/app/</code></td><td>Pages: / (galaxy), /learner, /guide, /admin, /library</td></tr>
-  <tr><td><code>src/app/api/</code></td><td>API routes: game generation, chat, explain, progress, admin</td></tr>
-  <tr><td><code>src/components/graph/</code></td><td>Galaxy view, planet view, mini-map, graph page</td></tr>
-  <tr><td><code>src/components/game/</code></td><td>Build screen, workshop, game player, game library, leaderboard</td></tr>
-  <tr><td><code>src/components/standard/</code></td><td>Standard panel, concept card, game card builder, game builder layout</td></tr>
-  <tr><td><code>src/lib/game-engines/</code></td><td>Pre-built game engines (19 total)</td></tr>
-  <tr><td><code>src/lib/mechanic-animations.tsx</code></td><td>19 stick figure SVG animations + matching logic</td></tr>
-  <tr><td><code>src/lib/mechanic-card-options.ts</code></td><td>Hardcoded Game Card options per mechanic</td></tr>
-  <tr><td><code>src/lib/auth.tsx</code></td><td>Auth context, sign-in flows, token management, data migration</td></tr>
-  <tr><td><code>src/lib/app-rules.ts</code></td><td>In-app Rules popover content</td></tr>
-  <tr><td><code>src/lib/html-sanitizer.ts</code></td><td>Strips dangerous elements from pasted HTML games</td></tr>
-  <tr><td><code>src/lib/token-config.ts</code></td><td>Admin-configurable token economy (stored in Firestore)</td></tr>
-</table>
-
-<!-- ============================================ -->
-<h2>6. Pending Work</h2>
-<!-- ============================================ -->
-
-<h3>In Progress</h3>
 <ul>
-  <li>Build remaining 17 game engines (2 of 19 done)</li>
-  <li>Wire engines into generation pipeline (replace AI HTML generation)</li>
-</ul>
-
-<h3>Planned</h3>
-<ul>
-  <li>3 variants per engine (57 total gameplay experiences)</li>
-  <li>AI theme config generation (replace full HTML generation with JSON config)</li>
-  <li>Clickable info buttons on more elements (game card, draft game, playable game)</li>
-  <li>Snapshot + link on feedback submissions (screenshot to Cloud Storage)</li>
+  <li><strong>3 variants per engine</strong> — 57 total gameplay experiences (different modes within each mechanic)</li>
+  <li><strong>Test all 19 engines end-to-end</strong> — verify every mechanic generates and plays correctly</li>
+  <li><strong>Theme fidelity check</strong> — ensure the Theme Config actually shows up in the generated game</li>
+  <li><strong>Hint Card content caching</strong> — avoid re-generating hint content on every play</li>
 </ul>
 
 </body>
