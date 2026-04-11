@@ -18,6 +18,10 @@ export interface ThemeConfig {
   winMessage: string      // shown on victory
   loseMessage: string     // shown on defeat
   dare?: string           // optional dare from the learner
+  // Sprite overrides (Phase 1: Phaser engines)
+  characterSprite?: string   // sprite library ID or upload URL
+  itemSprite?: string        // sprite library ID or upload URL
+  backgroundImage?: string   // sprite library ID or upload URL
 }
 
 // What the AI generates from the card builder choices
