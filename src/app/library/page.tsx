@@ -5,6 +5,7 @@ import moonNames from "@/data/moon-names.json"
 import { LearnerNav } from "@/components/learner-nav"
 import { InfoButton } from "@/components/info-button"
 import { UserMenu } from "@/components/user-menu"
+import { Logo } from "@/components/logo"
 import { getAdminDb } from "@/lib/firebase-admin"
 
 const MOON_NAMES = moonNames as Record<string, string>
@@ -54,12 +55,21 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   const skillName = skill ? (MOON_NAMES[skill] ?? skill) : null
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white relative">
-      <LearnerNav />
-      <div className="absolute top-4 right-4 z-20">
-        <UserMenu />
-      </div>
-      <div className="max-w-7xl mx-auto px-4 py-8 pt-20">
+    <div className="min-h-screen bg-zinc-950 text-white">
+      <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Logo size={28} className="text-blue-400" />
+            <h1 className="text-lg font-bold">Diagonally</h1>
+            <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full font-medium">
+              Learner
+            </span>
+          </div>
+          <UserMenu />
+        </div>
+      </header>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <LearnerNav />
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>

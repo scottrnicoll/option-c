@@ -47,7 +47,7 @@ export function InfoButton({ title, children, className = "" }: InfoButtonProps)
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full right-0 mt-2 w-72 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden">
+        <div className="fixed z-50 top-16 right-4 w-72 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden">
           <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 bg-zinc-900/80">
             <p className="text-xs font-semibold text-zinc-300 uppercase tracking-wide">{title}</p>
             <button onClick={() => setOpen(false)} className="text-zinc-500 hover:text-white p-0.5">

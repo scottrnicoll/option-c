@@ -17,8 +17,14 @@ export function LearnerNav() {
   const isDashboard = pathname === "/learner" || pathname === "/student"
   const isLibrary = pathname.startsWith("/library")
 
+  // On pages with their own header (learner, library), render inline instead of floating
+  const isOverlay = isExplore
+
   return (
-    <nav className={`absolute left-4 z-20 flex gap-1 bg-zinc-900/85 backdrop-blur-sm rounded-lg border border-zinc-700 p-1 ${impersonating ? "top-14" : "top-4"}`}>
+    <nav className={isOverlay
+      ? `absolute left-4 z-20 flex gap-1 bg-zinc-900/85 backdrop-blur-sm rounded-lg border border-zinc-700 p-1 ${impersonating ? "top-14" : "top-4"}`
+      : "flex gap-1 bg-zinc-900 rounded-lg border border-zinc-800 p-1 mb-4"
+    }>
       <Link
         href="/"
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors ${

@@ -15,6 +15,7 @@ import moonNames from "@/data/moon-names.json"
 import type { StandardsGraph } from "@/lib/graph-types"
 import { isClusterNode } from "@/lib/galaxy-utils"
 import { Logo } from "@/components/logo"
+import { LearnerNav } from "@/components/learner-nav"
 import { InfoButton } from "@/components/info-button"
 import { WeeklyProgressChart } from "@/components/weekly-progress-chart"
 
@@ -284,6 +285,7 @@ export default function LearnerDashboard() {
         </div>
       </header>
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <LearnerNav />
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
