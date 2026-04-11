@@ -5,6 +5,7 @@ import { Loader2, Check, Circle } from "lucide-react"
 import type { MechanicAnimation } from "@/lib/mechanic-animations"
 import { MECHANIC_OPTIONS_MAP } from "@/lib/mechanic-card-options"
 import type { GameDesignDoc } from "@/lib/game-types"
+import { ArtworkPicker } from "@/components/game/artwork-picker"
 
 type Vibe = "kawaii" | "stickman" | "c64"
 
@@ -54,6 +55,8 @@ export function GameCardBuilder({
   const [summary, setSummary] = useState("")
   const [enhancing, setEnhancing] = useState(false)
   const [building, setBuilding] = useState(false)
+  const [showArtwork, setShowArtwork] = useState(false)
+  const [sprites, setSprites] = useState<{ characterSprite?: string; itemSprite?: string; backgroundImage?: string }>({})
 
   // AI-generated options for the next slot
   const [charOptions, setCharOptions] = useState<string[]>([])
@@ -135,7 +138,7 @@ export function GameCardBuilder({
     setSummary(result.summary)
   }
 
-  const handleBuild = async () => {
+  const handleBuild = useCallback(async (selectedSprites?: typeof sprites) => {
     if (!allFilled || !theme || !character || !action || !win) return
     setBuilding(true)
     try {
@@ -159,6 +162,11 @@ Math skill: ${standardDescription}`
       const designDoc = (await res.json()) as GameDesignDoc
       // Attach raw card choices for theme config generation
       ;(designDoc as any).cardChoices = { theme: theme?.enhanced, character: character?.enhanced, action: action?.enhanced, win: win?.enhanced }
+      // Attach sprite selections if provided
+      const spritesToUse = selectedSprites ?? sprites
+      if (spritesToUse && Object.keys(spritesToUse).length > 0) {
+        ;(designDoc as any).sprites = spritesToUse
+      }
       onBuildGame(designDoc, gameSummary, vibe)
     } catch {
       onBuildGame({
@@ -176,10 +184,29 @@ Math skill: ${standardDescription}`
     } finally {
       setBuilding(false)
     }
-  }
+  }, [allFilled, theme, character, action, win, mechanic, standardDescription, standardId, planetId, sprites, vibe, onBuildGame, options])
 
   if (!options) {
     return <div className="text-center py-12 text-zinc-500"><p>No options for this mechanic.</p></div>
+  }
+
+  // Artwork step — shown after all slots + vibe are filled, before building
+  if (showArtwork) {
+    return (
+      <div className="flex flex-col h-full overflow-y-auto">
+        <ArtworkPicker
+          onSelect={(selected) => {
+            setSprites(selected)
+            setShowArtwork(false)
+            handleBuild(selected)
+          }}
+          onSkip={() => {
+            setShowArtwork(false)
+            handleBuild({})
+          }}
+        />
+      </div>
+    )
   }
 
   return (
@@ -345,7 +372,7 @@ Math skill: ${standardDescription}`
           ← Back
         </button>
         <button
-          onClick={handleBuild}
+          onClick={() => setShowArtwork(true)}
           disabled={!allFilled || building || enhancing}
           className="flex-1 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
         >
