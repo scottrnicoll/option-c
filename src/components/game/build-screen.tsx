@@ -307,35 +307,21 @@ export function BuildScreen({ designDoc, onComplete, preSelectedVibe }: BuildScr
               <p className="text-center text-sm text-zinc-300">
                 Pick the look you want for your game.
               </p>
-              {/* Arcade */}
-              <button
-                onClick={() => handleVibePick("arcade")}
-                className="w-full p-4 rounded-xl border-2 border-cyan-500/40 bg-black hover:border-cyan-400 hover:shadow-[0_0_24px_rgba(0,255,255,0.3)] transition-all text-left"
-                style={{ fontFamily: "monospace" }}
-              >
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="text-2xl">🕹️</span>
-                  <div>
-                    <p className="text-sm font-bold text-cyan-300" style={{ textShadow: "0 0 8px rgba(0,255,255,0.6)" }}>ARCADE</p>
-                    <p className="text-xs text-zinc-400">Neon, scanlines, retro arcade glow</p>
-                  </div>
-                </div>
-              </button>
-              {/* Retro Game */}
+              {/* Retro */}
               <button
                 onClick={() => handleVibePick("c64")}
                 className="w-full p-4 rounded-xl border-2 border-blue-400/40 bg-blue-950 hover:border-blue-300 transition-all text-left"
                 style={{ fontFamily: "monospace" }}
               >
                 <div className="flex items-center gap-3 mb-1">
-                  <span className="text-2xl">💻</span>
+                  <span className="text-2xl">👾</span>
                   <div>
-                    <p className="text-sm font-bold text-white">RETRO GAME</p>
-                    <p className="text-xs text-blue-200">1980s home computer aesthetic</p>
+                    <p className="text-sm font-bold text-white">Retro</p>
+                    <p className="text-xs text-blue-200">Blocky pixel art, classic game feel</p>
                   </div>
                 </div>
               </button>
-              {/* Kawaii (was: Cute) */}
+              {/* Cute */}
               <button
                 onClick={() => handleVibePick("kawaii")}
                 className="w-full p-4 rounded-xl border-2 border-pink-300/60 hover:border-pink-300 transition-all text-left"
@@ -348,8 +334,8 @@ export function BuildScreen({ designDoc, onComplete, preSelectedVibe }: BuildScr
                 <div className="flex items-center gap-3 mb-1">
                   <span className="text-2xl">🥹</span>
                   <div>
-                    <p className="text-sm font-bold" style={{ color: "#9d174d" }}>Kawaii</p>
-                    <p className="text-xs" style={{ color: "#831843" }}>Chubby characters, big shiny eyes</p>
+                    <p className="text-sm font-bold" style={{ color: "#9d174d" }}>Cute</p>
+                    <p className="text-xs" style={{ color: "#831843" }}>Soft pastels, chubby characters</p>
                   </div>
                 </div>
               </button>
@@ -382,7 +368,7 @@ export function BuildScreen({ designDoc, onComplete, preSelectedVibe }: BuildScr
                     Game Card
                   </p>
                   <p className="text-[10px] text-zinc-500 uppercase tracking-wide">
-                    {vibe === "arcade" ? "Arcade" : vibe === "c64" ? "Retro Game" : vibe === "kawaii" ? "Kawaii" : "Stick Man"} style
+                    {vibe === "c64" ? "Retro" : vibe === "kawaii" ? "Cute" : vibe === "stickman" ? "Stick Man" : vibe || ""} style
                   </p>
                 </div>
                 <div className="p-3 space-y-2">
@@ -394,10 +380,17 @@ export function BuildScreen({ designDoc, onComplete, preSelectedVibe }: BuildScr
                       <GameCardField icon="🧮" label="How math fits" value={gameCard.mathRole} />
                       <GameCardField icon="⚠️" label="Watch out for" value={gameCard.watchOut} />
                     </>
-                  ) : (
+                  ) : visualBullets.length > 0 ? (
                     visualBullets.map((b, i) => (
                       <p key={i} className="text-sm text-zinc-200">{b}</p>
                     ))
+                  ) : (
+                    <>
+                      <GameCardField icon="🎮" label="Game" value={designDoc.title || "Your game"} />
+                      {designDoc.howItWorks && <GameCardField icon="🛠️" label="How it works" value={designDoc.howItWorks} />}
+                      {designDoc.winCondition && <GameCardField icon="🎯" label="Win condition" value={designDoc.winCondition} />}
+                      {designDoc.mathRole && <GameCardField icon="🧮" label="Math" value={designDoc.mathRole} />}
+                    </>
                   )}
                 </div>
               </div>

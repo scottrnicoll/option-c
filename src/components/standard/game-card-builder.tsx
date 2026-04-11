@@ -9,10 +9,9 @@ import type { GameDesignDoc } from "@/lib/game-types"
 type Vibe = "arcade" | "c64" | "kawaii" | "stickman"
 
 const VIBE_OPTIONS: { id: Vibe; label: string; desc: string }[] = [
-  { id: "arcade", label: "🕹️ Arcade", desc: "Neon glow, dark background" },
-  { id: "kawaii", label: "🎀 Kawaii", desc: "Soft pastels, chubby characters" },
+  { id: "kawaii", label: "🎀 Cute", desc: "Soft pastels, chubby characters" },
   { id: "stickman", label: "✏️ Stick Man", desc: "Hand-drawn notebook style" },
-  { id: "c64", label: "👾 Pixel Art", desc: "Blocky retro pixel look" },
+  { id: "c64", label: "👾 Retro", desc: "Blocky pixel art, classic game feel" },
 ]
 
 interface GameCardBuilderProps {

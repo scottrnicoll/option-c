@@ -54,13 +54,20 @@ export function BuildWaitMiniGame({ grade }: BuildWaitMiniGameProps) {
     const op: "+" | "-" | "×" = "×"
     const answer = a * b
 
-    // Generate 3 wrong choices that are plausible distractors:
-    // close to the right answer but not equal. Avoid duplicates.
+    // Generate 3 wrong choices from the same multiplication table
+    // so kids practice distinguishing actual products, not nearby numbers.
     const wrongs = new Set<number>()
     while (wrongs.size < 3) {
-      const offset = Math.floor(Math.random() * 8) - 4 // -4 to +4
-      const candidate = answer + offset
+      // Pick a different multiplier from the same table
+      const altB = Math.floor(Math.random() * 10) + 1
+      const candidate = a * altB
       if (candidate !== answer && candidate > 0) wrongs.add(candidate)
+      // Also try the other factor's table as fallback
+      if (wrongs.size < 3) {
+        const altA = Math.floor(Math.random() * 10) + 1
+        const candidate2 = altA * b
+        if (candidate2 !== answer && candidate2 > 0) wrongs.add(candidate2)
+      }
     }
     const choices = [answer, ...Array.from(wrongs)]
     // Shuffle
