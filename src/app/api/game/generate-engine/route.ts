@@ -43,7 +43,9 @@ Return JSON:
   "targetName": "what you're trying to match/build (max 3 words)",
   "worldName": "the setting (max 3 words)",
   "winMessage": "victory text (max 5 words)",
-  "loseMessage": "defeat text (max 5 words)"
+  "loseMessage": "defeat text (max 5 words)",
+  "bgColor1": "hex background gradient start color matching the theme",
+  "bgColor2": "hex background gradient end color matching the theme"
 }`,
       }],
     })
@@ -56,13 +58,19 @@ Return JSON:
 
     const palette = VIBE_PALETTES[vibe || "stickman"] || VIBE_PALETTES.stickman
 
+    // Override background with theme-specific colors if provided
+    const themedPalette = { ...palette }
+    if (parsed.bgColor1 && parsed.bgColor2) {
+      themedPalette.bg = parsed.bgColor1
+    }
+
     themeConfig = {
       title: parsed.title || designDoc.title || "Math Game",
       character: parsed.character || "player",
       itemName: parsed.itemName || "items",
       targetName: parsed.targetName || "target",
       worldName: parsed.worldName || "the world",
-      colors: palette,
+      colors: themedPalette,
       vibe: (vibe || "stickman") as ThemeConfig["vibe"],
       winMessage: parsed.winMessage || "You did it!",
       loseMessage: parsed.loseMessage || "Try again!",
