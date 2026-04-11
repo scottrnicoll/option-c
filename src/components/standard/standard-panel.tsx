@@ -13,7 +13,8 @@ import { Lock, CheckCircle, ChevronLeft, Trophy, Play, X } from "lucide-react"
 import Link from "next/link"
 import { ConceptCard } from "./concept-card"
 import { GenieChat } from "./genie-chat"
-import { TemplateChat, type TemplateForChat } from "./template-chat"
+import { GameCardBuilder } from "./game-card-builder"
+import type { MechanicAnimation } from "@/lib/mechanic-animations"
 import { MasteryPlay } from "./mastery-play"
 import { GameIframe } from "@/components/game/game-iframe"
 import { useAuth } from "@/lib/auth"
@@ -129,12 +130,12 @@ export function StandardPanel({
   // to the chip-driven TemplateChat (auto-fills theme/action/win
   // through clicks). When they pick "describe your own game", this
   // stays null and we route to the free-form GenieChat.
-  const [pickedTemplate, setPickedTemplate] = useState<TemplateForChat | null>(null)
+  const [pickedMechanic, setPickedMechanic] = useState<MechanicAnimation | null>(null)
 
   // Reset step when standard changes
   useEffect(() => {
     setStep("learn")
-    setPickedTemplate(null)
+    setPickedMechanic(null)
   }, [standard?.id])
 
   // Count published games for this exact skill (across all classes), so we
@@ -284,27 +285,11 @@ export function StandardPanel({
                   {playToMasterButton}
                   <ConceptCard
                     standard={standard}
-                    onReady={(template) => {
-                      // If a template was clicked we route to the
-                      // chip-driven TemplateChat. If the learner hit
-                      // "I have a game idea" (no template), pickedTemplate
-                      // stays null and we fall through to GenieChat.
-                      if (
-                        template &&
-                        template.themeChips &&
-                        template.actionChips &&
-                        template.winChips &&
-                        template.themeChips.length > 0
-                      ) {
-                        setPickedTemplate({
-                          title: template.title,
-                          description: template.description,
-                          themeChips: template.themeChips,
-                          actionChips: template.actionChips,
-                          winChips: template.winChips,
-                        })
+                    onReady={(mechanic) => {
+                      if (mechanic) {
+                        setPickedMechanic(mechanic)
                       } else {
-                        setPickedTemplate(null)
+                        setPickedMechanic(null)
                       }
                       setStep("earn")
                     }}
@@ -346,19 +331,16 @@ export function StandardPanel({
         </div>
         {/* Chat area — fills remaining space */}
         <div className="flex-1 min-h-0 p-4">
-          {pickedTemplate ? (
-            <TemplateChat
-              template={pickedTemplate}
+          {pickedMechanic ? (
+            <GameCardBuilder
+              mechanic={pickedMechanic}
               standardDescription={standard.description}
               standardId={standard.id}
               planetId={`${standard.grade}.${standard.domainCode}`}
-              onUnlock={() => {
-                setStep("unlocked")
-                onUnlock(standard.id)
+              onBuildGame={(designDoc, summary) => {
+                if (onBuildGame) onBuildGame(designDoc, summary)
               }}
-              onBuildGame={(designDoc, history) => {
-                if (onBuildGame) onBuildGame(designDoc, history)
-              }}
+              onBack={() => setStep("learn")}
             />
           ) : (
             <GenieChat
@@ -398,11 +380,11 @@ export function StandardPanel({
             {playToMasterButton}
             <ConceptCard
               standard={standard}
-              onReady={(template) => {
-                if (template && template.themeChips && template.actionChips && template.winChips && template.themeChips.length > 0) {
-                  setPickedTemplate({ title: template.title, description: template.description, themeChips: template.themeChips, actionChips: template.actionChips, winChips: template.winChips })
+              onReady={(mechanic) => {
+                if (mechanic) {
+                  setPickedMechanic(mechanic)
                 } else {
-                  setPickedTemplate(null)
+                  setPickedMechanic(null)
                 }
                 setStep("earn")
               }}
