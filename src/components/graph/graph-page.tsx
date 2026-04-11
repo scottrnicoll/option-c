@@ -618,13 +618,15 @@ export function GraphPage({ data }: GraphPageProps) {
     }, 1500)
   }, [data, planets, saveProgress, progressMap])
 
-  // Vibe selected from the card builder (or null for GenieChat path)
+  // Vibe and mechanic ID from the card builder (or null for GenieChat path)
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null)
+  const [selectedMechanicId, setSelectedMechanicId] = useState<string | null>(null)
 
   // Handle "Build my Game" from card builder or Genie chat
-  const handleBuildGame = useCallback((designDoc: GameDesignDoc, _chatHistory?: string, vibe?: string) => {
+  const handleBuildGame = useCallback((designDoc: GameDesignDoc, _chatHistory?: string, vibe?: string, mechanicId?: string) => {
     setCurrentDesignDoc(designDoc)
     setSelectedVibe(vibe || null)
+    setSelectedMechanicId(mechanicId || null)
     setPanelOpen(false)
     setBuildMode("building")
     // Mark as in_progress now that they're actually building
@@ -832,6 +834,7 @@ export function GraphPage({ data }: GraphPageProps) {
           designDoc={currentDesignDoc}
           onComplete={handleBuildComplete}
           preSelectedVibe={selectedVibe || undefined}
+          mechanicId={selectedMechanicId || undefined}
         />
       )}
 

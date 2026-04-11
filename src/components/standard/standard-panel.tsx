@@ -107,7 +107,7 @@ interface StandardPanelProps {
   onClose: () => void
   onUnlock: (standardId: string) => void
   onDemonstrated?: (standardId: string) => void
-  onBuildGame?: (designDoc: import("@/lib/game-types").GameDesignDoc, chatHistory: string, vibe?: string) => void
+  onBuildGame?: (designDoc: import("@/lib/game-types").GameDesignDoc, chatHistory: string, vibe?: string, mechanicId?: string) => void
   // Called when the learner clicks "Paste my own HTML" — opens the import flow.
   onImportHtml?: (standard: StandardNode) => void
   nodeStatus?: "locked" | "available" | "in_progress" | "in_review" | "approved_unplayed" | "unlocked" | "mastered"
@@ -337,7 +337,7 @@ export function StandardPanel({
               standardId={standard.id}
               planetId={`${standard.grade}.${standard.domainCode}`}
               onBuildGame={(designDoc, summary, vibe) => {
-                if (onBuildGame) onBuildGame(designDoc, summary, vibe)
+                if (onBuildGame) onBuildGame(designDoc, summary, vibe, pickedMechanic?.id)
               }}
               onBack={() => setStep("learn")}
             />

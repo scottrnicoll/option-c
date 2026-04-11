@@ -16,6 +16,8 @@ interface BuildScreenProps {
   ) => void
   // If provided, skip narration/visualConcept/vibe phases and go straight to generating
   preSelectedVibe?: string
+  // If provided, try pre-built engine first (instant generation)
+  mechanicId?: string
 }
 
 interface NarrationItem {
@@ -48,7 +50,7 @@ interface GameCard {
   watchOut: string
 }
 
-export function BuildScreen({ designDoc, onComplete, preSelectedVibe }: BuildScreenProps) {
+export function BuildScreen({ designDoc, onComplete, preSelectedVibe, mechanicId }: BuildScreenProps) {
   const { activeProfile } = useAuth()
   const narrationSequence = buildNarrationSequence(designDoc)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -145,14 +147,58 @@ export function BuildScreen({ designDoc, onComplete, preSelectedVibe }: BuildScr
   useEffect(() => {
     if (preSelectedVibe && !autoStartedRef.current) {
       autoStartedRef.current = true
-      const bullets = [
-        designDoc.howItWorks || "",
-        designDoc.winCondition ? `Win condition: ${designDoc.winCondition}` : "",
-        designDoc.mathRole ? `Math role: ${designDoc.mathRole}` : "",
-      ].filter(Boolean)
-      startGeneration(bullets, preSelectedVibe as Vibe)
+
+      // Try pre-built engine first (instant)
+      if (mechanicId) {
+        fetch("/api/game/generate-engine", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            designDoc,
+            mechanicId,
+            vibe: preSelectedVibe,
+            standardId: designDoc.standardId,
+            standardDescription: designDoc.concept || designDoc.mathRole,
+            grade: "6", // TODO: get from profile
+          }),
+        })
+          .then(r => r.json())
+          .then(data => {
+            if (data.html && data.hasEngine) {
+              // Engine generated instantly!
+              setGeneratedHtml(data.html)
+              setProgress(1)
+              setTimeout(() => setPhase("done"), 600)
+            } else {
+              // No engine — fall back to AI generation
+              const bullets = [
+                designDoc.howItWorks || "",
+                designDoc.winCondition ? `Win condition: ${designDoc.winCondition}` : "",
+                designDoc.mathRole ? `Math role: ${designDoc.mathRole}` : "",
+              ].filter(Boolean)
+              startGeneration(bullets, preSelectedVibe as Vibe)
+            }
+          })
+          .catch(() => {
+            // Fallback to AI generation
+            const bullets = [
+              designDoc.howItWorks || "",
+              designDoc.winCondition ? `Win condition: ${designDoc.winCondition}` : "",
+              designDoc.mathRole ? `Math role: ${designDoc.mathRole}` : "",
+            ].filter(Boolean)
+            startGeneration(bullets, preSelectedVibe as Vibe)
+          })
+      } else {
+        // No mechanic ID — use AI generation
+        const bullets = [
+          designDoc.howItWorks || "",
+          designDoc.winCondition ? `Win condition: ${designDoc.winCondition}` : "",
+          designDoc.mathRole ? `Math role: ${designDoc.mathRole}` : "",
+        ].filter(Boolean)
+        startGeneration(bullets, preSelectedVibe as Vibe)
+      }
     }
-  }, [preSelectedVibe, designDoc, startGeneration])
+  }, [preSelectedVibe, mechanicId, designDoc, startGeneration])
 
   // Auto-advance narration → after the last narration item, fetch the
   // visual concept and move to the approval phase.
