@@ -401,7 +401,7 @@ class GameScene extends Phaser.Scene {
     if (this.timerVal <= 0) {
       this.timerActive = false;
       this.timerEvent.remove();
-      this._onWrongAnswer('Time\'s up!');
+      this._onWrongAnswer("Time is up!");
     }
   }
 
