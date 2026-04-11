@@ -24,7 +24,6 @@ import { UserMenu } from "@/components/user-menu"
 import { GalaxySettingsPopover } from "./galaxy-settings-popover"
 import { RulesPopover } from "@/components/rules-popover"
 import { useTokenConfig } from "@/lib/token-config"
-import { InfoButton } from "@/components/info-button"
 import { useSearchParams } from "next/navigation"
 import { Search, X, Gamepad2 } from "lucide-react"
 import { MECHANIC_ANIMATIONS } from "@/lib/mechanic-animations"
@@ -993,39 +992,20 @@ export function GraphPage({ data }: GraphPageProps) {
 
       {/* Top-right toolbar — single horizontal strip */}
       <div className={`absolute ${impersonating ? "top-14" : "top-4"} right-4 z-10 flex items-center gap-2 flex-wrap justify-end max-w-[calc(100vw-8rem)]`}>
-        {/* Info button — to the left of stats */}
-        {viewMode === "galaxy" && (
-          <InfoButton title="Read Me!">
-            <p>The <span className="text-zinc-200">Galaxy</span> is your map of all math from Kindergarten to High School.</p>
-            <p>It contains <span className="text-blue-400 font-semibold">66 planets</span> (math domains) and <span className="text-blue-400 font-semibold">535 moons</span> (math skills — one per Common Core standard).</p>
-            <p>Each planet groups related skills. Click a planet to zoom in and see its moons.</p>
-          </InfoButton>
-        )}
-        {viewMode === "planet" && currentPlanetId && (
-          <InfoButton title="Read Me!">
-            <p>A <span className="text-zinc-200">Planet</span> is a math domain at one grade level (e.g. Geometry Grade 6).</p>
-            <p>Each glowing dot is a <span className="text-zinc-200">moon</span> — a specific math skill (Common Core standard) you can learn by building a game.</p>
-            <p>Click a moon to read about it, then design your game.</p>
-          </InfoButton>
-        )}
-
-        {/* Compact status strip — plain text, no boxes */}
-        <div className="hidden md:flex items-center gap-3 bg-zinc-900/85 backdrop-blur-sm border border-zinc-700 rounded-lg px-4 py-2 text-sm">
-          <span className="flex items-center gap-1.5">
+        {/* Compact status strip */}
+        <div className="flex items-center gap-2 bg-zinc-900/85 backdrop-blur-sm border border-zinc-700 rounded-lg px-3 py-1.5 text-xs">
+          {studentData?.grade && <span className="text-zinc-400 font-semibold">G{studentData.grade}</span>}
+          <span className="text-zinc-700">·</span>
+          <span className="flex items-center gap-1">
             <span className="text-emerald-400 font-mono font-bold">{counts.unlocked}</span>
-            <span className="text-zinc-300">demonstrated</span>
+            <span className="text-zinc-400">skills</span>
           </span>
           <span className="text-zinc-700">·</span>
           <span className="flex items-center gap-1">
             <span className="text-amber-400">⬡</span>
             <span className="text-amber-300 font-mono font-bold">{tokens}</span>
+            <span className="text-zinc-400">tokens</span>
           </span>
-          {studentData?.grade && (
-            <>
-              <span className="text-zinc-700">·</span>
-              <span className="text-zinc-400 text-xs">Grade {studentData.grade}</span>
-            </>
-          )}
         </div>
 
         {/* Rules / help */}
@@ -1049,7 +1029,7 @@ export function GraphPage({ data }: GraphPageProps) {
 
       {/* Search bar — galaxy view only */}
       {viewMode === "galaxy" && (
-        <div className={`absolute ${impersonating ? "top-24" : "top-14"} left-4 z-10`}>
+        <div className={`absolute ${impersonating ? "top-24" : "top-14"} left-4 z-20`}>
           {searchOpen ? (
             <div className="w-72">
               <div className="flex items-center gap-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-700 rounded-lg px-3 py-2">
@@ -1137,21 +1117,7 @@ export function GraphPage({ data }: GraphPageProps) {
         </div>
       )}
 
-      {/* Tutorial hint — sits BELOW the nav, not next to it */}
-      {tutorialStep === 0 && viewMode === "galaxy" && (
-        <div className={`absolute ${impersonating ? "top-28" : "top-16"} left-4 z-10 max-w-[260px]`}>
-          <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-500/30 rounded-xl px-4 py-2 text-sm text-blue-200">
-            Click a planet to explore its moons
-          </div>
-        </div>
-      )}
-      {tutorialStep === 1 && viewMode === "planet" && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-10">
-          <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-500/30 rounded-xl px-5 py-3 text-sm text-blue-200 animate-bounce-slow max-w-xs text-center">
-            Click a glowing moon to start learning
-          </div>
-        </div>
-      )}
+      {/* Tutorial hints removed — content moved to How to Play button */}
 
       {/* Mini-map (always visible) */}
       <MiniMap

@@ -23,7 +23,8 @@ export const APP_RULES: RulesByRole = {
     {
       heading: "What is Diagonally?",
       body: [
-        "Diagonally is a galaxy of math skills. Each planet is a math domain at one grade level (e.g. Geometry Grade 2). Each moon orbiting a planet is a single math skill (one Common Core standard).",
+        "Diagonally is a galaxy of math skills. It contains 66 planets (math domains) and 535 moons (math skills — one per Common Core standard).",
+        "Click a planet to zoom in and explore its moons. Click a moon to learn the concept and build a game.",
         "Learners pick a moon, learn the concept, build a small game that proves the concept works, and earn tokens once a guide approves the game.",
       ],
     },

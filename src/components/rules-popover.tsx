@@ -33,11 +33,12 @@ export function RulesPopover() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center justify-center bg-zinc-900/85 backdrop-blur-sm border border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600 rounded-lg w-9 h-9 text-zinc-300 hover:text-white transition-colors"
-        title="How does this work?"
-        aria-label="Open the rules"
+        className="flex items-center gap-1.5 bg-zinc-900/85 backdrop-blur-sm border border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600 rounded-lg px-3 py-2 text-xs text-zinc-300 hover:text-white transition-colors font-medium"
+        title="How to Play"
+        aria-label="How to Play"
       >
-        <HelpCircle className="size-4" />
+        <HelpCircle className="size-3.5" />
+        How to Play
       </button>
 
       {open && (

@@ -79,6 +79,12 @@ export function GameCard({ game, onPlay }: GameCardProps) {
         </div>
       </div>
 
+      {(game as any).dare && (
+        <p className="text-xs text-amber-400/80 italic truncate">
+          &ldquo;{(game as any).dare}&rdquo;
+        </p>
+      )}
+
       <button
         onClick={() => onPlay(game.id)}
         className="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium transition-colors"
