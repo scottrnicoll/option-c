@@ -733,13 +733,18 @@ GAME DESIGN:
 - Math role: ${designDoc.mathRole}
 - Vibe: ${vibePreset.label}${visualConceptBlock}
 
-⚠️ FIRST: pick the core player verb using the CONCEPT → CORE VERB MAPPING in
-the system prompt. The math role above tells you which row of the table
-to use. The game's central interaction MUST be that verb. If the design
-doc above describes anything that looks like multiple choice, "type the
-answer", or "click the right one" — IGNORE that and replace it with the
-intrinsic verb from the table. The design doc is a starting point, not
-a constraint on the mechanic.
+⚠️ MANDATORY DESIGN RULES:
+1. The THEME, CHARACTER, and WIN CONDITION above are NON-NEGOTIABLE. The learner
+   chose them. The game MUST use them exactly:
+   - The game world/setting MUST match the theme
+   - The player character MUST be the character described
+   - The win condition MUST work exactly as described
+2. Pick the core player verb using the CONCEPT → CORE VERB MAPPING in the system
+   prompt. The math role tells you which row. The game's central interaction MUST
+   be that verb.
+3. If the design doc describes a quiz pattern (multiple choice, type the answer,
+   click the right one) — replace ONLY the interaction pattern with the intrinsic
+   verb, but KEEP the theme, character, and win condition unchanged.
 
 Add the required <!-- coreVerb: ... --> comment at the top of <body>.
 

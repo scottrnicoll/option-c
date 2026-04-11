@@ -33,7 +33,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["fill every sack to the exact target", "sort all gems before the tide rises", "load the shuttle without going over weight"],
+      options: ["complete 5 rounds: fill each sack to the exact target number", "sort all 10 gems before a 60-second timer runs out", "load 5 shuttles without exceeding the weight limit"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Add, subtract, and manage quantities to hit exact targets",
@@ -53,7 +53,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["serve every customer equal slices", "cut all crystals to the exact fraction", "fill every vial to the same level"],
+      options: ["serve 5 customers by cutting equal slices — 0 mistakes allowed", "cut 5 crystals to exact fractions before time runs out", "fill 5 vials to equal levels in under 60 seconds"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Split wholes into equal parts — fractions in action",
@@ -73,7 +73,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["balance all 5 scales in a row", "calibrate every machine before shutdown", "complete 5 fair trades"],
+      options: ["balance 5 scales in a row — one wrong resets your streak", "calibrate all 5 machines before a 90-second shutdown timer", "complete 5 fair trades without overpaying"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Keep both sides equal — solving equations by balancing",
@@ -93,7 +93,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["fill the entire floor with no gaps", "complete the window before sunset", "seal all hull breaches"],
+      options: ["fill 5 floors with no gaps — each floor gets harder", "complete 3 windows before a 90-second sunset timer", "seal all 5 hull breaches — one leak and you lose"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Rotate, flip, and fit shapes — geometry in action",
@@ -113,7 +113,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["double your coins in 5 rounds", "defeat 3 monsters using smart odds", "protect the city from all 5 storms"],
+      options: ["double your starting coins in exactly 5 betting rounds", "defeat 3 monsters by picking the highest-probability attack each turn", "protect the city from 5 storms by setting shields to the right probability"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Predict outcomes and weigh chances — probability and statistics",
@@ -133,7 +133,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["deliver all packages under the distance limit", "connect every chamber with minimum digging", "light all torches before the darkness spreads"],
+      options: ["deliver 5 packages — each route must be shorter than the limit shown", "connect all 5 chambers using the fewest tunnel segments", "light all 5 torches before a 60-second darkness timer"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Find the best path — graph reasoning and optimization",
@@ -153,7 +153,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["match the volume target exactly", "carve 3 sculptures to spec", "build the fort matching all measurements"],
+      options: ["match 5 volume targets exactly — each one bigger than the last", "carve 3 sculptures to exact dimensions in under 90 seconds", "build the fort matching all 5 measurement specs"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Build to exact measurements — area, volume, and dimensions",
@@ -173,7 +173,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["reach orbit on 3 launches", "land in the target zone 3 times", "hit the target speed at every checkpoint"],
+      options: ["reach orbit on 3 out of 5 launches by setting the right thrust", "land in the target zone 3 times — zone gets smaller each jump", "hit the target speed at all 5 checkpoints"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Control speed, distance, and rate of change — rates and slopes",
@@ -193,7 +193,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["solve the case in under 10 moves", "escape all 3 rooms", "crack all codes before time runs out"],
+      options: ["solve the case using fewer than 10 elimination moves", "escape 3 rooms — each room has more constraints", "crack 5 codes before a 90-second timer"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Use logic to eliminate and deduce — mathematical reasoning",
@@ -213,7 +213,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["reach 1000 mushrooms in 10 rounds", "mine 500 crystals through smart reinvestment", "grow the colony to 100 settlers"],
+      options: ["reach 1000 mushrooms in exactly 10 reinvestment rounds", "mine 500 crystals by choosing the best reinvestment each of 8 rounds", "grow to 100 settlers in 10 rounds by allocating resources"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Grow and compound — exponential growth and investment",
@@ -233,7 +233,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["complete 3 outfits with perfect measurements", "build the bridge with no measurement errors", "cook 3 recipes with exact amounts"],
+      options: ["complete 3 outfits — each measurement must be within 1 unit", "build the bridge with 0 measurement errors across 5 beams", "cook 3 recipes with exact amounts — wrong measure wastes an ingredient"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Measure, compare, and convert units accurately",
@@ -253,7 +253,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["rank all performers correctly", "order all racers with zero mistakes", "sort every treasure before the vault locks"],
+      options: ["rank all 5 performers correctly in each of 3 rounds", "order 5 racers with zero mistakes — speed increases each round", "sort 10 treasures before a 60-second vault timer"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Order, compare, and rank numbers — counting and cardinality",
@@ -273,7 +273,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["tune 3 music boxes to the right pattern", "signal the correct sequence 5 times", "repair all clocks by completing their patterns"],
+      options: ["tune 3 music boxes — each pattern gets longer", "signal the correct sequence 5 times in a row", "repair 3 clocks by completing their time patterns"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Recognize and extend patterns — sequences and functions",
@@ -293,7 +293,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["shrink all objects to the exact ratio", "make 3 accurate maps", "build 5 tunnels at correct scale"],
+      options: ["shrink 5 objects to the exact ratio — each one is trickier", "make 3 accurate maps by scaling distances correctly", "build 5 tunnels at the correct scale ratio"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Scale, resize, and keep proportions — ratios and proportional reasoning",
@@ -313,7 +313,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["brew 3 potions with perfect recipes", "assemble 5 robots correctly", "craft all camp gear before nightfall"],
+      options: ["brew 3 potions — each recipe needs exact ingredient counts", "assemble 5 robots correctly in under 90 seconds", "craft all 5 camp items before a 60-second nightfall timer"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Add, group, and combine — addition and grouping",
@@ -333,7 +333,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["map all 5 constellations", "find all submarines before fuel runs out", "dig up all treasure with minimum guesses"],
+      options: ["map all 5 constellations by plotting their star coordinates", "find all 5 submarines before a 10-ping fuel limit", "dig up all 5 treasures using fewer than 15 coordinate guesses"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Navigate and plot by coordinates — the coordinate plane",
@@ -353,7 +353,7 @@ export const MECHANIC_CARD_OPTIONS: MechanicCardOptions[] = [
       hint: "The player ___(does what on screen?)___",
     },
     win: {
-      options: ["win 3 auctions without overpaying", "build the best monster collection on budget", "profit on 5 trades in a row"],
+      options: ["win 3 out of 5 auctions without overpaying by more than 10%", "build the best 3-monster collection within a fixed budget", "profit on 5 consecutive trades by estimating within 20%"],
       hint: "You win by ___(doing what?)___",
     },
     mathRole: "Estimate, round, and judge place value",
