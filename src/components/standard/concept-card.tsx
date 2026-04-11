@@ -238,7 +238,8 @@ export function ConceptCard({ standard, onReady, readOnly }: ConceptCardProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white">{m.title}</p>
-                      <p className="text-xs text-zinc-400 mt-0.5">{m.mathDomain}</p>
+                      <p className="text-xs text-zinc-300 mt-0.5">{m.description}</p>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">{m.mathDomain}</p>
                     </div>
                   </div>
                 )
@@ -258,7 +259,8 @@ export function ConceptCard({ standard, onReady, readOnly }: ConceptCardProps) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-bold ${isSelected ? "text-blue-300" : "text-white"}`}>{m.title}</p>
-                    <p className="text-xs text-zinc-400 mt-0.5">{m.mathDomain}</p>
+                    <p className="text-xs text-zinc-300 mt-0.5">{m.description}</p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">{m.mathDomain}</p>
                   </div>
                 </button>
               )

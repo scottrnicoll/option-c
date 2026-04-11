@@ -22,7 +22,7 @@ interface SlotState {
   win: string
 }
 
-// One slot row: label, 3 option buttons, + a mad-lib text input
+// One slot: 3 option buttons + "Write your own" — mutually exclusive.
 function CardSlot({
   icon,
   label,
@@ -40,8 +40,9 @@ function CardSlot({
   onChange: (v: string) => void
   autoFill?: string
 }) {
-  const [customMode, setCustomMode] = useState(false)
+  const [customOpen, setCustomOpen] = useState(false)
   const [customText, setCustomText] = useState("")
+  const isCustomValue = value && !options.includes(value)
 
   if (autoFill) {
     return (
@@ -56,6 +57,13 @@ function CardSlot({
     )
   }
 
+  // Parse the hint into before/after text around the blank
+  // e.g. "The game happens in a ___(place)___" → ["The game happens in a ", "(place)"]
+  const hintMatch = hint.match(/^(.+?)___\((.+?)\)___(.*)$/)
+  const hintBefore = hintMatch ? hintMatch[1] : ""
+  const hintPlaceholder = hintMatch ? hintMatch[2] : "type here"
+  const hintAfter = hintMatch ? hintMatch[3] : ""
+
   return (
     <div className={`rounded-xl border-2 p-4 transition-all ${value ? "border-emerald-500/40 bg-emerald-500/5" : "border-zinc-700 bg-zinc-900"}`}>
       <div className="flex items-center gap-2 mb-3">
@@ -64,14 +72,14 @@ function CardSlot({
         {value && <span className="text-emerald-400 text-xs">✓</span>}
       </div>
 
-      {/* 3 option buttons */}
-      <div className="flex flex-wrap gap-2 mb-3">
+      <div className="flex flex-wrap gap-2">
+        {/* 3 pre-made option buttons */}
         {options.map((opt) => (
           <button
             key={opt}
-            onClick={() => { onChange(opt); setCustomMode(false) }}
+            onClick={() => { onChange(opt); setCustomOpen(false); setCustomText("") }}
             className={`px-3 py-2 rounded-lg text-sm transition-all border ${
-              value === opt
+              value === opt && !customOpen
                 ? "bg-blue-500/20 border-blue-500/60 text-blue-300 font-semibold"
                 : "bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white"
             }`}
@@ -79,23 +87,65 @@ function CardSlot({
             {opt}
           </button>
         ))}
-      </div>
 
-      {/* Mad lib input */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={customMode ? customText : ""}
-          onChange={(e) => { setCustomText(e.target.value); setCustomMode(true) }}
-          onBlur={() => { if (customText.trim()) onChange(customText.trim()) }}
-          onKeyDown={(e) => { if (e.key === "Enter" && customText.trim()) { onChange(customText.trim()); e.currentTarget.blur() } }}
-          placeholder={hint}
-          className={`flex-1 rounded-lg border px-3 py-2 text-sm transition-colors ${
-            customMode && customText.trim() && value === customText.trim()
-              ? "bg-blue-500/10 border-blue-500/40 text-blue-300"
-              : "bg-zinc-800/50 border-zinc-700/50 text-zinc-300 placeholder:text-zinc-600"
-          } focus:outline-none focus:border-zinc-500`}
-        />
+        {/* "Write your own" button / mad-lib */}
+        {!customOpen ? (
+          <button
+            onClick={() => {
+              setCustomOpen(true)
+              onChange("") // deselect any pre-made option
+            }}
+            className={`px-3 py-2 rounded-lg text-sm transition-all border border-dashed ${
+              isCustomValue
+                ? "bg-blue-500/20 border-blue-500/60 text-blue-300 font-semibold"
+                : "bg-zinc-800/50 border-zinc-600 text-zinc-400 hover:border-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            {isCustomValue ? `✏️ ${value}` : "✏️ Write your own"}
+          </button>
+        ) : (
+          <div className="w-full mt-1 rounded-lg border-2 border-blue-500/40 bg-blue-500/5 p-3">
+            <p className="text-sm text-zinc-300 leading-relaxed">
+              {hintBefore}
+              <input
+                type="text"
+                autoFocus
+                value={customText}
+                onChange={(e) => setCustomText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && customText.trim()) {
+                    onChange(customText.trim())
+                  }
+                  if (e.key === "Escape") {
+                    setCustomOpen(false)
+                    setCustomText("")
+                  }
+                }}
+                placeholder={hintPlaceholder}
+                className="inline-block w-48 mx-1 px-2 py-1 rounded border-b-2 border-blue-400 bg-zinc-800 text-blue-300 text-sm font-semibold placeholder:text-zinc-600 focus:outline-none"
+              />
+              {hintAfter}
+            </p>
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => {
+                  if (customText.trim()) onChange(customText.trim())
+                  else { setCustomOpen(false); setCustomText("") }
+                }}
+                disabled={!customText.trim()}
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium disabled:opacity-30 transition-colors"
+              >
+                Done
+              </button>
+              <button
+                onClick={() => { setCustomOpen(false); setCustomText("") }}
+                className="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 text-xs transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
