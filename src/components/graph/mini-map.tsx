@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useRef, useEffect } from "react"
+import { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import type { GalaxyData, GalaxyNode } from "@/lib/galaxy-utils"
 import { InfoButton } from "@/components/info-button"
 
@@ -32,6 +32,7 @@ export function MiniMap({
   scopeLabel,
 }: MiniMapProps) {
   const [expanded, setExpanded] = useState(false)
+  const [hoveredPlanet, setHoveredPlanet] = useState<{ name: string; grade: string; x: number; y: number } | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Expanded mini-map dimensions — large enough to actually read
@@ -249,13 +250,32 @@ export function MiniMap({
                       e.stopPropagation()
                       onPlanetClick(node.id)
                     }}
-                  >
-                    <title>{node.name} · Grade {node.grade}</title>
-                  </circle>
+                    onMouseEnter={(e) => {
+                      const rect = (e.target as SVGElement).closest("svg")?.getBoundingClientRect()
+                      if (rect) setHoveredPlanet({ name: node.name, grade: node.grade, x: pos.x, y: pos.y })
+                    }}
+                    onMouseLeave={() => setHoveredPlanet(null)}
+                  />
                 </g>
               )
             })}
           </svg>
+
+          {/* Planet tooltip */}
+          {hoveredPlanet && (
+            <div
+              className="absolute z-50 pointer-events-none"
+              style={{
+                left: Math.min(hoveredPlanet.x + 10, width - 120),
+                top: Math.max(hoveredPlanet.y - 30, 0),
+              }}
+            >
+              <div className="bg-zinc-800 border border-zinc-600 rounded-lg px-2 py-1 shadow-lg">
+                <p className="text-xs text-white font-medium whitespace-nowrap">{hoveredPlanet.name}</p>
+                <p className="text-[10px] text-zinc-400">Grade {hoveredPlanet.grade}</p>
+              </div>
+            </div>
+          )}
 
           {/* Stats — high-contrast, larger so they're actually readable */}
           <div className="px-3 pb-3 pt-1 flex flex-col gap-1">

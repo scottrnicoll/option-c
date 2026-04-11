@@ -329,7 +329,7 @@ export function StandardPanel({
           </button>
         </div>
         {/* Chat area — fills remaining space */}
-        <div className="flex-1 min-h-0 p-4">
+        <div className="flex-1 min-h-0 p-4 overflow-y-auto">
           {pickedMechanic ? (
             <GameCardBuilder
               mechanic={pickedMechanic}

@@ -986,7 +986,7 @@ export function GraphPage({ data }: GraphPageProps) {
       )}
 
       {/* Top-right toolbar — single horizontal strip */}
-      <div className={`absolute ${impersonating ? "top-14" : "top-4"} right-4 z-10 flex items-center gap-2`}>
+      <div className={`absolute ${impersonating ? "top-14" : "top-4"} right-4 z-10 flex items-center gap-2 flex-wrap justify-end max-w-[calc(100vw-8rem)]`}>
         {/* Info button — to the left of stats */}
         {viewMode === "galaxy" && (
           <InfoButton title="Read Me!">
@@ -1043,7 +1043,7 @@ export function GraphPage({ data }: GraphPageProps) {
 
       {/* Search bar — galaxy view only */}
       {viewMode === "galaxy" && (
-        <div className={`absolute ${impersonating ? "top-14" : "top-4"} left-4 z-10`}>
+        <div className={`absolute ${impersonating ? "top-24" : "top-14"} left-4 z-10`}>
           {searchOpen ? (
             <div className="w-72">
               <div className="flex items-center gap-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-700 rounded-lg px-3 py-2">

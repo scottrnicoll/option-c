@@ -269,7 +269,23 @@
   <li>✅ <strong>Hint Card caching</strong> — cached in Firestore after first generation</li>
 </ul>
 
-<h2>12. Pending Work</h2>
+<h2>12. Sources & References</h2>
+<!-- ============================================ -->
+
+<table>
+  <tr><th>Source</th><th>What we use it for</th><th>Link</th></tr>
+  <tr><td>Common Core State Standards for Mathematics</td><td>All 535 standards (moons) organized by domain (planets). The backbone of the entire app.</td><td><a href="https://www.thecorestandards.org/Math/" style="color: #60a5fa;">thecorestandards.org/Math</a></td></tr>
+  <tr><td>Coherence Map (Achieve the Core)</td><td>Prerequisite edges between standards. Determines which moons are locked/available.</td><td><a href="https://achievethecore.org/coherence-map/" style="color: #60a5fa;">achievethecore.org/coherence-map</a></td></tr>
+  <tr><td>Common Core Identifiers & XML</td><td>Official standard ID format (e.g. 6.EE.B.7) and hierarchy (domain → cluster → standard).</td><td><a href="https://www.thecorestandards.org/common-core-state-standards-official-identifiers-and-xml-representation/" style="color: #60a5fa;">thecorestandards.org/identifiers</a></td></tr>
+  <tr><td>Habgood & Ainsworth (2011)</td><td>Research on intrinsic vs extrinsic math integration in games. Our engines follow intrinsic design — math IS the gameplay verb, not a quiz on top.</td><td><a href="https://doi.org/10.1145/1979742.1979771" style="color: #60a5fa;">doi.org/10.1145/1979742.1979771</a></td></tr>
+  <tr><td>Anthropic Claude API</td><td>AI for: card builder slot enhancement (Haiku), theme config generation (Haiku), concept explanations (Sonnet), hint card content (Haiku).</td><td><a href="https://docs.anthropic.com/" style="color: #60a5fa;">docs.anthropic.com</a></td></tr>
+  <tr><td>Firebase / Firestore</td><td>Database for users, games, progress, feedback, config. Auth for learner sign-in (anonymous + personal codes).</td><td><a href="https://firebase.google.com/docs/firestore" style="color: #60a5fa;">firebase.google.com/docs/firestore</a></td></tr>
+  <tr><td>Next.js 16</td><td>App framework (App Router). Server-side rendering for the library page, API routes for all AI calls.</td><td><a href="https://nextjs.org/docs" style="color: #60a5fa;">nextjs.org/docs</a></td></tr>
+  <tr><td>react-force-graph-3d</td><td>3D galaxy visualization. Force-directed graph with Three.js rendering.</td><td><a href="https://github.com/vasturiano/react-force-graph" style="color: #60a5fa;">github.com/vasturiano/react-force-graph</a></td></tr>
+  <tr><td>Vercel</td><td>Hosting + auto-deploy from GitHub. Pro plan for 300s API route timeout (game generation).</td><td><a href="https://vercel.com/docs" style="color: #60a5fa;">vercel.com/docs</a></td></tr>
+</table>
+
+<h2>13. Pending Work</h2>
 <!-- ============================================ -->
 
 <ul>
