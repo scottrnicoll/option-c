@@ -43,9 +43,9 @@ export default function BuildPage() {
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="max-w-2xl mx-auto px-6 py-4">
         <LearnerNav />
-        <div className="mt-6" style={{ height: "calc(100vh - 180px)" }}>
+        <div className="mt-4 pb-8">
           <CircuitBoardBuilder
             mode="eureka"
             learnerGrade={activeProfile.grade || "6"}
