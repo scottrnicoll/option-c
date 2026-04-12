@@ -82,9 +82,9 @@ function WelcomeChoiceStep({
             onClick={onReturning}
             className="w-full bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl px-5 py-4 text-base font-semibold transition-colors border border-zinc-700 text-left"
           >
-            I&apos;m coming back — I have my personal code
+            I&apos;m coming back — I have my password
             <p className="text-xs text-zinc-400 font-normal mt-0.5">
-              The code you saved last time (like STAR-742)
+              Your username + password from last time (like STAR42)
             </p>
           </button>
         </div>
@@ -145,7 +145,7 @@ function ReturningStep({
     <div className="flex flex-col items-center gap-5">
       <h1 className="text-3xl font-bold text-white text-center">Welcome back!</h1>
       <p className="text-zinc-400 text-sm text-center">
-        Enter your name and your personal code (the one you saved, like STAR-742).
+        Enter your username and password.
       </p>
       <form
         onSubmit={(e) => {
@@ -159,7 +159,7 @@ function ReturningStep({
           type="text"
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
-          placeholder="Your name"
+          placeholder="Your username (first name)"
           className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-lg text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
           disabled={loading}
         />
@@ -167,7 +167,7 @@ function ReturningStep({
           type="text"
           value={code}
           onChange={(e) => onCodeChange(e.target.value.toUpperCase())}
-          placeholder="STAR-742"
+          placeholder="Your password (like STAR42)"
           className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-lg text-white text-center tracking-widest font-mono placeholder:text-zinc-500 placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
           disabled={loading}
           maxLength={12}
@@ -178,7 +178,7 @@ function ReturningStep({
       </form>
       {error && <p className="text-red-400 text-sm text-center">{error}</p>}
       <p className="text-zinc-600 text-xs text-center">
-        Forgot your code? Ask your teacher — they can look it up for you.
+        Forgot your password? Ask your teacher — they can look it up for you.
       </p>
       <button
         onClick={onBack}
@@ -212,7 +212,7 @@ function CodeRevealStep({
       </h1>
       <div className="w-full bg-amber-500/10 border-2 border-amber-500/40 rounded-2xl p-5 text-center">
         <p className="text-amber-300 text-sm font-medium mb-2">
-          📌 Save this — it&apos;s your personal code
+          📌 Save this — it&apos;s your password
         </p>
         <p className="text-4xl font-mono font-bold text-white tracking-widest my-3">
           {code}

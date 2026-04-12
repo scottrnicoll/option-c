@@ -109,7 +109,7 @@ async function generateUniquePersonalCode(): Promise<string> {
   for (let attempt = 0; attempt < 12; attempt++) {
     const word = CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)]
     const digits = String(Math.floor(Math.random() * 100)).padStart(2, "0")
-    const code = `${word}-${digits}`
+    const code = `${word}${digits}`
     const existing = await getDocs(
       query(collection(db, "users"), where("personalCode", "==", code))
     )

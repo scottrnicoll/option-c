@@ -120,9 +120,9 @@ export const APP_RULES: RulesByRole = {
     {
       heading: "Sign in / sign out",
       body: [
-        "First-time learners join with a class code their guide gives them. They get a personal code (like STAR-742) on their first sign-in.",
-        "Returning learners use their NAME + their personal code to come back. All progress, tokens, and games are preserved.",
-        "If you forget your code, your guide can look it up.",
+        "First-time learners join with a class code their teacher gives them. You'll pick a username (your first name) and get a password (like STAR42).",
+        "Returning learners use their username + password to come back. All progress, tokens, and games are preserved.",
+        "If you forget your password, your teacher can look it up.",
       ],
     },
     {
