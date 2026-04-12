@@ -11,7 +11,7 @@ import { buildMeasureEngine } from "./build-measure"
 import { patternRepeatEngine } from "./pattern-repeat"
 import { inventoryCraftingPhaserEngine } from "./inventory-crafting-phaser"
 import { bidEstimateEngine } from "./bid-estimate"
-import { measureCompareEngine } from "./measure-compare"
+import { measurementChallengesPhaserEngine } from "./measurement-challenges-phaser"
 import { growCompoundEngine } from "./grow-compound"
 import { solveEliminateEngine } from "./solve-eliminate"
 import { partitioningPhaserEngine } from "./partitioning-phaser"
@@ -32,7 +32,7 @@ const ENGINE_REGISTRY: Record<string, GameEngine> = {
   "motion-simulation": raceCalculateEngine,
   "constraint-puzzles": solveEliminateEngine,
   "strategy-economy": growCompoundEngine,
-  "measurement-challenges": measureCompareEngine,
+  "measurement-challenges": measurementChallengesPhaserEngine,
   "scoring-ranking": scoringRankingPhaserEngine,
   "timing-rhythm": patternRepeatEngine,
   "scaling-resizing": scalingResizingPhaserEngine,

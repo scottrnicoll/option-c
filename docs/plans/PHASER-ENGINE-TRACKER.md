@@ -36,7 +36,7 @@
 |---|---|---|---|---|
 | 2 | Split & Share | `partitioning` | cut-the-bar, pour-the-liquid, share-the-pizza | DONE |
 | 14 | Scale & Transform | `scaling-resizing` | resize-tool, recipe-scaler, map-distance | DONE |
-| 11 | Measure & Compare | `measurement-challenges` | size-picker, ruler-race, unit-converter | Not Started |
+| 11 | Measure & Compare | `measurement-challenges` | size-picker, ruler-race, unit-converter | DONE |
 | 17 | Bid & Estimate | `bidding-auction` | auction-house, price-is-right, round-and-win | Not Started |
 
 ## Phase 4: Mixed Interaction Types
@@ -65,4 +65,4 @@
 | 6 | Navigate & Optimize | `path-optimization` | shortest-route, map-builder, delivery-run | Not Started |
 | 19 | Build a Structure | `build-structure` | shape-matcher, free-build, shape-decomposer | Not Started |
 
-## Progress: 6/19 mechanics done (18/57 game options)
+## Progress: 7/19 mechanics done (21/57 game options)
