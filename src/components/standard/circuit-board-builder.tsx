@@ -101,8 +101,13 @@ export function CircuitBoardBuilder({
   const [building, setBuilding] = useState(false)
   const [expandedMechanic, setExpandedMechanic] = useState<string | null>(mechanics[0]?.id || null)
 
-  const allFilled = selectedBackground && selectedCharacter && selectedGameOption && selectedItem
-  const filledCount = [selectedBackground, selectedCharacter, selectedGameOption, selectedItem].filter(Boolean).length
+  const allFilled = selectedBackground && selectedCharacter && selectedGameOption && selectedItem && winCondition.trim()
+  const filledCount = [selectedBackground, selectedCharacter, selectedGameOption, selectedItem, winCondition.trim()].filter(Boolean).length
+
+  // Game Criteria lights
+  const criteriaWellApplied = !!selectedGameOption  // Math Well Applied: game option selected
+  const criteriaEssential = !!selectedGameOption && !!winCondition.trim()  // Math Essential: game option + win condition
+  const criteriaPlayable = !!selectedBackground && !!selectedCharacter && !!selectedGameOption && !!selectedItem && !!winCondition.trim()  // Playable: all slots filled
 
   const handleBuild = async () => {
     if (!allFilled || !selectedGameOption) return
@@ -150,16 +155,28 @@ Math: ${standardDescription}`
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 shrink-0">
-        <h2 className="text-lg font-bold text-white">Build Your Game</h2>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-zinc-400">{filledCount}/4 components</span>
-          <div className="flex gap-1">
-            {[selectedBackground, selectedCharacter, selectedGameOption, selectedItem].map((v, i) => (
-              <div key={i} className={`w-3 h-3 rounded-full ${v ? "bg-emerald-500" : "bg-zinc-700"}`} />
-            ))}
-          </div>
+      {/* Header with criteria lights */}
+      <div className="mb-4 shrink-0">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold text-white">Build Your Game</h2>
+          <span className="text-xs text-zinc-400">{filledCount}/5</span>
+        </div>
+        <div className="flex gap-3">
+          <CriteriaLight
+            lit={criteriaWellApplied}
+            label="Math Well Applied"
+            icon="🧠"
+          />
+          <CriteriaLight
+            lit={criteriaEssential}
+            label="Math Essential"
+            icon="💎"
+          />
+          <CriteriaLight
+            lit={criteriaPlayable}
+            label="Playable Game"
+            icon="🎮"
+          />
         </div>
       </div>
 
@@ -328,18 +345,18 @@ Math: ${standardDescription}`
           </div>
         </SlotSection>
 
-        {/* Win Condition — text input */}
-        <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-3">
+        {/* Win Condition — required */}
+        <div className={`rounded-xl border-2 transition-all p-3 ${winCondition.trim() ? "border-emerald-500/40 bg-emerald-500/5" : "border-zinc-700 bg-zinc-900"}`}>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm">🏆</span>
             <span className="text-xs text-zinc-400 uppercase tracking-wide font-semibold">Win Condition</span>
-            <span className="text-[9px] text-zinc-500 font-normal normal-case">(optional)</span>
+            {winCondition.trim() && <span className="text-emerald-400 text-xs">✓</span>}
           </div>
           <input
             type="text"
             value={winCondition}
             onChange={(e) => setWinCondition(e.target.value)}
-            placeholder="Complete 5 rounds (default)"
+            placeholder="e.g. Complete 5 rounds before time runs out"
             className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500"
           />
         </div>
@@ -363,7 +380,7 @@ Math: ${standardDescription}`
           ) : allFilled ? (
             "Build my game →"
           ) : (
-            `Select all components (${filledCount}/4)`
+            `Select all components (${filledCount}/5)`
           )}
         </button>
       </div>
@@ -399,6 +416,24 @@ function SlotSection({
         </div>
       </button>
       {expanded && <div className="px-3 pb-3">{children}</div>}
+    </div>
+  )
+}
+
+function CriteriaLight({ lit, label, icon }: { lit: boolean; label: string; icon: string }) {
+  return (
+    <div className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
+      lit
+        ? "border-emerald-500/40 bg-emerald-500/10"
+        : "border-zinc-800 bg-zinc-900/50"
+    }`}>
+      <div className={`w-3 h-3 rounded-full transition-all ${
+        lit ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "bg-zinc-700"
+      }`} />
+      <span className="text-sm">{icon}</span>
+      <span className={`text-[10px] font-semibold uppercase tracking-wide ${lit ? "text-emerald-300" : "text-zinc-600"}`}>
+        {label}
+      </span>
     </div>
   )
 }

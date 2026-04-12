@@ -59,12 +59,12 @@ export function Leaderboard({ myGrade, myUid }: LeaderboardProps) {
         )
         if (cancelled) return
         const rows: LeaderRow[] = all.docs.map((d) => {
-          const data = d.data() as { name?: string; grade?: string; tokens?: number }
+          const data = d.data() as { name?: string; grade?: string; tokens?: number; lifetimeTokens?: number }
           return {
             uid: d.id,
             name: data.name ?? "Unknown",
             grade: data.grade ?? "",
-            tokens: data.tokens ?? 0,
+            tokens: data.lifetimeTokens ?? data.tokens ?? 0,
           }
         })
         rows.sort((a, b) => b.tokens - a.tokens)
@@ -93,12 +93,12 @@ export function Leaderboard({ myGrade, myUid }: LeaderboardProps) {
         )
         if (cancelled) return
         const rows: LeaderRow[] = all.docs.map((d) => {
-          const data = d.data() as { name?: string; grade?: string; tokens?: number }
+          const data = d.data() as { name?: string; grade?: string; tokens?: number; lifetimeTokens?: number }
           return {
             uid: d.id,
             name: data.name ?? "Unknown",
             grade: data.grade ?? "",
-            tokens: data.tokens ?? 0,
+            tokens: data.lifetimeTokens ?? data.tokens ?? 0,
           }
         })
         // Discover the set of grades present

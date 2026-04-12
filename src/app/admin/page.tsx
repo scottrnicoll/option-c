@@ -167,7 +167,7 @@ export default function AdminDashboardPage() {
           { status: "approved_unplayed", approvedAt: Date.now() },
           { merge: true }
         )
-        await updateDoc(doc(db, "users", g.authorUid), { tokens: increment(tokenCfg.gameApproved) }).catch(() => {})
+        await updateDoc(doc(db, "users", g.authorUid), { tokens: increment(tokenCfg.gameApproved), lifetimeTokens: increment(tokenCfg.gameApproved) }).catch(() => {})
         // Inbox notification
         const fbId = doc(collection(db, "feedback")).id
         const now = Date.now()
@@ -1300,12 +1300,20 @@ function TokenEconomyEditor() {
   const [saved, setSaved] = useState(false)
   const [gameApproved, setGameApproved] = useState(TOKEN_DEFAULTS.gameApproved)
   const [skillMastered, setSkillMastered] = useState(TOKEN_DEFAULTS.skillMastered)
+  const [tokenPerPlay, setTokenPerPlay] = useState(TOKEN_DEFAULTS.tokenPerPlay)
+  const [diagonalSpark, setDiagonalSpark] = useState(TOKEN_DEFAULTS.diagonalSpark)
+  const [diagonalIdea, setDiagonalIdea] = useState(TOKEN_DEFAULTS.diagonalIdea)
+  const [diagonalVision, setDiagonalVision] = useState(TOKEN_DEFAULTS.diagonalVision)
 
   useEffect(() => {
     getTokenConfig().then((c) => {
       setConfig(c)
       setGameApproved(c.gameApproved)
       setSkillMastered(c.skillMastered)
+      setTokenPerPlay(c.tokenPerPlay)
+      setDiagonalSpark(c.diagonalSpark)
+      setDiagonalIdea(c.diagonalIdea)
+      setDiagonalVision(c.diagonalVision)
       setLoading(false)
     })
   }, [])
@@ -1314,8 +1322,9 @@ function TokenEconomyEditor() {
     setSaving(true)
     setSaved(false)
     try {
-      await saveTokenConfig({ gameApproved, skillMastered })
-      setConfig({ gameApproved, skillMastered })
+      const newConfig = { gameApproved, skillMastered, tokenPerPlay, diagonalSpark, diagonalIdea, diagonalVision }
+      await saveTokenConfig(newConfig)
+      setConfig(newConfig)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } finally {
@@ -1323,7 +1332,11 @@ function TokenEconomyEditor() {
     }
   }
 
-  const hasChanges = config && (config.gameApproved !== gameApproved || config.skillMastered !== skillMastered)
+  const hasChanges = config && (
+    config.gameApproved !== gameApproved || config.skillMastered !== skillMastered ||
+    config.tokenPerPlay !== tokenPerPlay || config.diagonalSpark !== diagonalSpark ||
+    config.diagonalIdea !== diagonalIdea || config.diagonalVision !== diagonalVision
+  )
 
   if (loading) {
     return (
@@ -1367,6 +1380,44 @@ function TokenEconomyEditor() {
             onChange={(e) => setSkillMastered(Math.max(0, parseInt(e.target.value) || 0))}
             className="w-40 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
           />
+        </div>
+
+        <div>
+          <label className="text-sm text-zinc-300 block mb-1.5">Tokens per game play</label>
+          <p className="text-xs text-zinc-500 mb-2">Awarded to the game creator each time a unique learner plays their game.</p>
+          <input
+            type="number"
+            min={0}
+            step={5}
+            value={tokenPerPlay}
+            onChange={(e) => setTokenPerPlay(Math.max(0, parseInt(e.target.value) || 0))}
+            className="w-40 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+          />
+        </div>
+
+        <div className="border-t border-zinc-800 pt-4 mt-2">
+          <p className="text-xs text-zinc-400 uppercase tracking-wide font-semibold mb-3">Diagonal Idea Prizes</p>
+          <p className="text-xs text-zinc-500 mb-3">Awarded by admin when a learner submits an exceptionally good idea via the feedback button.</p>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">Diagonal Spark</label>
+              <input type="number" min={0} step={100} value={diagonalSpark}
+                onChange={(e) => setDiagonalSpark(Math.max(0, parseInt(e.target.value) || 0))}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50" />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">Diagonal Idea</label>
+              <input type="number" min={0} step={100} value={diagonalIdea}
+                onChange={(e) => setDiagonalIdea(Math.max(0, parseInt(e.target.value) || 0))}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50" />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">Diagonal Vision</label>
+              <input type="number" min={0} step={100} value={diagonalVision}
+                onChange={(e) => setDiagonalVision(Math.max(0, parseInt(e.target.value) || 0))}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50" />
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-3 pt-2">

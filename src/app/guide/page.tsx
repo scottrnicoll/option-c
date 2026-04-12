@@ -232,7 +232,7 @@ export default function GuideDashboard() {
       )
 
       const tokenCfg = await getTokenConfig()
-      await updateDoc(doc(db, "users", game.authorUid), { tokens: increment(tokenCfg.gameApproved) })
+      await updateDoc(doc(db, "users", game.authorUid), { tokens: increment(tokenCfg.gameApproved), lifetimeTokens: increment(tokenCfg.gameApproved) })
 
       try {
         const fbId = doc(collection(db, "feedback")).id

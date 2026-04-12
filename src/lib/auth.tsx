@@ -388,7 +388,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) throw new Error("Must be signed in to update tokens.")
     const targetUid = impersonating?.uid ?? user.uid
     const userRef = doc(db, "users", targetUid)
-    await updateDoc(userRef, { tokens: increment(delta) })
+    await updateDoc(userRef, { tokens: increment(delta), lifetimeTokens: increment(Math.max(0, delta)) })
     const snap = await getDoc(userRef)
     const newTotal = (snap.data() as UserProfile).tokens
     if (impersonating) {

@@ -56,6 +56,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       } catch {}
       await adminDb.collection("users").doc(game.authorUid).update({
         tokens: FieldValue.increment(gameApprovedTokens),
+        lifetimeTokens: FieldValue.increment(gameApprovedTokens),
       })
       await adminDb
         .collection("progress")

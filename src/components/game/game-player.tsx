@@ -105,7 +105,11 @@ export function GamePlayer({ gameId, title, html, concept, onClose, isPendingRev
     if (isAuthor) return // author's own plays don't count
     if (!gameId) return
     playCountedRef.current = true
-    fetch(`/api/game/${gameId}/play`, { method: "POST" }).catch(() => {})
+    fetch(`/api/game/${gameId}/play`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerUid: activeProfile?.uid }),
+    }).catch(() => {})
   }, [gameId, isAuthor, isPendingReview])
 
   // Game-end handler — fired when the iframe posts game_win or game_lose.
