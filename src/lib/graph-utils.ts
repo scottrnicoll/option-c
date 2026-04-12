@@ -35,16 +35,22 @@ function blendColor(hex: string, brightness: number): string {
   return `rgb(${Math.round(r * brightness)}, ${Math.round(g * brightness)}, ${Math.round(b * brightness)})`
 }
 
-export function getNodeColor(node: StandardNode, status: NodeStatus): string {
+// Grade ordering for comparison
+const GRADE_ORDER: Record<string, number> = { K: 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, HS: 9 }
+
+export function getNodeColor(node: StandardNode, status: NodeStatus, learnerGrade?: string): string {
   const domainColor = getDomainColor(node)
+  // Below-grade available/locked moons are purple
+  const isBelowGrade = learnerGrade && GRADE_ORDER[node.grade] !== undefined && GRADE_ORDER[learnerGrade] !== undefined
+    && GRADE_ORDER[node.grade] < GRADE_ORDER[learnerGrade]
   switch (status) {
-    case "locked": return blendColor(domainColor, 0.25)      // faint starfield
-    case "available": return blendColor(domainColor, 0.7)     // bright
-    case "in_progress": return blendColor(domainColor, 0.85)  // brighter
-    case "in_review": return "#eab308"                        // yellow
-    case "approved_unplayed": return "#eab308"                // yellow
-    case "unlocked": return blendColor(domainColor, 1.0)      // full color
-    case "mastered": return "#f59e0b"                         // gold
+    case "locked": return isBelowGrade ? "#7c3aed25" : blendColor(domainColor, 0.25)
+    case "available": return isBelowGrade ? "#a78bfa" : blendColor(domainColor, 0.7)
+    case "in_progress": return blendColor(domainColor, 0.85)
+    case "in_review": return "#eab308"
+    case "approved_unplayed": return "#eab308"
+    case "unlocked": return blendColor(domainColor, 1.0)
+    case "mastered": return "#f59e0b"
   }
 }
 
@@ -63,7 +69,9 @@ export function getNodeSize(status: NodeStatus, isHub: boolean): number {
 
 export function getEdgeColor(sourceStatus: NodeStatus, targetStatus: NodeStatus): string {
   if (sourceStatus === "unlocked" && targetStatus === "unlocked") return "rgba(34,197,94,0.4)"
-  if (sourceStatus === "unlocked" && targetStatus === "available") return "rgba(74,158,255,0.3)"
+  if (sourceStatus === "mastered" && targetStatus === "mastered") return "rgba(251,191,36,0.4)"
+  // Yellow-tinted for arrows pointing to unlocked/available targets
+  if (targetStatus === "available" || targetStatus === "in_progress" || targetStatus === "in_review" || targetStatus === "approved_unplayed" || targetStatus === "unlocked") return "rgba(251,191,36,0.15)"
   return "rgba(255,255,255,0.03)"
 }
 
@@ -98,7 +106,8 @@ export interface GraphData {
 
 export function buildGraphData(
   data: StandardsGraph,
-  progressMap: Map<string, NodeStatus>
+  progressMap: Map<string, NodeStatus>,
+  learnerGrade?: string
 ): GraphData {
   const nodeSet = new Set(data.nodes.map(n => n.id))
 
@@ -114,7 +123,7 @@ export function buildGraphData(
       isHub: node.isHub,
       classification: node.classification,
       cluster: node.cluster,
-      color: getNodeColor(node, status),
+      color: getNodeColor(node, status, learnerGrade),
       size: getNodeSize(status, node.isHub),
       status,
       val: getNodeSize(status, node.isHub),

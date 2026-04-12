@@ -294,23 +294,7 @@ export function GalaxyView({ galaxyData, onPlanetClick, onLockedPlanetClick, cur
       group.add(outerRing)
     }
 
-    // "Start here" indicator for recommended planet
-    if (isRecommended) {
-      const recRingGeom = new THREE.RingGeometry(
-        Math.sqrt(node.val) * 2.0,
-        Math.sqrt(node.val) * 2.4,
-        32
-      )
-      const recRingMat = new THREE.MeshBasicMaterial({
-        color: "#ffffff",
-        transparent: true,
-        opacity: 0.6,
-        side: THREE.DoubleSide,
-      })
-      const recRing = new THREE.Mesh(recRingGeom, recRingMat)
-      recRing.userData = { isRecommendedRing: true }
-      group.add(recRing)
-    }
+    // Recommended ring removed — learners use mini-map or Eureka button instead
 
     // Moon dots — small spheres in a ring around the planet, color-coded by status
     if (node.moonCount > 0 && !isLocked) {
@@ -329,7 +313,10 @@ export function GalaxyView({ galaxyData, onPlanetClick, onLockedPlanetClick, cur
       const moonColors: string[] = []
       for (let i = 0; i < greenCount; i++) moonColors.push("#22c55e")
       for (let i = 0; i < yellowCount; i++) moonColors.push("#eab308")
-      for (let i = 0; i < blueCount; i++) moonColors.push("#3b82f6")
+      // Below-grade moons are purple instead of blue
+      const gradeOrder: Record<string, number> = { K: 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, HS: 9 }
+      const isBelowGrade = initialGrade && gradeOrder[node.grade] !== undefined && gradeOrder[initialGrade] !== undefined && gradeOrder[node.grade] < gradeOrder[initialGrade]
+      for (let i = 0; i < blueCount; i++) moonColors.push(isBelowGrade ? "#a78bfa" : "#3b82f6")
       for (let i = 0; i < greyCount; i++) moonColors.push("#555555")
 
       for (let i = 0; i < node.moonCount; i++) {
@@ -438,11 +425,7 @@ export function GalaxyView({ galaxyData, onPlanetClick, onLockedPlanetClick, cur
             obj.rotation.z = time * 0.4
             obj.material.opacity = 0.4 + Math.sin(time * 1.5) * 0.2
           }
-          if (obj.userData?.isRecommendedRing) {
-            obj.scale.setScalar(1 + Math.sin(time * 3) * 0.2)
-            obj.material.opacity = 0.4 + Math.sin(time * 3) * 0.3
-            obj.rotation.z = time * 0.5
-          }
+          // Recommended ring removed
         })
       }
       frame = requestAnimationFrame(animate)
