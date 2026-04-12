@@ -108,6 +108,7 @@ export function CircuitBoardBuilder({
         body: JSON.stringify({
           background: selectedBackground,
           character: selectedCharacter,
+          item: selectedItem,
           gameIdea: eurekaIdea.trim(),
           grade: learnerGrade || "6",
           uid: learnerUid || "",
@@ -270,6 +271,25 @@ Math: ${effectiveStandardDesc}`
           />
         </SlotSection>
 
+        {/* In Eureka mode: Items come BEFORE Game Option (learner picks items first, then describes idea) */}
+        {isEureka && (
+          <SlotSection
+            icon="⭐"
+            label="Items"
+            selected={selectedItem}
+            onClear={() => setSelectedItem(null)}
+          >
+            <SpritePicker
+              type="items"
+              libraryItems={SPRITE_ITEMS}
+              categories={ITEM_CATEGORIES}
+              selected={selectedItem}
+              onSelect={setSelectedItem}
+              recommended={[]}
+            />
+          </SlotSection>
+        )}
+
         {/* SLOT 3: Game Option */}
         <SlotSection
           icon="🎮"
@@ -313,12 +333,22 @@ Math: ${effectiveStandardDesc}`
                   ))}
                 </div>
               )}
-              {/* Show matched standard */}
+              {/* Show matched standard + personalized explanation */}
               {selectedGameOption && eurekaStandardDesc && (
-                <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
-                  <p className="text-xs text-blue-400 uppercase tracking-wide font-semibold mb-1">The math behind your game</p>
-                  <p className="text-sm text-zinc-200">{eurekaStandardDesc}</p>
-                  <p className="text-[10px] text-zinc-600 mt-1">{eurekaStandardId}</p>
+                <div className="space-y-2">
+                  <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
+                    <p className="text-xs text-blue-400 uppercase tracking-wide font-semibold mb-1">The math behind this</p>
+                    <p className="text-sm text-zinc-200">{eurekaStandardDesc}</p>
+                    <p className="text-[10px] text-zinc-600 mt-1">{eurekaStandardId}</p>
+                  </div>
+                  <div className="bg-emerald-500/5 rounded-lg p-3 border border-emerald-500/20">
+                    <p className="text-xs text-emerald-400 uppercase tracking-wide font-semibold mb-1">In YOUR game...</p>
+                    <p className="text-sm text-zinc-300">
+                      Your {selectedCharacter || "character"} in {selectedBackground || "the world"} will use{" "}
+                      {selectedItem ? selectedItem + "s" : "items"} to {selectedGameOption.optionDescription.toLowerCase()}.{" "}
+                      The math ({eurekaStandardDesc.split(".")[0].toLowerCase()}) is what makes it possible to win!
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -378,22 +408,24 @@ Math: ${effectiveStandardDesc}`
           )}
         </SlotSection>
 
-        {/* SLOT 4: Items */}
-        <SlotSection
-          icon="⭐"
-          label="Items"
-          selected={selectedItem}
-          onClear={() => setSelectedItem(null)}
-        >
-          <SpritePicker
-            type="items"
-            libraryItems={SPRITE_ITEMS}
-            categories={ITEM_CATEGORIES}
+        {/* SLOT 4: Items (moon mode only — in Eureka, items are above game option) */}
+        {!isEureka && (
+          <SlotSection
+            icon="⭐"
+            label="Items"
             selected={selectedItem}
-            onSelect={setSelectedItem}
-            recommended={[]}
-          />
-        </SlotSection>
+            onClear={() => setSelectedItem(null)}
+          >
+            <SpritePicker
+              type="items"
+              libraryItems={SPRITE_ITEMS}
+              categories={ITEM_CATEGORIES}
+              selected={selectedItem}
+              onSelect={setSelectedItem}
+              recommended={[]}
+            />
+          </SlotSection>
+        )}
 
       </div>
 
