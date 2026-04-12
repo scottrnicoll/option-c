@@ -75,7 +75,7 @@ function scrollToSection(id) {
 
 <table>
   <tr><th>Term</th><th>Definition</th><th>Common Core equivalent</th></tr>
-  <tr><td>Galaxy</td><td>The 3D map of all math from K to 12. Contains 65 planets and 517 moons (pending cleanup — see Galaxy Cleanup section).</td><td>—</td></tr>
+  <tr><td>Galaxy</td><td>The 3D map of all math from K to 12. Contains 65 planets and 466 moons (pending cleanup — see Galaxy Cleanup section).</td><td>—</td></tr>
   <tr><td>Planet</td><td>A math domain at one grade level (e.g. "Geometry Grade 6"). Groups related skills. Shown as a glowing sphere in the galaxy.</td><td>Domain</td></tr>
   <tr><td>Moon</td><td>A single math skill. One moon = one learning objective. Shown as a small dot orbiting a planet.</td><td>Standard</td></tr>
   <tr><td>Moon Status</td><td>The progression state of a skill:
@@ -608,7 +608,7 @@ function scrollToSection(id) {
 
 <table>
   <tr><th>Source</th><th>What we use it for</th><th>Link</th></tr>
-  <tr><td>Common Core State Standards for Mathematics</td><td>All 517 standards (moons) organized by domain (planets). The backbone of the entire app.</td><td><a href="https://www.thecorestandards.org/Math/" style="color: #60a5fa;">thecorestandards.org/Math</a></td></tr>
+  <tr><td>Common Core State Standards for Mathematics</td><td>All 466 standards (moons) organized by domain (planets). The backbone of the entire app.</td><td><a href="https://www.thecorestandards.org/Math/" style="color: #60a5fa;">thecorestandards.org/Math</a></td></tr>
   <tr><td>Coherence Map (Achieve the Core)</td><td>Prerequisite edges between standards. Determines which moons are locked/available.</td><td><a href="https://achievethecore.org/coherence-map/" style="color: #60a5fa;">achievethecore.org/coherence-map</a></td></tr>
   <tr><td>Common Core Identifiers & XML</td><td>Official standard ID format (e.g. 6.EE.B.7) and hierarchy (domain → cluster → standard).</td><td><a href="https://www.thecorestandards.org/common-core-state-standards-official-identifiers-and-xml-representation/" style="color: #60a5fa;">thecorestandards.org/identifiers</a></td></tr>
   <tr><td>CPA Instruction: Enhancing Students' Learning (2025)</td><td>Confirmed CPA approach significantly improves math problem-solving. Informs our animated visual → game → hint card flow.</td><td><a href="https://www.tandfonline.com/doi/full/10.1080/2331186X.2025.2558303" style="color: #60a5fa;">tandfonline.com (2025)</a></td></tr>
@@ -650,8 +650,8 @@ function scrollToSection(id) {
   <tr><th>Level</th><th>Example</th><th>What it is</th><th>Our galaxy equivalent</th></tr>
   <tr><td>Domain</td><td>Number &amp; Operations — Fractions</td><td>Broad math area at one grade level</td><td>Planet (65 total)</td></tr>
   <tr><td>Cluster</td><td>3.NF.A: "Develop understanding of fractions as numbers"</td><td>Group of related skills within a domain. Just a label — not a skill to learn.</td><td>Should NOT be a moon (currently showing — 183 to remove)</td></tr>
-  <tr><td>Standard</td><td>3.NF.A.1: "Understand a fraction 1/b..."</td><td>A single demonstrable skill. This is what a learner masters.</td><td>Moon (393 base + 124 sub-parts = 517)</td></tr>
-  <tr><td>Sub-part</td><td>3.NF.A.3a: "Understand two fractions as equivalent..."</td><td>A lettered breakdown of a complex standard. Each is a distinct skill.</td><td>Moon (124 total, included in 517 count)</td></tr>
+  <tr><td>Standard</td><td>3.NF.A.1: "Understand a fraction 1/b..."</td><td>A single demonstrable skill. This is what a learner masters.</td><td>Moon (393 base + 124 sub-parts - 43 duplicate parents = 466)</td></tr>
+  <tr><td>Sub-part</td><td>3.NF.A.3a: "Understand two fractions as equivalent..."</td><td>A lettered breakdown of a complex standard. Each is a distinct skill.</td><td>Moon (124 total, included in 466 count)</td></tr>
 </table>
 
 <p><strong>K-8</strong> is organized by grade: Grade K, Grade 1, ..., Grade 8. Each grade has domains like "Operations &amp; Algebraic Thinking" (OA), "Geometry" (G), "Number &amp; Operations — Fractions" (NF), etc.</p>
@@ -672,7 +672,7 @@ function scrollToSection(id) {
   <tr><td>Cluster headers (e.g., 3.OA.A)</td><td>183</td><td>No — just grouping labels</td><td>Remove from moon list</td></tr>
   <tr><td>Math Practices (MP.1-MP.8)</td><td>8</td><td>No — habits of mind, not skills</td><td>Remove from moon list</td></tr>
   <tr><td><strong>Total in file</strong></td><td><strong>664</strong></td><td></td><td></td></tr>
-  <tr><td><strong>After cleanup (actual moons)</strong></td><td><strong>517</strong></td><td></td><td></td></tr>
+  <tr><td><strong>After cleanup (actual moons)</strong></td><td><strong>466</strong></td><td></td><td></td></tr>
 </table>
 
 <h3 style="color: #f87171;">Galaxy Cleanup — TO DO</h3>
@@ -683,7 +683,7 @@ function scrollToSection(id) {
   <li>Update the mini-map to reflect the cleaned data</li>
   <li>Update How to Play with correct moon count</li>
   <li>Update this Blueprint with final numbers</li>
-  <li>Confirm the final count is 517 moons across 65 planets</li>
+  <li>Confirm the final count is 466 moons across 65 planets</li>
 </ul>
 
 <!-- ============================================ -->
@@ -697,7 +697,7 @@ function scrollToSection(id) {
 
 <h3>Galaxy &amp; Navigation</h3>
 <ul>
-  <li><strong>Galaxy cleanup:</strong> Remove 183 cluster headers, 43 duplicate parents, 8 math practices from galaxy view. Verify edges. Update mini-map, How to Play, Blueprint. Final target: 517 moons, 65 planets. (See Section 14 for full details.)</li>
+  <li><strong>Galaxy cleanup:</strong> Remove 183 cluster headers, 43 duplicate parents, 8 math practices from galaxy view. Verify edges. Update mini-map, How to Play, Blueprint. Final target: 466 moons, 65 planets. (See Section 14 for full details.)</li>
   <li><strong>Arrow colors:</strong> Prerequisite arrows between planets are always grey. Change to: slightly yellow for arrows pointing to unlocked planets, grey for arrows pointing to locked planets.</li>
   <li><strong>Remove white ring around planets:</strong> Currently planets have a white ring. Remove it.</li>
 </ul>
@@ -714,7 +714,7 @@ function scrollToSection(id) {
 <h3>Content</h3>
 <ul>
   <li><del>Item recommendations per game option</del> — DONE: 2-3 recommended items per mechanic, shown first with green border</li>
-  <li><strong>Hardcode "This is about..." for all 517 standards</strong> (currently AI-generated per visit).</li>
+  <li><strong>Hardcode "This is about..." for all 466 standards</strong> (currently AI-generated per visit).</li>
 </ul>
 
 <h3>Analytics &amp; Data</h3>
@@ -897,7 +897,7 @@ function scrollToSection(id) {
 <p style="color: #f87171; font-size: 12px;"><strong>Review needed:</strong> Balance &amp; Equalize (224), Craft &amp; Combine (155), and Fit &amp; Rotate (149) match very broadly. Build a Structure (3) and Navigate &amp; Optimize (6) match very narrowly. Consider tightening/broadening keywords.</p>
 
 <h3>Also for review: Hardcoded Hint Card Content</h3>
-<p>The ? (help) button inside each game currently shows AI-generated math help. Plan is to hardcode this per standard so it loads instantly and is verified for accuracy. Each hint should include: what the math concept is, step-by-step approach, common mistakes, and an encouraging message. Needs to be written/verified for all 517 standards.</p>
+<p>The ? (help) button inside each game currently shows AI-generated math help. Plan is to hardcode this per standard so it loads instantly and is verified for accuracy. Each hint should include: what the math concept is, step-by-step approach, common mistakes, and an encouraging message. Needs to be written/verified for all 466 standards.</p>
 
 <h3>Also for review: Visual Concept Types (Animated Math Visuals)</h3>
 <p><strong>52 visual concept types</strong> covering all 147 clusters (509 standards). Each is a 3-second stick-figure animation with actual numbers and a one-sentence caption. Same template reused across grades with different numbers. Aligned with Common Core cluster structure — each cluster group shares one animation type. Full list with cluster mappings in <code>docs/visual-concepts.md</code>.</p>
