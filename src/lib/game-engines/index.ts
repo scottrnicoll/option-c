@@ -5,7 +5,7 @@ import { balanceSystemsPhaserEngine } from "./balance-systems-phaser"
 import { aboveBelowZeroPhaserEngine } from "./above-below-zero-phaser"
 import { scoringRankingPhaserEngine } from "./scoring-ranking-phaser"
 import { collectManagePhaserEngine } from "./collect-manage-phaser"
-import { plotExploreEngine } from "./plot-explore"
+import { terrainGenerationPhaserEngine } from "./terrain-generation-phaser"
 import { scalingResizingPhaserEngine } from "./scaling-resizing-phaser"
 import { constructionSystemsPhaserEngine } from "./construction-systems-phaser"
 import { timingRhythmPhaserEngine } from "./timing-rhythm-phaser"
@@ -37,7 +37,7 @@ const ENGINE_REGISTRY: Record<string, GameEngine> = {
   "timing-rhythm": timingRhythmPhaserEngine,
   "scaling-resizing": scalingResizingPhaserEngine,
   "inventory-crafting": inventoryCraftingPhaserEngine,
-  "terrain-generation": plotExploreEngine,
+  "terrain-generation": terrainGenerationPhaserEngine,
   "bidding-auction": biddingAuctionPhaserEngine,
   "above-below-zero": aboveBelowZeroPhaserEngine,
   "build-structure": buildStructureEngine,
