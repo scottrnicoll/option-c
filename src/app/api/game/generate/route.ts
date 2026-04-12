@@ -533,7 +533,6 @@ Output ONLY the HTML, no markdown, no code fences.`
       event: "game_generated",
       properties: {
         standard_id: designDoc.standardId,
-        vibe,
         core_verb: coreVerb,
         generation_seconds: totalSeconds,
       },

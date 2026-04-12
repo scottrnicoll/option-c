@@ -139,7 +139,6 @@ export function GamePlayer({ gameId, title, html, concept, onClose, isPendingRev
       // if a win happened within the last 3 seconds, suppress the overlay.
       const recentlyWon = now - lastWinAtRef.current < 3000
       if (concept && !recentlyWon) setShowMathMoment(true)
-      posthog.capture("game_lost", { game_id: gameId, standard_id: standardId, play_mode: playMode })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onWin, onLose, concept, hintMode])
