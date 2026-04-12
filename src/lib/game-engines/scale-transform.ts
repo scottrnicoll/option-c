@@ -150,5 +150,62 @@ function startGame() {
 </script>
 `
 
+  // VARIANT B: Recipe Scaler
+  if (variant === "variantB") {
+    const vB = `
+<div class="intro-overlay" id="intro"><div class="intro-box"><h2>${config.title} — Recipe</h2><p>Scale a recipe from 4 servings to a different number!</p><button class="intro-start" onclick="document.getElementById('intro').remove(); startGame()">Play →</button></div></div>
+<div id="helpPanel" class="help-panel"><div class="help-content"><h3>How to play</h3><p>If recipe serves 4 and you need 8, multiply each ingredient by 2.</p><button class="help-close" onclick="document.getElementById('helpPanel').classList.remove('open')">Got it</button></div></div>
+<div class="game-header"><div class="game-title">${config.title} — Recipe</div><div class="game-stats"><span>Score: <strong id="scoreDisplay">0</strong></span><div class="round-dots" id="roundDots"></div></div></div>
+<div class="game-area" id="gameArea"><div style="text-align:center;width:90%;max-width:400px;">
+  <div style="font-size:14px;opacity:.6;">Recipe for 4. Scale to:</div>
+  <div id="ts" style="font-size:48px;font-weight:700;color:${c.accent};margin:8px 0;"></div>
+  <div id="ings" style="text-align:left;margin-bottom:16px;"></div>
+  <button onclick="chk()" style="padding:10px 32px;background:${c.primary};color:${config.vibe === "kawaii" ? "#fff" : c.bg};border:none;border-radius:8px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;">Check!</button>
+</div></div>
+<script>
+const TR=5;let cr=0,ans=[];const NM=['flour','sugar','eggs','butter','milk'];
+function chk(){let ok=true;ans.forEach((a,i)=>{const v=parseFloat(document.getElementById('i'+i).value);if(Math.abs(v-a)>0.1)ok=false;});
+if(ok){window.gameScore+=10*(cr+1);document.getElementById('scoreDisplay').textContent=window.gameScore;spawnParticles(window.innerWidth/2,window.innerHeight/2,'${c.accent}',12);addCombo();
+const d=document.querySelectorAll('.round-dot');if(d[cr])d[cr].classList.add('done');cr++;if(cr>=TR){setTimeout(()=>showVictory('${config.winMessage}'),500);}else{setTimeout(sr,800);}}
+else{screenShake();resetCombo();trackFail();}}
+function sr(){resetFails();const sv=[2,6,8,12,1][cr%5];document.getElementById('ts').textContent=sv+' people';
+const orig=[2,1,3,0.5,1.5];const sc=sv/4;ans=orig.map(a=>Math.round(a*sc*10)/10);
+const c2=document.getElementById('ings');c2.innerHTML='';orig.forEach((o,i)=>{const r=document.createElement('div');r.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+r.innerHTML='<span style="width:50px;font-size:14px;color:${c.text};">'+NM[i]+'</span><span style="color:${c.text}80;">was '+o+'</span><span>→</span><input id="i'+i+'" type="number" step="0.5" style="width:60px;background:${c.bg};border:2px solid ${c.primary};border-radius:6px;padding:4px;color:${c.text};font-size:14px;font-family:inherit;text-align:center;" placeholder="?">';
+c2.appendChild(r);});const d=document.querySelectorAll('.round-dot');d.forEach((x,i)=>{x.classList.remove('current');if(i===cr)x.classList.add('current');});}
+function startGame(){const dc=document.getElementById('roundDots');dc.innerHTML='';for(let i=0;i<TR;i++){const d=document.createElement('div');d.className='round-dot';dc.appendChild(d);}sr();}
+</script>`
+    return baseTemplate(config, vB, variant, 45)
+  }
+
+  // VARIANT C: Map Distance
+  if (variant === "variantC") {
+    const vC = `
+<div class="intro-overlay" id="intro"><div class="intro-box"><h2>${config.title} — Map</h2><p>Use the map scale to find real distances!</p><button class="intro-start" onclick="document.getElementById('intro').remove(); startGame()">Play →</button></div></div>
+<div id="helpPanel" class="help-panel"><div class="help-content"><h3>How to play</h3><p>Scale says 1cm = 5km. Cities are 3cm apart. Real distance = 3 × 5 = 15km.</p><button class="help-close" onclick="document.getElementById('helpPanel').classList.remove('open')">Got it</button></div></div>
+<div class="game-header"><div class="game-title">${config.title} — Map</div><div class="game-stats"><span>Score: <strong id="scoreDisplay">0</strong></span><div class="round-dots" id="roundDots"></div></div></div>
+<div class="game-area" id="gameArea"><div style="text-align:center;width:90%;max-width:400px;">
+  <div id="si" style="font-size:16px;color:${c.accent};margin-bottom:12px;"></div>
+  <div id="md" style="font-size:14px;color:${c.text};margin-bottom:16px;"></div>
+  <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:16px;">
+    <input id="a" type="number" style="width:100px;font-size:24px;font-weight:700;text-align:center;background:${c.bg};border:2px solid ${c.primary};border-radius:8px;padding:8px;color:${c.text};font-family:inherit;" placeholder="?">
+    <span style="color:${c.text}80;">km</span></div>
+  <button onclick="chk()" style="padding:10px 32px;background:${c.primary};color:${config.vibe === "kawaii" ? "#fff" : c.bg};border:none;border-radius:8px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;">Check!</button>
+</div></div>
+<script>
+const TR=5;let cr=0,ca=0;
+function chk(){const v=parseFloat(document.getElementById('a').value);
+if(Math.abs(v-ca)<0.1){window.gameScore+=10*(cr+1);document.getElementById('scoreDisplay').textContent=window.gameScore;spawnParticles(window.innerWidth/2,window.innerHeight/2,'${c.accent}',12);addCombo();
+const d=document.querySelectorAll('.round-dot');if(d[cr])d[cr].classList.add('done');cr++;if(cr>=TR){setTimeout(()=>showVictory('${config.winMessage}'),500);}else{setTimeout(sr,800);}}
+else{screenShake();resetCombo();trackFail();}}
+function sr(){resetFails();document.getElementById('a').value='';const sc=[2,5,10,3,4][cr%5];const md=[3,4,6,7,8][cr%5];ca=sc*md;
+document.getElementById('si').textContent='Scale: 1 cm = '+sc+' km';document.getElementById('md').textContent='Two cities are '+md+' cm apart on the map';
+document.getElementById('a').focus();const d=document.querySelectorAll('.round-dot');d.forEach((x,i)=>{x.classList.remove('current');if(i===cr)x.classList.add('current');});}
+function startGame(){const dc=document.getElementById('roundDots');dc.innerHTML='';for(let i=0;i<TR;i++){const d=document.createElement('div');d.className='round-dot';dc.appendChild(d);}sr();}
+document.addEventListener('keydown',(e)=>{if(e.key==='Enter')chk();});
+</script>`
+    return baseTemplate(config, vC, variant, 45)
+  }
+
   return baseTemplate(config, gameContent, variant, 45)
 }
