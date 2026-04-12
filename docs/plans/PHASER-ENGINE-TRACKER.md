@@ -26,7 +26,7 @@
 
 | # | Mechanic | Mechanic ID | Options | Status |
 |---|---|---|---|---|
-| 3 | Balance & Equalize | `balance-systems` | free-balance, mystery-side, chain-scales | In Progress — Claude |
+| 3 | Balance & Equalize | `balance-systems` | free-balance, mystery-side, chain-scales | DONE |
 | 12 | Score & Rank | `scoring-ranking` | sorting-lane, number-line-drop, leaderboard-fix | Not Started |
 | 15 | Craft & Combine | `inventory-crafting` | recipe-mixer, potion-lab, assembly-line | Not Started |
 
@@ -65,4 +65,4 @@
 | 6 | Navigate & Optimize | `path-optimization` | shortest-route, map-builder, delivery-run | Not Started |
 | 19 | Build a Structure | `build-structure` | shape-matcher, free-build, shape-decomposer | Not Started |
 
-## Progress: 1/19 mechanics done (3/57 game options)
+## Progress: 2/19 mechanics done (6/57 game options)

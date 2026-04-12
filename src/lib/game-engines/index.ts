@@ -1,7 +1,7 @@
 // Game engine registry — all 19 engines.
 
 import type { ThemeConfig, MathParams, GameEngine, GameOption, RoundData } from "./engine-types"
-import { balanceEqualizeEngine } from "./balance-equalize"
+import { balanceSystemsPhaserEngine } from "./balance-systems-phaser"
 import { riseFallEngine } from "./rise-fall"
 import { scoreRankEngine } from "./score-rank"
 import { collectManagePhaserEngine } from "./collect-manage-phaser"
@@ -24,7 +24,7 @@ import { buildStructureEngine } from "./build-structure"
 const ENGINE_REGISTRY: Record<string, GameEngine> = {
   "resource-management": collectManagePhaserEngine,
   "partitioning": splitShareEngine,
-  "balance-systems": balanceEqualizeEngine,
+  "balance-systems": balanceSystemsPhaserEngine,
   "spatial-puzzles": fitRotateEngine,
   "probability-systems": rollPredictEngine,
   "path-optimization": navigateOptimizeEngine,
