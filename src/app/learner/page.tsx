@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useAuth } from "@/lib/auth"
+import posthog from "posthog-js"
 import { db } from "@/lib/firebase"
 import { collection, query, where, getDocs } from "firebase/firestore"
 import type { Game } from "@/lib/game-types"
@@ -52,6 +53,7 @@ export default function LearnerDashboard() {
 
   useEffect(() => {
     if (!activeProfile?.uid) return
+    posthog.capture("my_stuff_viewed")
     loadData()
   }, [activeProfile?.uid])
 

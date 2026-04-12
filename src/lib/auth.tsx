@@ -383,6 +383,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleSignOut = useCallback(async () => {
     await firebaseSignOut(auth)
     setProfile(null)
+    posthog.reset()
   }, [])
 
   const startImpersonating = useCallback(async (studentUid: string) => {

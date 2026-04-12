@@ -30,6 +30,7 @@ import { Logo } from "@/components/logo"
 import { GameIframe } from "@/components/game/game-iframe"
 import { Play, Bug, FileText } from "lucide-react"
 import { getTokenConfig, saveTokenConfig, TOKEN_DEFAULTS, type TokenConfig } from "@/lib/token-config"
+import posthog from "posthog-js"
 
 type Tab = "overview" | "guides" | "classes" | "students" | "games" | "feedback" | "tokens" | "broadcast" | "blueprint"
 
@@ -581,7 +582,7 @@ export default function AdminDashboardPage() {
           {tabs.map((t) => (
             <button
               key={t.key}
-              onClick={() => setTab(t.key)}
+              onClick={() => { setTab(t.key); posthog.capture("admin_tab_viewed", { tab_name: t.key }) }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 tab === t.key
                   ? "bg-zinc-800 text-white"
@@ -1349,6 +1350,15 @@ function TokenEconomyEditor() {
       const newConfig = { gameApproved, skillMastered, tokenPerPlay, diagonalSpark, diagonalIdea, diagonalVision }
       await saveTokenConfig(newConfig)
       setConfig(newConfig)
+      // Fire one event per changed field
+      if (config) {
+        if (config.gameApproved !== gameApproved) posthog.capture("admin_token_config_changed", { token_type: "gameApproved", new_value: gameApproved })
+        if (config.skillMastered !== skillMastered) posthog.capture("admin_token_config_changed", { token_type: "skillMastered", new_value: skillMastered })
+        if (config.tokenPerPlay !== tokenPerPlay) posthog.capture("admin_token_config_changed", { token_type: "tokenPerPlay", new_value: tokenPerPlay })
+        if (config.diagonalSpark !== diagonalSpark) posthog.capture("admin_token_config_changed", { token_type: "diagonalSpark", new_value: diagonalSpark })
+        if (config.diagonalIdea !== diagonalIdea) posthog.capture("admin_token_config_changed", { token_type: "diagonalIdea", new_value: diagonalIdea })
+        if (config.diagonalVision !== diagonalVision) posthog.capture("admin_token_config_changed", { token_type: "diagonalVision", new_value: diagonalVision })
+      }
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } finally {
@@ -1503,6 +1513,7 @@ function BroadcastPanel({ senderUid, senderName }: { senderUid: string; senderNa
         count++
       }
 
+      posthog.capture("admin_broadcast_sent", { recipient_count: count })
       setSent({ count })
       setMessage("")
     } catch (err) {

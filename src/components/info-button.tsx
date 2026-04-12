@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Info, X } from "lucide-react"
+import posthog from "posthog-js"
 
 interface InfoButtonProps {
   title: string
@@ -34,7 +35,7 @@ export function InfoButton({ title, children, className = "" }: InfoButtonProps)
   return (
     <div ref={ref} className={`relative inline-flex ${className}`}>
       <button
-        onClick={() => setOpen(o => !o)}
+        onClick={() => { const next = !open; setOpen(next); if (next) posthog.capture("info_button_clicked", { title }) }}
         className={`flex items-center justify-center rounded-full transition-colors ${
           open
             ? "bg-blue-500/20 text-blue-400 border border-blue-500/50"

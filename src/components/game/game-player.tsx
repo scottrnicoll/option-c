@@ -336,6 +336,7 @@ export function GamePlayer({ gameId, title, html, concept, onClose, isPendingRev
               </button>
               <button
                 onClick={() => {
+                  posthog.capture("hint_card_opened", { game_id: gameId, standard_id: standardId })
                   setHintMode("hint")
                   // Fetch hint card content
                   if (concept) {
@@ -368,7 +369,7 @@ export function GamePlayer({ gameId, title, html, concept, onClose, isPendingRev
             <p className="text-sm text-zinc-400">Ready to play without it? Wins will count toward mastery and tokens.</p>
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => { setHintMode("real"); setIframeKey(k => k + 1) }}
+                onClick={() => { posthog.capture("hint_card_to_real_play", { game_id: gameId, standard_id: standardId }); setHintMode("real"); setIframeKey(k => k + 1) }}
                 className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors"
               >
                 Play for real →

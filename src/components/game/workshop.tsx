@@ -190,8 +190,8 @@ export function Workshop({
           <GameIframe
             html={html}
             className="w-full h-full"
-            onLose={() => setShowMathMoment(true)}
-            onWin={() => setHasWon(true)}
+            onLose={() => { posthog.capture("game_tested_in_workshop", { game_id: currentGameId, standard_id: designDoc.standardId, outcome: "lose" }); setShowMathMoment(true) }}
+            onWin={() => { posthog.capture("game_tested_in_workshop", { game_id: currentGameId, standard_id: designDoc.standardId, outcome: "win" }); setHasWon(true) }}
           />
           {showMathMoment && (
             <MathMomentOverlay

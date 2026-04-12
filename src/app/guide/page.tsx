@@ -7,6 +7,7 @@ import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, arra
 import { Button } from "@/components/ui/button"
 import { Copy, Check, Users, GamepadIcon, Clock, Plus, ChevronDown, Eye, Play, X, Bug, MessageCircle, LayoutDashboard, GraduationCap, RefreshCw, Pencil } from "lucide-react"
 import { useRouter } from "next/navigation"
+import posthog from "posthog-js"
 import type { Game } from "@/lib/game-types"
 import { getTokenConfig } from "@/lib/token-config"
 import { GameIframe } from "@/components/game/game-iframe"
@@ -203,6 +204,7 @@ export default function GuideDashboard() {
   }
 
   async function handleStudentClick(student: StudentSummary) {
+    posthog.capture("guide_learner_selected", { learner_uid: student.uid })
     setSelectedStudent(student)
     const q = query(collection(db, "games"), where("authorUid", "==", student.uid))
     const snap = await getDocs(q)
@@ -387,7 +389,7 @@ export default function GuideDashboard() {
         {/* Tabs */}
         <div className="flex items-center gap-1 mb-6 bg-zinc-900 rounded-xl p-1 w-fit">
           {tabs.map((t) => (
-            <button key={t.key} onClick={() => { setTab(t.key); setSelectedStudent(null) }}
+            <button key={t.key} onClick={() => { setTab(t.key); setSelectedStudent(null); posthog.capture("guide_tab_viewed", { tab_name: t.key }) }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 tab === t.key ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-zinc-200"
               }`}
@@ -584,7 +586,7 @@ export default function GuideDashboard() {
                 <GameList
                   games={gamesSubTab === "to_review" ? pendingGames : gamesSubTab === "needs_fix" ? needsFixGames : approvedGames}
                   emptyMessage={gamesSubTab === "to_review" ? "No games waiting for review." : gamesSubTab === "needs_fix" ? "No games awaiting fixes." : "No approved games yet."}
-                  onPlay={(g) => setPreviewGame(g)}
+                  onPlay={(g) => { posthog.capture("guide_game_review_started", { game_id: g.id }); setPreviewGame(g) }}
                 />
               </div>
             )}

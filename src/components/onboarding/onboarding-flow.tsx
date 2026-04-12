@@ -614,6 +614,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         }
       }
       posthog.capture("onboarding_step_reached", { step: "codeReveal" })
+      posthog.capture("personal_code_viewed")
       setStep("codeReveal")
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not join class. Try again."

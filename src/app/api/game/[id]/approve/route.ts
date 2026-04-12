@@ -46,8 +46,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // If approved, award tokens (reads admin-configured amount) AND
     // move the standard to "approved_unplayed" — student still needs
     // to win 3 in a row on their own game to flip it to fully unlocked (green).
+    let gameApprovedTokens = 2000
     if (approved && game.authorUid && game.standardId) {
-      let gameApprovedTokens = 2000
       try {
         const cfgSnap = await adminDb.collection("config").doc("tokens").get()
         if (cfgSnap.exists) {
@@ -81,6 +81,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         has_comment: !!comment,
       },
     })
+    if (approved && game.authorUid) {
+      phog.capture({
+        distinctId: game.authorUid,
+        event: "token_earned",
+        properties: {
+          amount: gameApprovedTokens,
+          reason: "approval",
+          learner_uid: game.authorUid,
+        },
+      })
+    }
 
     return Response.json({
       status: approved ? "published" : "pending_review",
