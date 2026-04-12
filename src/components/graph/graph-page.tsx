@@ -211,6 +211,17 @@ export function GraphPage({ data }: GraphPageProps) {
   // standard panel for that moon. Used by deep links from My Stuff.
   // Runs once after onboarding is complete and the data is loaded.
   const moonParamHandled = useRef(false)
+  // Reset to galaxy view when navigating to / with no params
+  useEffect(() => {
+    const hasMoon = searchParams?.get("moon")
+    const hasFix = searchParams?.get("fix")
+    const hasSearch = searchParams?.get("search")
+    if (!hasMoon && !hasFix && !hasSearch && viewMode === "planet") {
+      setViewMode("galaxy")
+      setCurrentPlanetId(null)
+    }
+  }, [searchParams])
+
   useEffect(() => {
     if (!onboardingComplete || moonParamHandled.current) return
     const moonId = searchParams?.get("moon")
