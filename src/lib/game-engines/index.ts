@@ -2,7 +2,7 @@
 
 import type { ThemeConfig, MathParams, GameEngine, GameOption, RoundData } from "./engine-types"
 import { balanceSystemsPhaserEngine } from "./balance-systems-phaser"
-import { riseFallEngine } from "./rise-fall"
+import { aboveBelowZeroPhaserEngine } from "./above-below-zero-phaser"
 import { scoringRankingPhaserEngine } from "./scoring-ranking-phaser"
 import { collectManagePhaserEngine } from "./collect-manage-phaser"
 import { plotExploreEngine } from "./plot-explore"
@@ -39,7 +39,7 @@ const ENGINE_REGISTRY: Record<string, GameEngine> = {
   "inventory-crafting": inventoryCraftingPhaserEngine,
   "terrain-generation": plotExploreEngine,
   "bidding-auction": biddingAuctionPhaserEngine,
-  "above-below-zero": riseFallEngine,
+  "above-below-zero": aboveBelowZeroPhaserEngine,
   "build-structure": buildStructureEngine,
 }
 
