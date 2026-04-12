@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react"
 import {
-  signInAnonymously,
+  signInWithCustomToken,
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
@@ -240,14 +240,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const normalizedName = normalizeName(trimmedName)
     if (!normalizedName) throw new Error("That name doesn't have any letters or numbers. Try again.")
 
-    // 1. Sign in anonymously first (needed for Firestore access)
-    let currentUser = auth.currentUser
-    if (!currentUser) {
-      const cred = await signInAnonymously(auth)
-      currentUser = cred.user
+    // 1. Get a custom token from our API instead of signInAnonymously
+    const res = await fetch("/api/auth/student-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ classCode, name: trimmedName }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || "Login failed")
     }
 
-    // 2. Find the class by code
+    const { token } = await res.json()
+    const cred = await signInWithCustomToken(auth, token)
+    const currentUser = cred.user
+
+    // 2. Find the class by code (client-side check for metadata)
     const classQuery = query(
       collection(db, "classes"),
       where("code", "==", classCode.toUpperCase())
@@ -257,39 +266,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const classDoc = classSnap.docs[0]
     const classId = classDoc.id
 
-    // 3. Check if this student already exists in this class. We query
-    //    by classId only and filter client-side by normalized name so
-    //    "Pepito", "pepito ", "PEPITO" all match the same student
-    //    (and we don't need a Firestore composite index for this).
-    const studentsQuery = query(
-      collection(db, "users"),
-      where("classId", "==", classId)
-    )
-    const studentSnap = await getDocs(studentsQuery)
-    const matching = studentSnap.docs.find((d) => {
-      const docName = (d.data() as { name?: string }).name ?? ""
-      return normalizeName(docName) === normalizedName
-    })
+    // 3. Ensure the user profile exists in Firestore (the API might have just created the Auth user)
+    const profileSnap = await getDoc(doc(db, "users", currentUser.uid))
+    let matching = profileSnap.exists()
 
-    if (matching) {
-      // Returning student signing in via class-code + name path.
-      // Migrate their data to the new anonymous uid and preserve personalCode.
-      const existingData = matching.data() as UserProfile
-      const oldUid = existingData.uid
-      // Make sure they have a personal code (back-fill for pre-existing users)
-      const personalCode = existingData.personalCode ?? (await generateUniquePersonalCode())
-      await setDoc(doc(db, "users", currentUser.uid), {
-        ...existingData,
-        uid: currentUser.uid,
-        personalCode,
-        lastLoginAt: Date.now(),
-      })
-      await migrateStudentData(oldUid, currentUser.uid)
-    } else {
-      // Brand-new student — generate a personal code and save the profile.
-      // Store the trimmed display name (preserving the kid's original
-      // capitalization), but rely on normalizeName() for all future
-      // matching.
+    if (!matching) {
+      // New student — generate a personal code and save the profile.
       const personalCode = await generateUniquePersonalCode()
       await setDoc(doc(db, "users", currentUser.uid), {
         uid: currentUser.uid,
@@ -303,6 +285,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         createdAt: Date.now(),
         lastLoginAt: Date.now(),
       } satisfies UserProfile)
+    } else {
+      // Existing student — update lastLoginAt
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        lastLoginAt: Date.now()
+      })
     }
 
     // Reload profile
@@ -310,55 +297,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     posthog.identify(currentUser.uid, { name: trimmedName, role: "student" })
     posthog.capture("learner_signed_in", { is_new_learner: !matching })
-  }, [loadProfile, migrateStudentData])
+  }, [loadProfile])
 
-  // Returning-student login: look up by personal code + name, then migrate
-  // their data to a new anonymous uid.
+  // Returning-student login: look up by personal code + name
   const signInReturning = useCallback(async (name: string, personalCode: string) => {
-    // 1. Sign in anonymously FIRST so the Firestore queries below run as
-    //    an authenticated user. Without this, the users-by-personalCode
-    //    query is rejected by Firestore rules with "Missing or
-    //    insufficient permissions."
-    let currentUser = auth.currentUser
-    if (!currentUser) {
-      const cred = await signInAnonymously(auth)
-      currentUser = cred.user
+    // 1. Get custom token from API
+    const res = await fetch("/api/auth/student-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, personalCode }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || "Login failed")
     }
 
-    // 2. Find the existing student by personal code
-    const normalizedCode = personalCode.trim().toUpperCase()
-    const codeQuery = query(
-      collection(db, "users"),
-      where("personalCode", "==", normalizedCode)
-    )
-    const codeSnap = await getDocs(codeQuery)
-    if (codeSnap.empty) {
-      throw new Error("We don't know that code. Check the code or use your class code instead.")
-    }
-    const existingDoc = codeSnap.docs[0]
-    const existingData = existingDoc.data() as UserProfile
+    const { token } = await res.json()
+    const cred = await signInWithCustomToken(auth, token)
+    const currentUser = cred.user
 
-    // 3. Second factor: name must match. Use normalizeName so "Pepito",
-    //    "pepito", "PEPITO ", "pepito-1" all match the same record.
+    // 2. Double check name match (extra security factor)
+    const snap = await getDoc(doc(db, "users", currentUser.uid))
+    if (!snap.exists()) throw new Error("User record lost.")
+    const existingData = snap.data() as UserProfile
+
     if (normalizeName(existingData.name) !== normalizeName(name)) {
+      await firebaseSignOut(auth)
       throw new Error("That code doesn't match the name. Try again.")
     }
 
-    // 4. Copy the profile to the new uid and migrate data
-    const oldUid = existingData.uid
-    await setDoc(doc(db, "users", currentUser.uid), {
-      ...existingData,
-      uid: currentUser.uid,
+    // 3. Update lastLoginAt
+    await updateDoc(doc(db, "users", currentUser.uid), {
       lastLoginAt: Date.now(),
     })
-    await migrateStudentData(oldUid, currentUser.uid)
 
-    // 5. Reload profile
+    // 4. Reload profile
     await loadProfile(currentUser.uid)
 
     posthog.identify(currentUser.uid, { name: existingData.name, role: "student" })
     posthog.capture("learner_signed_in", { is_new_learner: false, via: "personal_code" })
-  }, [loadProfile, migrateStudentData])
+  }, [loadProfile])
 
   const signInGuide = useCallback(async (email: string, password: string) => {
     const cred = await signInWithEmailAndPassword(auth, email, password)
