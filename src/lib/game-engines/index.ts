@@ -14,7 +14,7 @@ import { bidEstimateEngine } from "./bid-estimate"
 import { measureCompareEngine } from "./measure-compare"
 import { growCompoundEngine } from "./grow-compound"
 import { solveEliminateEngine } from "./solve-eliminate"
-import { splitShareEngine } from "./split-share"
+import { partitioningPhaserEngine } from "./partitioning-phaser"
 import { rollPredictEngine } from "./roll-predict"
 import { fitRotateEngine } from "./fit-rotate"
 import { navigateOptimizeEngine } from "./navigate-optimize"
@@ -23,7 +23,7 @@ import { buildStructureEngine } from "./build-structure"
 
 const ENGINE_REGISTRY: Record<string, GameEngine> = {
   "resource-management": collectManagePhaserEngine,
-  "partitioning": splitShareEngine,
+  "partitioning": partitioningPhaserEngine,
   "balance-systems": balanceSystemsPhaserEngine,
   "spatial-puzzles": fitRotateEngine,
   "probability-systems": rollPredictEngine,

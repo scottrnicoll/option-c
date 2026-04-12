@@ -34,7 +34,7 @@
 
 | # | Mechanic | Mechanic ID | Options | Status |
 |---|---|---|---|---|
-| 2 | Split & Share | `partitioning` | cut-the-bar, pour-the-liquid, share-the-pizza | Not Started |
+| 2 | Split & Share | `partitioning` | cut-the-bar, pour-the-liquid, share-the-pizza | DONE |
 | 14 | Scale & Transform | `scaling-resizing` | resize-tool, recipe-scaler, map-distance | Not Started |
 | 11 | Measure & Compare | `measurement-challenges` | size-picker, ruler-race, unit-converter | Not Started |
 | 17 | Bid & Estimate | `bidding-auction` | auction-house, price-is-right, round-and-win | Not Started |
@@ -65,4 +65,4 @@
 | 6 | Navigate & Optimize | `path-optimization` | shortest-route, map-builder, delivery-run | Not Started |
 | 19 | Build a Structure | `build-structure` | shape-matcher, free-build, shape-decomposer | Not Started |
 
-## Progress: 4/19 mechanics done (12/57 game options)
+## Progress: 5/19 mechanics done (15/57 game options)
