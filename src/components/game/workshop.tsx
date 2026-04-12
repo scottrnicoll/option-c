@@ -34,6 +34,10 @@ export function Workshop({
   // The "Send for Review" button stays disabled until they have, so we
   // know they actually understood what they built.
   const [hasWon, setHasWon] = useState(false)
+  // First play is always hint mode (productive struggle)
+  const [hintMode, setHintMode] = useState<"hint" | "prompt_real" | "real">("hint")
+  const [hasWonHint, setHasWonHint] = useState(false)
+  const [iframeKey, setIframeKey] = useState(0)
   // Lock in a stable game id immediately on mount so every save (auto, back,
   // submit-for-review) refers to the SAME Firestore doc — preventing the
   // "draft + approved" duplicate that used to happen when the user clicked
@@ -111,11 +115,54 @@ export function Workshop({
       <div className="flex-1 flex overflow-hidden">
         {/* Game iframe — 65% on desktop, full on mobile */}
         <div className="flex-1 md:w-[65%] md:flex-none relative">
+          {/* Prompt to play for real after winning in hint mode */}
+          {hintMode === "prompt_real" && (
+            <div className="absolute inset-0 z-30 bg-zinc-950/90 flex items-center justify-center">
+              <div className="max-w-sm text-center space-y-4 p-6">
+                <p className="text-2xl font-bold text-emerald-400">Nice practice run!</p>
+                <p className="text-sm text-zinc-300">Ready to play for real? Wins count this time.</p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => { setHintMode("real"); setIframeKey(k => k + 1) }}
+                    className="px-6 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors"
+                  >
+                    Play for real!
+                  </button>
+                  <button
+                    onClick={() => { setHintMode("hint"); setIframeKey(k => k + 1) }}
+                    className="px-6 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors"
+                  >
+                    Practice again
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Hint mode banner */}
+          {hintMode === "hint" && (
+            <div className="absolute top-0 left-0 right-0 z-20 bg-blue-600/90 text-white text-center py-1.5 text-xs font-medium">
+              Practice mode — wins don&apos;t count. Hint Card is available!
+            </div>
+          )}
+
           <GameIframe
+            key={iframeKey}
             html={html}
             className="w-full h-full"
-            onLose={() => { posthog.capture("game_tested_in_workshop", { game_id: currentGameId, standard_id: designDoc.standardId, outcome: "lose" }); setShowMathMoment(true) }}
-            onWin={() => { posthog.capture("game_tested_in_workshop", { game_id: currentGameId, standard_id: designDoc.standardId, outcome: "win" }); setHasWon(true) }}
+            onLose={() => {
+              posthog.capture("game_tested_in_workshop", { game_id: currentGameId, standard_id: designDoc.standardId, outcome: "lose", hint_mode: hintMode })
+              setShowMathMoment(true)
+            }}
+            onWin={() => {
+              posthog.capture("game_tested_in_workshop", { game_id: currentGameId, standard_id: designDoc.standardId, outcome: "win", hint_mode: hintMode })
+              if (hintMode === "hint") {
+                setHasWonHint(true)
+                setHintMode("prompt_real")
+              } else {
+                setHasWon(true)
+              }
+            }}
           />
           {showMathMoment && (
             <MathMomentOverlay
@@ -124,7 +171,7 @@ export function Workshop({
             />
           )}
 
-          {/* Mobile chat toggle */}
+          {/* Mobile panel toggle */}
           <button
             onClick={() => setMobileChat(true)}
             className="md:hidden absolute bottom-4 right-4 p-3 rounded-full bg-emerald-600 text-white shadow-lg"
