@@ -136,21 +136,51 @@ function getGradeBand(grade: string): "K-2" | "3-5" | "6-8" | "HS" {
   return "HS"
 }
 
-// A node is a "cluster header" (not a real moon) if its id is exactly 3 parts
-// where the last part is a single capital letter — e.g. "K.G.A", "K.CC.B".
-// These are headers for groups of standards, not standards themselves, so we
-// hide them from the galaxy view.
+// Returns true if the node should be EXCLUDED from the galaxy.
+// Filters out:
+// 1. K-8 cluster headers (e.g. "K.G.A", "3.OA.B") — 3 parts, last is single capital
+// 2. HS cluster headers (e.g. "A-REI.A", "G-CO.B") — 2 parts, last is single capital
+// 3. Math Practices (e.g. "MP.1") — not demonstrable skills
 export function isClusterNode(nodeId: string): boolean {
+  if (nodeId.startsWith("MP.")) return true
   const parts = nodeId.split(".")
-  return parts.length === 3 && /^[A-Z]$/.test(parts[2])
+  // K-8 cluster: "K.G.A", "3.OA.B" — 3 parts, last is single capital letter
+  if (parts.length === 3 && /^[A-Z]$/.test(parts[2])) return true
+  // HS cluster: "A-REI.A", "N-CN.B" — 2 parts, last is single capital letter
+  if (parts.length === 2 && /^[A-Z]$/.test(parts[1])) return true
+  return false
 }
 
-// Group standards into planets
+// Build set of duplicate parent IDs — standards that have lettered sub-parts
+// (e.g. 3.NF.A.3 when 3.NF.A.3a exists). These are redundant with their sub-parts.
+let _dupeParentCache: Set<string> | null = null
+export function buildDuplicateParentSet(nodeIds: string[]): Set<string> {
+  if (_dupeParentCache) return _dupeParentCache
+  const idSet = new Set(nodeIds)
+  const dupes = new Set<string>()
+  for (const id of nodeIds) {
+    if (idSet.has(id + "a") || idSet.has(id + "b")) {
+      dupes.add(id)
+    }
+  }
+  _dupeParentCache = dupes
+  return dupes
+}
+
+// Combined filter: should this node be shown as a moon?
+export function isValidMoon(nodeId: string, dupeParents: Set<string>): boolean {
+  if (isClusterNode(nodeId)) return false
+  if (dupeParents.has(nodeId)) return false
+  return true
+}
+
+// Group standards into planets (only valid moons)
 export function buildPlanets(data: StandardsGraph): Planet[] {
   const planetMap = new Map<string, Planet>()
+  const dupeParents = buildDuplicateParentSet(data.nodes.map(n => n.id))
 
   for (const node of data.nodes) {
-    if (isClusterNode(node.id)) continue
+    if (!isValidMoon(node.id, dupeParents)) continue
     const planetId = `${node.grade}.${node.domainCode}`
     if (!planetMap.has(planetId)) {
       planetMap.set(planetId, {

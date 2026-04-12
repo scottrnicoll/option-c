@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react"
 import type { StandardsGraph, StandardNode, NodeStatus } from "@/lib/graph-types"
-import { buildPlanets, buildBridges, buildGalaxyData, buildMoonData, isClusterNode } from "@/lib/galaxy-utils"
+import { buildPlanets, buildBridges, buildGalaxyData, buildMoonData, isClusterNode, buildDuplicateParentSet, isValidMoon } from "@/lib/galaxy-utils"
 import type { Planet, Bridge, ColorMode } from "@/lib/galaxy-utils"
 import { GalaxyView } from "./galaxy-view"
 import { PlanetView } from "./planet-view"
@@ -36,6 +36,7 @@ interface GraphPageProps {
 }
 
 function computeInitialProgress(data: StandardsGraph): Map<string, NodeStatus> {
+  const dupeParents = buildDuplicateParentSet(data.nodes.map(n => n.id))
   const incomingPrereqs = new Set<string>()
   for (const edge of data.edges) {
     if (edge.type === "prerequisite") {
@@ -44,7 +45,7 @@ function computeInitialProgress(data: StandardsGraph): Map<string, NodeStatus> {
   }
   const progressMap = new Map<string, NodeStatus>()
   for (const node of data.nodes) {
-    if (isClusterNode(node.id)) continue
+    if (!isValidMoon(node.id, dupeParents)) continue
     progressMap.set(node.id, incomingPrereqs.has(node.id) ? "locked" : "available")
   }
   return progressMap
@@ -112,6 +113,7 @@ export function GraphPage({ data }: GraphPageProps) {
   const { user, profile, activeProfile, impersonating, stopImpersonating, loading: authLoading, saveProgress, loadProgress } = useAuth()
   const { gameApproved: tokenGameApproved } = useTokenConfig()
   const searchParams = useSearchParams()
+  const dupeParents = useMemo(() => buildDuplicateParentSet(data.nodes.map(n => n.id)), [data])
   const initialProgress = useMemo(() => computeInitialProgress(data), [data])
   const [progressMap, setProgressMap] = useState<Map<string, NodeStatus>>(initialProgress)
   const [selectedStandard, setSelectedStandard] = useState<StandardNode | null>(null)
@@ -142,7 +144,7 @@ export function GraphPage({ data }: GraphPageProps) {
     const qNoDots = q.replace(/\./g, "")
     const results: { id: string; name: string; planetId: string; planetName: string; mechanic?: string }[] = []
     for (const node of data.nodes) {
-      if (isClusterNode(node.id)) continue
+      if (!isValidMoon(node.id, dupeParents)) continue
       const moonName = (MOON_NAMES[node.id] ?? node.description).toLowerCase()
       const stdId = node.id.toLowerCase()
       const stdIdNoDots = stdId.replace(/\./g, "")
@@ -394,7 +396,7 @@ export function GraphPage({ data }: GraphPageProps) {
     const grade = studentData?.grade
     let total = 0, available = 0, demonstrated = 0, mastered = 0
     for (const node of data.nodes) {
-      if (isClusterNode(node.id)) continue
+      if (!isValidMoon(node.id, dupeParents)) continue
       // If student picked a grade, only count that grade's standards
       if (grade && node.grade !== grade) continue
       total++
@@ -628,7 +630,7 @@ export function GraphPage({ data }: GraphPageProps) {
 
       // Check if the ENTIRE GRADE is now complete
       if (node) {
-        const gradeStandards = data.nodes.filter(n => n.grade === node.grade && !isClusterNode(n.id) && !n.id.startsWith("MP."))
+        const gradeStandards = data.nodes.filter(n => n.grade === node.grade && isValidMoon(n.id, dupeParents))
         const gradeComplete = gradeStandards.every(s => {
           if (s.id === standardId) return true
           const st = progressMap.get(s.id)

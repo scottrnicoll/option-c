@@ -14,7 +14,7 @@ import { UserMenu } from "@/components/user-menu"
 import standardsData from "@/data/standards.json"
 import moonNames from "@/data/moon-names.json"
 import type { StandardsGraph } from "@/lib/graph-types"
-import { isClusterNode } from "@/lib/galaxy-utils"
+import { isClusterNode, buildDuplicateParentSet, isValidMoon } from "@/lib/galaxy-utils"
 import { Logo } from "@/components/logo"
 import { LearnerNav } from "@/components/learner-nav"
 import { InfoButton } from "@/components/info-button"
@@ -208,8 +208,9 @@ export default function LearnerDashboard() {
     const gameByStandard = new Map(games.map((g) => [g.standardId, g]))
     const groupMap = new Map<string, PlanetGroup>()
 
+    const dupeParents = buildDuplicateParentSet(STANDARDS.nodes.map((n: any) => n.id))
     for (const node of STANDARDS.nodes) {
-      if (isClusterNode(node.id)) continue
+      if (!isValidMoon(node.id, dupeParents)) continue
       if (node.grade !== grade) continue
 
       const planetId = `${node.grade}.${node.domainCode}`

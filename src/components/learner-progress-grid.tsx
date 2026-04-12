@@ -6,7 +6,7 @@ import { db } from "@/lib/firebase"
 import standardsData from "@/data/standards.json"
 import moonNamesData from "@/data/moon-names.json"
 import type { StandardsGraph } from "@/lib/graph-types"
-import { isClusterNode } from "@/lib/galaxy-utils"
+import { isClusterNode, buildDuplicateParentSet, isValidMoon } from "@/lib/galaxy-utils"
 
 const STANDARDS = standardsData as StandardsGraph
 const MOON_NAMES = moonNamesData as Record<string, string>
@@ -90,8 +90,9 @@ export function LearnerProgressGrid({ uid, grade }: LearnerProgressGridProps) {
   const planets: PlanetInfo[] = useMemo(() => {
     if (!grade) return []
     const groupMap = new Map<string, PlanetInfo>()
+    const dupeParents = buildDuplicateParentSet(STANDARDS.nodes.map((n: any) => n.id))
     for (const node of STANDARDS.nodes) {
-      if (isClusterNode(node.id)) continue
+      if (!isValidMoon(node.id, dupeParents)) continue
       if (node.grade !== grade) continue
       const pid = `${node.grade}.${node.domainCode}`
       let group = groupMap.get(pid)
