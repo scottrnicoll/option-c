@@ -26,6 +26,13 @@
   .pending { background: #18181b; color: #71717a; }
   ul { margin: 8px 0 16px 20px; font-size: 14px; color: #a1a1aa; }
   li { margin-bottom: 4px; }
+  del { color: #71717a; }
+  /* Tab navigation */
+  .tab-bar { position: sticky; top: 0; z-index: 100; background: #09090b; border-bottom: 1px solid #27272a; padding: 8px 0; margin: 0 -24px 24px; padding-left: 24px; overflow-x: auto; white-space: nowrap; }
+  .tab-bar button { display: inline-block; padding: 6px 14px; margin-right: 4px; border: 1px solid #27272a; border-radius: 6px; background: #18181b; color: #a1a1aa; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .tab-bar button:hover { border-color: #3f3f46; color: #e4e4e7; }
+  .tab-bar button.active { background: #1e3a5f; border-color: #60a5fa; color: #60a5fa; }
+  .section-group { scroll-margin-top: 60px; }
 </style>
 </head>
 <body>
@@ -36,13 +43,33 @@
 
 <div class="latest-update">
   <strong>Latest update</strong>
-  <p><strong>Barbara + Claude (April 11 night):</strong> Overnight build session completed. Removed vibes, wired Lexend + Space Grotesk fonts. Added criteria lights, win condition required, token-per-play, lifetime tokens, Diagonal Idea prizes (3 levels), multiplication tables trainer (2-12, Firestore tracking), updated How to Play, renamed Math Moment to Hint Card. Blueprint updated after every push. See questions list for morning.</p>
+  <p><strong>Barbara + Claude (April 12):</strong> Standardized names (Game Assembler, Game Testing Lab). Fix This / Change This replaces chat panel. First play always hint mode (productive struggle). 52 visual concept types drafted. Sprite upload with categories + favorites. Grade completion badges. Blueprint reorganized with tab navigation. Learning science research section added.</p>
 </div>
 
 <p>This document explains how Diagonally works — what every part is called, how the pieces fit together, and what happens behind the scenes. Written for the team, no coding required.</p>
 
+<div class="tab-bar" id="tabBar">
+  <button onclick="scrollToSection('sec-glossary')" class="active">Glossary</button>
+  <button onclick="scrollToSection('sec-engines')">Engines</button>
+  <button onclick="scrollToSection('sec-generation')">Generation</button>
+  <button onclick="scrollToSection('sec-science')">Learning Science</button>
+  <button onclick="scrollToSection('sec-tech')">Tech</button>
+  <button onclick="scrollToSection('sec-standards')">Standards</button>
+  <button onclick="scrollToSection('sec-pending')">Pending</button>
+  <button onclick="scrollToSection('sec-review')">For Review</button>
+  <button onclick="scrollToSection('sec-log')">Change Log</button>
+</div>
+<script>
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+
 <!-- ============================================ -->
-<h2>1. Glossary — The Galaxy</h2>
+<h2 id="sec-glossary" class="section-group">1. Glossary — The Galaxy</h2>
 <p>These terms describe the learner's map and how they navigate math.</p>
 <!-- ============================================ -->
 
@@ -161,7 +188,7 @@
 </table>
 
 <!-- ============================================ -->
-<h2>7. All 19 Game Engines</h2>
+<h2 id="sec-engines" class="section-group">7. All 19 Game Engines</h2>
 <!-- ============================================ -->
 
 <p>Every Game Mechanic has a pre-built Game Engine with 3 game options each (57 total). The engine handles all game logic. AI only generates the Theme Config (names, colors, messages) — not game code. Generation takes ~3 seconds. See the full Game Options table below for all 57 gameplay modes.</p>
@@ -471,7 +498,7 @@
 </table>
 
 <!-- ============================================ -->
-<h2>8. How Game Generation Works</h2>
+<h2 id="sec-generation" class="section-group">8. How Game Generation Works</h2>
 <!-- ============================================ -->
 
 <p>When a learner builds a game, here's what happens step by step:</p>
@@ -491,7 +518,7 @@
 </table>
 
 <!-- ============================================ -->
-<h2>9. Tech Stack</h2>
+<h2 id="sec-tech" class="section-group">9. Tech Stack</h2>
 <!-- ============================================ -->
 
 <table>
@@ -554,7 +581,7 @@
   <li>✅ <strong>Orphaned files archived</strong> — game-card-builder, genie-chat, artwork-picker moved to _archived/</li>
 </ul>
 
-<h2>12. Learning Science — Research Foundations</h2>
+<h2 id="sec-science" class="section-group">12. Learning Science — Research Foundations</h2>
 <!-- ============================================ -->
 
 <p>These research findings inform how Diagonally teaches math. Every design decision should trace back to one of these principles.</p>
@@ -612,7 +639,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
 
 <!-- ============================================ -->
-<h2>15. Common Core Organization &amp; Galaxy Cleanup</h2>
+<h2 id="sec-standards" class="section-group">15. Common Core Organization &amp; Galaxy Cleanup</h2>
 <!-- ============================================ -->
 
 <p style="color: #f87171; font-weight: 600;">IMPORTANT: Galaxy cleanup is pending. The data file currently shows 664 nodes including non-standard items. This section documents what needs to change.</p>
@@ -660,7 +687,7 @@
 </ul>
 
 <!-- ============================================ -->
-<h2>16. Pending Work</h2>
+<h2 id="sec-pending" class="section-group">16. Pending Work</h2>
 <!-- ============================================ -->
 
 <h3>Bugs</h3>
@@ -725,7 +752,7 @@
 </ul>
 
 <!-- ============================================ -->
-<h2>17. For Review — Mechanic-to-Standards Mapping</h2>
+<h2 id="sec-review" class="section-group">17. For Review — Mechanic-to-Standards Mapping</h2>
 <!-- ============================================ -->
 
 <p>This table shows which Common Core standards (moons) map to each game mechanic based on keyword and domain code matching. Use this to verify that every standard gets a relevant game mechanic, and that no mechanic is assigned to standards where it doesn't make sense. Only 2 of 664 standards are unmatched (8.F.B, N-Q.A.2).</p>
@@ -878,7 +905,7 @@
 <p style="color: #fbbf24;">Note: Visual concepts are NOT the same as game mechanics (19) or planets (65). They are <strong>concept visualization types</strong> — the pictorial stage of the CPA learning model. One visual concept may map to multiple game mechanics, and one planet may contain standards from multiple visual concepts.</p>
 
 <!-- ============================================ -->
-<h2>18. Change Log</h2>
+<h2 id="sec-log" class="section-group">18. Change Log</h2>
 <!-- ============================================ -->
 
 <table>
