@@ -50,24 +50,41 @@ export const APP_RULES: RulesByRole = {
     {
       heading: "How to demonstrate a skill",
       body: [
-        "1. Click a blue moon. Read \"This is about...\" and \"Where you'll use this\".",
-        "2. Click \"Build Your Game\" to open the Game Assembler.",
-        "3. Pick your components: Background, Character, Game Option, Items, and Win Condition.",
+        "1. Click a blue moon to see what the math is about.",
+        "2. Click \"Open Game Assembler\" to start building your game.",
+        "3. Pick your components: Background, Character, Game Option, and Items.",
         "4. Watch the 3 criteria lights — when all 3 are lit, click \"Build my game\".",
-        "5. Name your game and write an optional dare. Test it in the Game Testing Lab.",
-        "6. Submit for review. Your guide will approve or send it back with feedback.",
+        "5. Your game opens in the Game Testing Lab. First play is practice mode with a Hint Card to help you learn the math.",
+        "6. After winning in practice, play for real. Then submit for your guide to review.",
         "7. When approved, you earn tokens — but the moon is still YELLOW.",
         "8. Play your own game and win 3 times IN A ROW. The moon turns GREEN.",
+      ],
+    },
+    {
+      heading: "Two ways to build",
+      body: [
+        "From the Galaxy: Click a moon → see the math → open the Game Assembler → pick from game options for that skill.",
+        "From Build NOW!: Click \"Build NOW!\" in the nav → pick background and character → describe your game idea → AI matches it to a math skill.",
+        "Both paths use the same Game Assembler. Same game, two starting points.",
       ],
     },
     {
       heading: "The 3 game criteria",
       body: [
         "As you fill the Game Assembler, 3 criteria lights illuminate one by one:",
-        "🧠 MATH WELL APPLIED — Lights up when you pick a Game Option. The math is built into the game mechanic.",
-        "💎 MATH ESSENTIAL — Lights up when you pick a Game Option AND set a Win Condition. The math is essential to winning.",
-        "🎮 PLAYABLE GAME — Lights up when all 5 components are filled (Background, Character, Game Option, Items, Win Condition).",
+        "🧠 MATH WELL APPLIED — Lights up when you pick a Game Option.",
+        "💎 MATH ESSENTIAL — Lights up when you pick a Game Option (the math is built into the gameplay).",
+        "🎮 PLAYABLE GAME — Lights up when all 4 components are filled (Background, Character, Game Option, Items).",
         "When all 3 lights are on, your game is ready to build!",
+      ],
+    },
+    {
+      heading: "Practice mode & the Hint Card",
+      body: [
+        "Your first play is always in practice mode. Wins don't count yet.",
+        "A Hint Card appears next to your game showing the math concept — use it to learn!",
+        "If you lose, the Hint Card explains the math step by step.",
+        "After winning in practice, you can play for real (wins count) or practice again.",
       ],
     },
     {

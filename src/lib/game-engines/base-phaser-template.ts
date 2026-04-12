@@ -403,7 +403,17 @@ function startGame() {
 }
 
 function showHelp() {
-  document.getElementById('help-content').textContent = HELP_TEXT;
+  // Use AI-generated hints when available (standard-specific), fall back to generic
+  let helpContent = HELP_TEXT;
+  if (AI_ROUNDS && AI_ROUNDS.length > 0) {
+    const hints = AI_ROUNDS.filter(r => r.hint).map(r => r.hint);
+    if (hints.length > 0) {
+      helpContent = 'Skill: ' + MATH.standardDescription + '\\n\\n' + hints[0] + '\\n\\nExample: ' + AI_ROUNDS[0].prompt;
+    } else {
+      helpContent = 'Skill: ' + MATH.standardDescription + '\\n\\nExample: ' + AI_ROUNDS[0].prompt + '\\n\\n' + HELP_TEXT;
+    }
+  }
+  document.getElementById('help-content').textContent = helpContent;
   document.getElementById('help-overlay').classList.add('open');
 }
 
