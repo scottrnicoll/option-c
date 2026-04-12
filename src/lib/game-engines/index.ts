@@ -16,7 +16,7 @@ import { growCompoundEngine } from "./grow-compound"
 import { solveEliminateEngine } from "./solve-eliminate"
 import { partitioningPhaserEngine } from "./partitioning-phaser"
 import { rollPredictEngine } from "./roll-predict"
-import { fitRotateEngine } from "./fit-rotate"
+import { spatialPuzzlesPhaserEngine } from "./spatial-puzzles-phaser"
 import { navigateOptimizeEngine } from "./navigate-optimize"
 import { raceCalculateEngine } from "./race-calculate"
 import { buildStructureEngine } from "./build-structure"
@@ -25,7 +25,7 @@ const ENGINE_REGISTRY: Record<string, GameEngine> = {
   "resource-management": collectManagePhaserEngine,
   "partitioning": partitioningPhaserEngine,
   "balance-systems": balanceSystemsPhaserEngine,
-  "spatial-puzzles": fitRotateEngine,
+  "spatial-puzzles": spatialPuzzlesPhaserEngine,
   "probability-systems": rollPredictEngine,
   "path-optimization": navigateOptimizeEngine,
   "construction-systems": constructionSystemsPhaserEngine,

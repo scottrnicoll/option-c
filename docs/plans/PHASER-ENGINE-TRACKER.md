@@ -52,7 +52,7 @@
 
 | # | Mechanic | Mechanic ID | Options | Status |
 |---|---|---|---|---|
-| 4 | Fit & Rotate | `spatial-puzzles` | rotate-to-match, tangram-fill, mirror-puzzle | Not Started |
+| 4 | Fit & Rotate | `spatial-puzzles` | rotate-to-match, tangram-fill, mirror-puzzle | DONE |
 | 5 | Roll & Predict | `probability-systems` | find-the-stat, bet-the-spinner, build-the-chart | Not Started |
 | 8 | Race & Calculate | `motion-simulation` | launch-to-target, speed-trap, catch-up | Not Started |
 | 10 | Grow & Compound | `strategy-economy` | investment-sim, population-boom, doubling-maze | Not Started |
@@ -65,4 +65,4 @@
 | 6 | Navigate & Optimize | `path-optimization` | shortest-route, map-builder, delivery-run | Not Started |
 | 19 | Build a Structure | `build-structure` | shape-matcher, free-build, shape-decomposer | Not Started |
 
-## Progress: 12/19 mechanics done (36/57 game options)
+## Progress: 13/19 mechanics done (39/57 game options)
