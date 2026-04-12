@@ -5,7 +5,8 @@ import { Loader2 } from "lucide-react"
 import type { MechanicAnimation } from "@/lib/mechanic-animations"
 import { matchMechanics } from "@/lib/mechanic-animations"
 import { MECHANIC_OPTIONS_MAP } from "@/lib/mechanic-card-options"
-import { SPRITE_CHARACTERS, SPRITE_ITEMS, SPRITE_BACKGROUNDS } from "@/lib/sprite-library"
+import { SPRITE_CHARACTERS, SPRITE_ITEMS, SPRITE_BACKGROUNDS, CHARACTER_CATEGORIES, BACKGROUND_CATEGORIES, ITEM_CATEGORIES } from "@/lib/sprite-library"
+import { SpritePicker } from "@/components/sprite-picker"
 import { getGameOptions } from "@/lib/game-engines/game-option-registry"
 import { getRecommendedItems } from "@/lib/item-recommendations"
 import type { GameDesignDoc } from "@/lib/game-types"
@@ -24,9 +25,6 @@ interface CircuitBoardBuilderProps {
   onBack: () => void
 }
 
-const BACKGROUNDS = SPRITE_BACKGROUNDS
-const CHARACTERS = SPRITE_CHARACTERS
-const ITEMS = SPRITE_ITEMS
 
 interface GameOptionInfo {
   mechanicId: string
@@ -175,28 +173,13 @@ Math: ${standardDescription}`
           selected={selectedBackground}
           onClear={() => setSelectedBackground(null)}
         >
-          <div className="grid grid-cols-5 gap-2">
-            {(BACKGROUNDS.length > 0 ? BACKGROUNDS : [
-              { id: "underwater", name: "Underwater" }, { id: "space", name: "Space" },
-              { id: "forest", name: "Forest" }, { id: "castle", name: "Castle" },
-              { id: "kitchen", name: "Kitchen" }, { id: "cave", name: "Cave" },
-              { id: "city", name: "City" }, { id: "volcano", name: "Volcano" },
-              { id: "arctic", name: "Arctic" }, { id: "jungle", name: "Jungle" },
-            ]).map((bg: any) => (
-              <button
-                key={bg.id}
-                onClick={() => setSelectedBackground(bg.id)}
-                className={`p-2 rounded-lg border-2 text-center transition-all ${
-                  selectedBackground === bg.id
-                    ? "border-blue-500 bg-blue-500/10"
-                    : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-600"
-                }`}
-              >
-                <img src={`/sprites/backgrounds/${bg.id}.svg`} alt={bg.label || bg.name || bg.id} className="w-full h-12 object-cover rounded mb-1" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                <span className="text-[10px] text-zinc-300">{bg.label || bg.name || bg.id}</span>
-              </button>
-            ))}
-          </div>
+          <SpritePicker
+            type="backgrounds"
+            libraryItems={SPRITE_BACKGROUNDS}
+            categories={BACKGROUND_CATEGORIES}
+            selected={selectedBackground}
+            onSelect={setSelectedBackground}
+          />
         </SlotSection>
 
         {/* SLOT 2: Character */}
@@ -206,28 +189,13 @@ Math: ${standardDescription}`
           selected={selectedCharacter}
           onClear={() => setSelectedCharacter(null)}
         >
-          <div className="grid grid-cols-5 gap-2">
-            {(CHARACTERS.length > 0 ? CHARACTERS : [
-              { id: "pirate", name: "Pirate" }, { id: "robot", name: "Robot" },
-              { id: "astronaut", name: "Astronaut" }, { id: "knight", name: "Knight" },
-              { id: "chef", name: "Chef" }, { id: "diver", name: "Diver" },
-              { id: "ghost", name: "Ghost" }, { id: "ninja", name: "Ninja" },
-              { id: "wizard", name: "Wizard" }, { id: "explorer", name: "Explorer" },
-            ]).map((ch: any) => (
-              <button
-                key={ch.id}
-                onClick={() => setSelectedCharacter(ch.id)}
-                className={`p-2 rounded-lg border-2 text-center transition-all ${
-                  selectedCharacter === ch.id
-                    ? "border-blue-500 bg-blue-500/10"
-                    : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-600"
-                }`}
-              >
-                <img src={`/sprites/characters/${ch.id}.svg`} alt={ch.label || ch.name || ch.id} className="w-10 h-10 mx-auto mb-1" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                <span className="text-[10px] text-zinc-300">{ch.label || ch.name || ch.id}</span>
-              </button>
-            ))}
-          </div>
+          <SpritePicker
+            type="characters"
+            libraryItems={SPRITE_CHARACTERS}
+            categories={CHARACTER_CATEGORIES}
+            selected={selectedCharacter}
+            onSelect={setSelectedCharacter}
+          />
         </SlotSection>
 
         {/* SLOT 3: Game Option — grouped by mechanic */}
@@ -297,17 +265,13 @@ Math: ${standardDescription}`
           selected={selectedItem}
           onClear={() => setSelectedItem(null)}
         >
-          <ItemGrid
-            items={ITEMS.length > 0 ? [...ITEMS] : [
-              { id: "coin", label: "Coin" }, { id: "gem", label: "Gem" },
-              { id: "treasure-chest", label: "Chest" }, { id: "crystal", label: "Crystal" },
-              { id: "potion", label: "Potion" }, { id: "fruit", label: "Fruit" },
-              { id: "star", label: "Star" }, { id: "shell", label: "Shell" },
-              { id: "mushroom", label: "Mushroom" }, { id: "key", label: "Key" },
-            ]}
-            recommended={selectedGameOption ? getRecommendedItems(selectedGameOption.mechanicId) : []}
+          <SpritePicker
+            type="items"
+            libraryItems={SPRITE_ITEMS}
+            categories={ITEM_CATEGORIES}
             selected={selectedItem}
             onSelect={setSelectedItem}
+            recommended={selectedGameOption ? getRecommendedItems(selectedGameOption.mechanicId) : []}
           />
         </SlotSection>
 
@@ -389,45 +353,3 @@ function CriteriaLight({ lit, label, icon }: { lit: boolean; label: string; icon
   )
 }
 
-function ItemGrid({ items, recommended, selected, onSelect }: {
-  items: Array<{ id: string; label?: string; name?: string }>
-  recommended: string[]
-  selected: string | null
-  onSelect: (id: string) => void
-}) {
-  // Sort: recommended items first, then the rest
-  const sorted = [...items].sort((a, b) => {
-    const aRec = recommended.includes(a.id) ? 0 : 1
-    const bRec = recommended.includes(b.id) ? 0 : 1
-    return aRec - bRec
-  })
-
-  return (
-    <div>
-      {recommended.length > 0 && (
-        <p className="text-[10px] text-emerald-400/70 mb-1.5">Recommended for this game option:</p>
-      )}
-      <div className="grid grid-cols-5 gap-2">
-        {sorted.map((item) => {
-          const isRec = recommended.includes(item.id)
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSelect(item.id)}
-              className={`p-2 rounded-lg border-2 text-center transition-all ${
-                selected === item.id
-                  ? "border-blue-500 bg-blue-500/10"
-                  : isRec
-                    ? "border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/50"
-                    : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-600"
-              }`}
-            >
-              <img src={`/sprites/items/${item.id}.svg`} alt={item.label || item.name || item.id} className="w-8 h-8 mx-auto mb-1" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-              <span className="text-[10px] text-zinc-300">{item.label || item.name || item.id}</span>
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
