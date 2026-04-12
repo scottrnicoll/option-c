@@ -710,6 +710,7 @@ export function GraphPage({ data }: GraphPageProps) {
       const existing = await getDoc(ref)
       const isNew = !existing.exists()
 
+      const safeDoc = currentDesignDoc ? JSON.parse(JSON.stringify(currentDesignDoc)) : {}
       const update: Record<string, unknown> = {
         id,
         title: currentDesignDoc?.title || "Untitled",
@@ -719,7 +720,7 @@ export function GraphPage({ data }: GraphPageProps) {
         standardId: currentDesignDoc?.standardId || "",
         planetId: currentDesignDoc?.planetId || "",
         gameHtml: html,
-        designDoc: currentDesignDoc,
+        designDoc: safeDoc,
         updatedAt: Date.now(),
       }
       if (isNew) {
@@ -736,8 +737,8 @@ export function GraphPage({ data }: GraphPageProps) {
         }
       }
       await setDoc(ref, update, { merge: true })
-    } catch {
-      // Silent fail
+    } catch (err) {
+      console.error("[handleBackToPlanet] Save failed:", err)
     }
     setBuildMode("idle")
     setCurrentDesignDoc(null)
