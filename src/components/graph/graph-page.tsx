@@ -15,7 +15,7 @@ import { Workshop } from "@/components/game/workshop"
 import { ImportHtml } from "@/components/game/import-html"
 import { MasteryAnimation } from "./mastery-animation"
 import type { GameDesignDoc } from "@/lib/game-types"
-import { doc, setDoc, getDoc, collection } from "firebase/firestore"
+import { doc, setDoc, getDoc, updateDoc, collection } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useAuth } from "@/lib/auth"
 import { LearnerNav } from "@/components/learner-nav"
@@ -625,8 +625,32 @@ export function GraphPage({ data }: GraphPageProps) {
           })
         }, 1200)
       }
+
+      // Check if the ENTIRE GRADE is now complete
+      if (node) {
+        const gradeStandards = data.nodes.filter(n => n.grade === node.grade && !isClusterNode(n.id) && !n.id.startsWith("MP."))
+        const gradeComplete = gradeStandards.every(s => {
+          if (s.id === standardId) return true
+          const st = progressMap.get(s.id)
+          return st === "unlocked" || st === "mastered"
+        })
+        if (gradeComplete) {
+          posthog.capture("grade_completed", { grade: node.grade })
+          // Award grade completion badge
+          if (activeProfile?.uid) {
+            updateDoc(doc(db, "users", activeProfile.uid), {
+              [`gradeBadges.${node.grade}`]: true,
+            }).catch(() => {})
+          }
+          // Show notification
+          setTimeout(() => {
+            setTokenNotify(`Grade ${node.grade} complete! All standards demonstrated!`)
+            setTimeout(() => setTokenNotify(null), 5000)
+          }, 3000)
+        }
+      }
     }, 1500)
-  }, [data, planets, saveProgress, progressMap])
+  }, [data, planets, saveProgress, progressMap, activeProfile])
 
   // Mechanic ID from the circuit board builder
   const [selectedMechanicId, setSelectedMechanicId] = useState<string | null>(null)
