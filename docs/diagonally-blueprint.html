@@ -393,31 +393,36 @@
 <h2>15. Pending Work</h2>
 <!-- ============================================ -->
 
-<h3>Next Up — Builder &amp; UX</h3>
+<h3>Bugs</h3>
 <ul>
-  <li><del>Remove vibe system</del> — DONE</li>
-  <li><del>Wire fonts into games</del> — DONE</li>
-  <li><del>Criteria lights in builder</del> — DONE</li>
-  <li><del>Win condition required</del> — DONE</li>
-  <li><del>Multiplication tables trainer</del> — DONE: tables 2-12, Firestore tracking, prioritizes struggles</li>
+  <li><strong>BUG: "Failed to submit" on Send for Review:</strong> A working game that the user won shows "Failed to submit" when clicking Send for Review. The error is caught generically — needs better logging to diagnose. Likely a Firestore permission or field validation issue.</li>
+</ul>
+
+<h3>Galaxy &amp; Navigation</h3>
+<ul>
   <li><strong>Galaxy cleanup:</strong> Remove 183 cluster headers, 43 duplicate parents, 8 math practices from galaxy view. Verify edges. Update mini-map, How to Play, Blueprint. Final target: 517 moons, 65 planets. (See Section 14 for full details.)</li>
+  <li><strong>Arrow colors:</strong> Prerequisite arrows between planets are always grey. Change to: slightly yellow for arrows pointing to unlocked planets, grey for arrows pointing to locked planets.</li>
+  <li><strong>Remove white ring around planets:</strong> Currently planets have a white ring. Remove it.</li>
+</ul>
+
+<h3>Game Builder (Arcade Cabinet)</h3>
+<ul>
+  <li><strong>Arcade cabinet animation:</strong> The Circuit Board Builder should look like an arcade cabinet opening up, with components visible as gears/chips that slot in. When all 3 criteria lights are lit, the cabinet closes and building starts. (Currently just a flat form with buttons.)</li>
+  <li><strong>All parts visible:</strong> The opened arcade should show all components clearly, especially the 3 math criteria lights — they should be prominent, not hidden.</li>
+  <li><strong>Remove "Your game is ready" screen:</strong> The naming screen (game name + dare) looks like the login screen and doesn't make sense. Remove it entirely — move naming + dare into the Workshop or skip it.</li>
+  <li><strong>AI-suggested game design:</strong> Option for learner to start building and have AI suggest game components (background, character, game option, items) based on the math standard. Learner can accept or change suggestions. (See Barbara's email for full idea.)</li>
+  <li><strong>Bring back upload button:</strong> Re-add the ability to upload custom sprites (was removed during vibe cleanup).</li>
+</ul>
+
+<h3>Content</h3>
+<ul>
   <li><strong>Item recommendations per game option:</strong> 2-3 suggested items based on the game option, learner can browse all.</li>
   <li><strong>Hardcode "This is about..." for all 517 standards</strong> (currently AI-generated per visit).</li>
 </ul>
 
-<h3>Next Up — Analytics &amp; Data</h3>
+<h3>Analytics &amp; Data</h3>
 <ul>
-  <li><strong>PostHog integration:</strong> Record learner usage data — unsuccessful game attempts (= math concept not mastered), time spent, game options chosen, standards attempted. Unsuccessful attempts should flag the guide to consider moving the learner back to prerequisite skills. <em>(Mike to set up)</em></li>
-  <li><del>Tokens from plays</del> — DONE: 10 tokens per unique player, inbox notification to creator</li>
-  <li><del>Ranking = lifetime tokens</del> — DONE: leaderboard uses lifetimeTokens field</li>
-</ul>
-
-<h3>Next Up — Engagement</h3>
-<ul>
-  <li><del>Diagonal Idea prizes (3 levels)</del> — DONE</li>
-  <li><del>"I had a Diagonal Idea!" in How to Play</del> — DONE</li>
-  <li><del>Prize badges on My Stuff</del> — DONE: 🥇🥈🥉 medals</li>
-  <li><del>Prize award UI for admin</del> — DONE: buttons on idea-type feedback</li>
+  <li><strong>PostHog integration:</strong> Record learner usage data — unsuccessful game attempts (= math concept not mastered), time spent, game options chosen, standards attempted. Unsuccessful attempts should flag the guide to consider moving the learner back to prerequisite skills. <em>(Mike setting up now.)</em></li>
 </ul>
 
 <h3>Game Engines</h3>
@@ -436,12 +441,12 @@
 
 <h3>Cleanup</h3>
 <ul>
-  <li><del>Archive orphaned files</del> — DONE: moved to src/components/_archived/</li>
   <li>Snapshot + link on feedback (upload screenshots to Cloud Storage)</li>
 </ul>
 
 <h3>Eventually</h3>
 <ul>
+  <li>Players build and upload their own backgrounds, characters, and items by spending tokens</li>
   <li>AI-generated custom sprites from text descriptions (needs image generation API)</li>
   <li>Multiplayer game modes (Mike's Phase 4)</li>
   <li>Stick figure that kills bugs (build wait screen)</li>
