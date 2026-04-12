@@ -48,7 +48,7 @@
 
 <table>
   <tr><th>Term</th><th>Definition</th><th>Common Core equivalent</th></tr>
-  <tr><td>Galaxy</td><td>The 3D map of all math from K to 12. Contains 66 planets and 535 moons.</td><td>—</td></tr>
+  <tr><td>Galaxy</td><td>The 3D map of all math from K to 12. Contains 65 planets and 517 moons (pending cleanup — see Galaxy Cleanup section).</td><td>—</td></tr>
   <tr><td>Planet</td><td>A math domain at one grade level (e.g. "Geometry Grade 6"). Groups related skills. Shown as a glowing sphere in the galaxy.</td><td>Domain</td></tr>
   <tr><td>Moon</td><td>A single math skill. One moon = one learning objective. Shown as a small dot orbiting a planet.</td><td>Standard</td></tr>
   <tr><td>Moon Status</td><td>The progression state of a skill:
@@ -342,7 +342,55 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
 
 <!-- ============================================ -->
-<h2>14. Pending Work</h2>
+<h2>14. Common Core Organization &amp; Galaxy Cleanup</h2>
+<!-- ============================================ -->
+
+<p style="color: #f87171; font-weight: 600;">IMPORTANT: Galaxy cleanup is pending. The data file currently shows 664 nodes including non-standard items. This section documents what needs to change.</p>
+
+<h3>How Common Core Math is organized</h3>
+<p>Common Core Math has a 4-level hierarchy:</p>
+<table>
+  <tr><th>Level</th><th>Example</th><th>What it is</th><th>Our galaxy equivalent</th></tr>
+  <tr><td>Domain</td><td>Number &amp; Operations — Fractions</td><td>Broad math area at one grade level</td><td>Planet (65 total)</td></tr>
+  <tr><td>Cluster</td><td>3.NF.A: "Develop understanding of fractions as numbers"</td><td>Group of related skills within a domain. Just a label — not a skill to learn.</td><td>Should NOT be a moon (currently showing — 183 to remove)</td></tr>
+  <tr><td>Standard</td><td>3.NF.A.1: "Understand a fraction 1/b..."</td><td>A single demonstrable skill. This is what a learner masters.</td><td>Moon (393 base + 124 sub-parts = 517)</td></tr>
+  <tr><td>Sub-part</td><td>3.NF.A.3a: "Understand two fractions as equivalent..."</td><td>A lettered breakdown of a complex standard. Each is a distinct skill.</td><td>Moon (124 total, included in 517 count)</td></tr>
+</table>
+
+<p><strong>K-8</strong> is organized by grade: Grade K, Grade 1, ..., Grade 8. Each grade has domains like "Operations &amp; Algebraic Thinking" (OA), "Geometry" (G), "Number &amp; Operations — Fractions" (NF), etc.</p>
+
+<p><strong>High School</strong> is organized differently — not by grade but by conceptual category: Number &amp; Quantity (N), Algebra (A), Functions (F), Geometry (G), Statistics &amp; Probability (S). Each category has sub-domains like A-REI (Reasoning with Equations), F-IF (Interpreting Functions), G-CO (Congruence), etc. Our galaxy groups all HS standards under "Grade HS" planets.</p>
+
+<p><strong>Mathematical Practices</strong> (MP.1-MP.8) are 8 cross-cutting habits of mind like "Make sense of problems and persevere in solving them." They apply across all grades and are NOT individual skills to demonstrate. They should NOT be moons.</p>
+
+<h3>Coherence Map (prerequisite edges)</h3>
+<p>The <a href="https://achievethecore.org/coherence-map/" style="color: #60a5fa;">Coherence Map</a> from Achieve the Core provides prerequisite relationships between standards. Example: 3.NF.A.1 (understand fractions) is a prerequisite for 5.NF.A.1 (add fractions). Our galaxy uses these as edges — when a prerequisite moon is grey/locked, the dependent moon stays locked. We have 457 prerequisite edges and 84 "related" edges (541 total).</p>
+
+<h3>Current state of our data file (needs cleanup)</h3>
+<table>
+  <tr><th>What's in standards.json</th><th>Count</th><th>Should be a moon?</th><th>Action needed</th></tr>
+  <tr><td>Base standards (e.g., 3.OA.A.1)</td><td>393</td><td>Yes</td><td>Keep</td></tr>
+  <tr><td>Sub-part standards (e.g., 3.NF.A.3a)</td><td>124</td><td>Yes — each is a distinct skill</td><td>Keep</td></tr>
+  <tr><td>Duplicate parent standards (e.g., 3.NF.A.3 when a/b/c/d exist)</td><td>43</td><td>No — redundant with sub-parts</td><td>Remove from moon list</td></tr>
+  <tr><td>Cluster headers (e.g., 3.OA.A)</td><td>183</td><td>No — just grouping labels</td><td>Remove from moon list</td></tr>
+  <tr><td>Math Practices (MP.1-MP.8)</td><td>8</td><td>No — habits of mind, not skills</td><td>Remove from moon list</td></tr>
+  <tr><td><strong>Total in file</strong></td><td><strong>664</strong></td><td></td><td></td></tr>
+  <tr><td><strong>After cleanup (actual moons)</strong></td><td><strong>517</strong></td><td></td><td></td></tr>
+</table>
+
+<h3 style="color: #f87171;">Galaxy Cleanup — TO DO</h3>
+<p>When we tackle this, we need to:</p>
+<ul>
+  <li>Filter out 183 cluster headers, 43 duplicate parents, and 8 math practices from the galaxy view</li>
+  <li>Verify all 541 prerequisite/related edges still connect valid moons after filtering</li>
+  <li>Update the mini-map to reflect the cleaned data</li>
+  <li>Update How to Play with correct moon count</li>
+  <li>Update this Blueprint with final numbers</li>
+  <li>Confirm the final count is 517 moons across 65 planets</li>
+</ul>
+
+<!-- ============================================ -->
+<h2>15. Pending Work</h2>
 <!-- ============================================ -->
 
 <h3>Next Up — Builder &amp; UX</h3>
@@ -352,8 +400,9 @@
   <li><del>Criteria lights in builder</del> — DONE</li>
   <li><del>Win condition required</del> — DONE</li>
   <li><del>Multiplication tables trainer</del> — DONE: tables 2-12, Firestore tracking, prioritizes struggles</li>
+  <li><strong>Galaxy cleanup:</strong> Remove 183 cluster headers, 43 duplicate parents, 8 math practices from galaxy view. Verify edges. Update mini-map, How to Play, Blueprint. Final target: 517 moons, 65 planets. (See Section 14 for full details.)</li>
   <li><strong>Item recommendations per game option:</strong> 2-3 suggested items based on the game option, learner can browse all.</li>
-  <li><strong>Hardcode "This is about..." for all 535 standards</strong> (currently AI-generated per visit).</li>
+  <li><strong>Hardcode "This is about..." for all 517 standards</strong> (currently AI-generated per visit).</li>
 </ul>
 
 <h3>Next Up — Analytics &amp; Data</h3>
@@ -400,7 +449,7 @@
 </ul>
 
 <!-- ============================================ -->
-<h2>15. For Review — Mechanic-to-Standards Mapping</h2>
+<h2>16. For Review — Mechanic-to-Standards Mapping</h2>
 <!-- ============================================ -->
 
 <p>This table shows which Common Core standards (moons) map to each game mechanic based on keyword and domain code matching. Use this to verify that every standard gets a relevant game mechanic, and that no mechanic is assigned to standards where it doesn't make sense. Only 2 of 664 standards are unmatched (8.F.B, N-Q.A.2).</p>
@@ -548,7 +597,7 @@
 <p>The ? (help) button inside each game currently shows AI-generated math help. Plan is to hardcode this per standard so it loads instantly and is verified for accuracy. Each hint should include: what the math concept is, step-by-step approach, common mistakes, and an encouraging message. Needs to be written/verified for all 535 standards.</p>
 
 <!-- ============================================ -->
-<h2>16. Change Log</h2>
+<h2>17. Change Log</h2>
 <!-- ============================================ -->
 
 <table>
