@@ -33,6 +33,7 @@ import {
 } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
 import type { UserProfile, ProgressDoc } from "@/lib/auth-types"
+import posthog from "posthog-js"
 
 interface AuthContextValue {
   user: User | null
@@ -306,6 +307,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Reload profile
     await loadProfile(currentUser.uid)
+
+    posthog.identify(currentUser.uid, { name: trimmedName, role: "student" })
+    posthog.capture("learner_signed_in", { is_new_learner: !matching })
   }, [loadProfile, migrateStudentData])
 
   // Returning-student login: look up by personal code + name, then migrate
@@ -351,16 +355,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // 5. Reload profile
     await loadProfile(currentUser.uid)
+
+    posthog.identify(currentUser.uid, { name: existingData.name, role: "student" })
+    posthog.capture("learner_signed_in", { is_new_learner: false, via: "personal_code" })
   }, [loadProfile, migrateStudentData])
 
   const signInGuide = useCallback(async (email: string, password: string) => {
     const cred = await signInWithEmailAndPassword(auth, email, password)
     await loadProfile(cred.user.uid)
+    posthog.identify(cred.user.uid, { email, role: "guide" })
+    posthog.capture("guide_signed_in", { method: "email" })
   }, [loadProfile])
 
   const signInGuideWithGoogle = useCallback(async () => {
     const result = await signInWithPopup(auth, googleProvider)
     await loadProfile(result.user.uid)
+    posthog.identify(result.user.uid, { email: result.user.email ?? undefined, role: "guide" })
+    posthog.capture("guide_signed_in", { method: "google" })
   }, [loadProfile])
 
   const linkGoogleAccount = useCallback(async () => {

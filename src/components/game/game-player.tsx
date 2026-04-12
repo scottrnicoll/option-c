@@ -8,6 +8,7 @@ import { X, Star, RotateCcw, ArrowLeft, BookOpen, Zap } from "lucide-react"
 import { FeedbackButton } from "@/components/feedback/feedback-button"
 import { useAuth } from "@/lib/auth"
 import { collection, doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore"
+import posthog from "posthog-js"
 import { db } from "@/lib/firebase"
 import type { FeedbackDoc } from "@/lib/feedback-types"
 
@@ -110,6 +111,7 @@ export function GamePlayer({ gameId, title, html, concept, onClose, isPendingRev
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ playerUid: activeProfile?.uid }),
     }).catch(() => {})
+    posthog.capture("library_game_played", { game_id: gameId, play_mode: playMode, standard_id: standardId })
   }, [gameId, isAuthor, isPendingReview])
 
   // Game-end handler — fired when the iframe posts game_win or game_lose.
@@ -125,6 +127,9 @@ export function GamePlayer({ gameId, title, html, concept, onClose, isPendingRev
         setHintMode("prompt_real")
         return
       }
+      if (playMode === "master") {
+        posthog.capture("library_game_won", { game_id: gameId, standard_id: standardId })
+      }
       onWin?.()
     } else {
       onLose?.()
@@ -133,7 +138,9 @@ export function GamePlayer({ gameId, title, html, concept, onClose, isPendingRev
       // if a win happened within the last 3 seconds, suppress the overlay.
       const recentlyWon = now - lastWinAtRef.current < 3000
       if (concept && !recentlyWon) setShowMathMoment(true)
+      posthog.capture("game_lost", { game_id: gameId, standard_id: standardId, play_mode: playMode })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onWin, onLose, concept, hintMode])
 
   const handleUnapprove = async () => {

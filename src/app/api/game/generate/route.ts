@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 // Generate-and-test loop can take 60-180s in the worst case:
 //   - Initial generation:        ~25-40s
@@ -525,6 +526,18 @@ Output ONLY the HTML, no markdown, no code fences.`
     const coreVerb = verbMatch ? verbMatch[1] : "(NOT DECLARED)"
     const totalSeconds = Math.round((Date.now() - startTime) / 1000)
     console.log(`[generate] standard=${designDoc.standardId ?? "?"} mathRole="${designDoc.mathRole ?? "?"}" coreVerb="${coreVerb}" totalTime=${totalSeconds}s`)
+
+    const phog = getPostHogClient()
+    phog.capture({
+      distinctId: designDoc.standardId ?? "unknown",
+      event: "game_generated",
+      properties: {
+        standard_id: designDoc.standardId,
+        vibe,
+        core_verb: coreVerb,
+        generation_seconds: totalSeconds,
+      },
+    })
 
     return Response.json({ html })
   } catch (error) {

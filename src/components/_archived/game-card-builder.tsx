@@ -6,6 +6,7 @@ import type { MechanicAnimation } from "@/lib/mechanic-animations"
 import { MECHANIC_OPTIONS_MAP } from "@/lib/mechanic-card-options"
 import type { GameDesignDoc } from "@/lib/game-types"
 import { ArtworkPicker } from "@/components/game/artwork-picker"
+import posthog from "posthog-js"
 
 type Vibe = "kawaii" | "stickman" | "c64"
 
@@ -167,6 +168,13 @@ Math skill: ${standardDescription}`
       if (spritesToUse && Object.keys(spritesToUse).length > 0) {
         ;(designDoc as any).sprites = spritesToUse
       }
+      posthog.capture("game_card_completed", {
+        standard_id: standardId,
+        mechanic: mechanic.id,
+        vibe,
+        theme: theme?.raw,
+        character: character?.raw,
+      })
       onBuildGame(designDoc, gameSummary, vibe)
     } catch {
       onBuildGame({

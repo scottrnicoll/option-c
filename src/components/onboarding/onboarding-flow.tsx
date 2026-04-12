@@ -6,6 +6,7 @@ import { Logo } from "@/components/logo"
 import { useAuth } from "@/lib/auth"
 import { doc, updateDoc, getDoc } from "firebase/firestore"
 import { db, auth } from "@/lib/firebase"
+import posthog from "posthog-js"
 
 interface OnboardingData {
   name: string
@@ -670,7 +671,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         {/* Welcome: new vs returning */}
         <StepWrapper visible={step === "welcome"}>
           <WelcomeChoiceStep
-            onNew={() => setStep("classCode")}
+            onNew={() => { posthog.capture("onboarding_started"); setStep("classCode") }}
             onReturning={() => setStep("returning")}
           />
         </StepWrapper>

@@ -1,5 +1,6 @@
 import { getAdminDb } from "@/lib/firebase-admin"
 import { FieldValue } from "firebase-admin/firestore"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -68,6 +69,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           { merge: true }
         )
     }
+
+    const phog = getPostHogClient()
+    phog.capture({
+      distinctId: reviewerUid,
+      event: approved ? "game_approved" : "game_rejected",
+      properties: {
+        game_id: id,
+        author_uid: game.authorUid,
+        standard_id: game.standardId,
+        has_comment: !!comment,
+      },
+    })
 
     return Response.json({
       status: approved ? "published" : "pending_review",

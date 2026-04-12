@@ -8,6 +8,7 @@ import { GameIframe } from "@/components/game/game-iframe"
 import { Trophy } from "lucide-react"
 import type { Game } from "@/lib/game-types"
 import type { FeedbackDoc } from "@/lib/feedback-types"
+import posthog from "posthog-js"
 import { useTokenConfig } from "@/lib/token-config"
 
 interface MasteryPlayProps {
@@ -64,6 +65,7 @@ export function MasteryPlay({ standardId, onDemonstrated }: MasteryPlayProps) {
   const handleWin = async () => {
     const newWins = wins + 1
     setWins(newWins)
+    posthog.capture("own_game_win", { standard_id: standardId, streak: newWins })
     if (newWins >= 3) {
       // Demonstrated! Flip standard to unlocked (green moon).
       setDemonstrated(true)
@@ -73,6 +75,7 @@ export function MasteryPlay({ standardId, onDemonstrated }: MasteryPlayProps) {
         unlockedAt: Date.now(),
         ownGameWinStreak: 3,
       })
+      posthog.capture("standard_unlocked", { standard_id: standardId })
       // Notify parent so the planet can refresh / supernova can fire
       setTimeout(() => onDemonstrated(), 1500)
     } else {
