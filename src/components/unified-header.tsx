@@ -77,10 +77,10 @@ function NavLink({ href, active, icon, label, highlight }: {
   return (
     <Link
       href={href}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors ${
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
         active
-          ? highlight ? "bg-emerald-600 text-white" : "bg-zinc-700 text-white"
-          : highlight ? "bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30" : "text-zinc-400 hover:text-white"
+          ? "text-white border-b-2 border-blue-400 rounded-b-none"
+          : highlight ? "text-emerald-400 hover:text-emerald-300" : "text-zinc-400 hover:text-white"
       }`}
     >
       {icon}
@@ -123,7 +123,7 @@ function LearnerStats() {
         <span className="font-medium">G{activeProfile.grade}</span>
       )}
       <span>{skillCount}/{totalForGrade} skills</span>
-      <span className="text-amber-400 font-mono">⬡ {activeProfile.tokens || 0}</span>
+      <span className="text-amber-400 font-mono">🪙 {activeProfile.tokens || 0}</span>
     </div>
   )
 }
@@ -169,10 +169,10 @@ function HowToPlayButton() {
   return (
     <Link
       href="/?howtoplay=1"
-      className="flex items-center gap-1 px-2 py-1.5 rounded-md text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+      className="p-1.5 rounded-md text-zinc-500 hover:text-zinc-300 transition-colors"
+      title="How to play"
     >
-      <HelpCircle className="size-3.5" />
-      <span className="hidden sm:inline">How to play</span>
+      <HelpCircle className="size-4" />
     </Link>
   )
 }
