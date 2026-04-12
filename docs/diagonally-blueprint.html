@@ -36,7 +36,7 @@
 
 <div class="latest-update">
   <strong>Latest update</strong>
-  <p><strong>Barbara + Claude (April 12):</strong> All 57 game options complete. Added font palette for Barbara to choose from. Major moon card redesign planned (circuit board drag-and-drop builder). Added "Game Option" to glossary. Reorganized pending work with new "Eventually" section. Hybrid approach decided: HTML engines now, Mike's Phaser replaces over time.</p>
+  <p><strong>Barbara + Claude (April 9):</strong> Moon card redesign COMPLETE. New flow: Title → "This is about..." → "Where you'll use this" → collapsible "Learn more" → "Build Your Game". Circuit Board Builder replaces old card builder + GenieChat. All 57 game options wired in, grouped by mechanic. Vibe auto-detected from background. Sprite library integrated for backgrounds, characters, items.</p>
 </div>
 
 <p>This document explains how Diagonally works — what every part is called, how the pieces fit together, and what happens behind the scenes. Written for the team, no coding required.</p>
@@ -112,8 +112,8 @@
     <br>• <strong>✏️ Stick Man</strong> — dark zinc background, white line art, Patrick Hand font
     <br>• <strong>👾 Retro</strong> — blue pixel art, blocky SVG, VT323 font
   </td></tr>
-  <tr><td>Moon Card</td><td>The full-page view when you click a moon. Shows: concept explanation, stick figure animation, game mechanic options, and "I have my own idea" button.</td></tr>
-  <tr><td>Explore Card</td><td>The concept explanation section within the Moon Card: "What is this?", formula, "Watch out for", "Where you'll use this".</td></tr>
+  <tr><td>Moon Card</td><td>The full-page view when you click a moon. Shows: Title, "This is about...", "Where you'll use this", collapsible "Learn more" (formula + watch out for), then "Build Your Game" button.</td></tr>
+  <tr><td>Circuit Board Builder</td><td>The drag-and-drop game builder. Learner selects: Background (sprite), Character (sprite), Game Option (grouped by mechanic), Items (sprite). Math Role is auto-filled. Win Condition is optional. Replaces the old card builder + GenieChat flow.</td></tr>
   <tr><td>Game Naming</td><td>After a game generates, the learner names it and writes an optional dare before testing it.</td></tr>
   <tr><td>Game Dare</td><td>Optional challenge text (e.g. "I dare you to beat this in under 30 seconds!"). Shows in the Game Library when others play it.</td></tr>
 </table>
@@ -330,14 +330,14 @@
 <h2>14. Pending Work</h2>
 <!-- ============================================ -->
 
-<h3>Next Up — Moon Card Redesign</h3>
+<h3>Next Up</h3>
 <ul>
-  <li><strong>Redesign moon card flow:</strong> Title → "This is about..." → "Where you'll use this" → "Build Your Game" (arcade cabinet / circuit board)</li>
-  <li><strong>Build the circuit board UI:</strong> drag-and-drop game builder with slots for background, character, game option, items, win condition</li>
-  <li><strong>Wire all 57 game options into the new UI:</strong> grouped by mechanic, descriptions visible</li>
-  <li><strong>Auto-detect vibe from background:</strong> replace vibe picker with automatic font/color detection</li>
+  <li><del>Redesign moon card flow</del> — DONE: Title → "This is about..." → "Where you'll use this" → "Learn more" expandable → "Build Your Game"</li>
+  <li><del>Build the circuit board UI</del> — DONE: circuit-board-builder.tsx with slots for background, character, game option, items, win condition</li>
+  <li><del>Wire all 57 game options into the new UI</del> — DONE: grouped by mechanic with expand/collapse</li>
+  <li><del>Auto-detect vibe from background</del> — DONE: dark backgrounds → stickman, light → kawaii, other → c64</li>
+  <li><del>Move concept explanation to "Learn more" expandable</del> — DONE</li>
   <li><strong>Item recommendations per game option:</strong> 2-3 suggested items based on the game option, learner can browse all</li>
-  <li><strong>Move concept explanation to "Learn more" expandable section</strong></li>
   <li><strong>Hardcode "This is about..." for all 535 standards</strong></li>
 </ul>
 
