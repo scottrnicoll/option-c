@@ -134,7 +134,7 @@ Math: ${standardDescription}`
       {/* Header with criteria lights */}
       <div className="mb-4 shrink-0">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-white">Build Your Game</h2>
+          <h2 className="text-lg font-bold text-white">Game Assembler</h2>
           <span className="text-xs text-zinc-400">{filledCount}/4</span>
         </div>
         <div className="flex gap-3">

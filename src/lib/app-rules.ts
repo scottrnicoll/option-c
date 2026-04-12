@@ -51,10 +51,10 @@ export const APP_RULES: RulesByRole = {
       heading: "How to demonstrate a skill",
       body: [
         "1. Click a blue moon. Read \"This is about...\" and \"Where you'll use this\".",
-        "2. Click \"Build Your Game\" to open the Circuit Board Builder.",
+        "2. Click \"Build Your Game\" to open the Game Assembler.",
         "3. Pick your components: Background, Character, Game Option, Items, and Win Condition.",
         "4. Watch the 3 criteria lights — when all 3 are lit, click \"Build my game\".",
-        "5. Name your game and write an optional dare. Test it in the Workshop.",
+        "5. Name your game and write an optional dare. Test it in the Game Testing Lab.",
         "6. Submit for review. Your guide will approve or send it back with feedback.",
         "7. When approved, you earn tokens — but the moon is still YELLOW.",
         "8. Play your own game and win 3 times IN A ROW. The moon turns GREEN.",
@@ -63,7 +63,7 @@ export const APP_RULES: RulesByRole = {
     {
       heading: "The 3 game criteria",
       body: [
-        "As you fill the Circuit Board Builder, 3 criteria lights illuminate one by one:",
+        "As you fill the Game Assembler, 3 criteria lights illuminate one by one:",
         "🧠 MATH WELL APPLIED — Lights up when you pick a Game Option. The math is built into the game mechanic.",
         "💎 MATH ESSENTIAL — Lights up when you pick a Game Option AND set a Win Condition. The math is essential to winning.",
         "🎮 PLAYABLE GAME — Lights up when all 5 components are filled (Background, Character, Game Option, Items, Win Condition).",

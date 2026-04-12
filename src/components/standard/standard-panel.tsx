@@ -243,12 +243,12 @@ function MoonCardView({
 
               {playToMasterButton}
 
-              {/* Build Your Game button */}
+              {/* Open the Game Assembler */}
               <button
                 onClick={onBuild}
                 className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-base font-bold transition-colors shadow-lg shadow-emerald-900/30"
               >
-                Build Your Game →
+                Open Game Assembler →
               </button>
 
               {onImportHtml && (
