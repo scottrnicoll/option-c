@@ -43,7 +43,7 @@
 
 | # | Mechanic | Mechanic ID | Options | Status |
 |---|---|---|---|---|
-| 13 | Pattern & Repeat | `timing-rhythm` | sequence-builder, pattern-machine, broken-pattern | Not Started |
+| 13 | Pattern & Repeat | `timing-rhythm` | sequence-builder, pattern-machine, broken-pattern | In Progress — Claude |
 | 18 | Rise & Fall | `above-below-zero` | depth-navigator, temperature-swing, elevator-operator | Not Started |
 | 7 | Build & Measure | `construction-systems` | stack-to-target, fill-the-floor, box-packer | Not Started |
 | 16 | Plot & Explore | `terrain-generation` | coordinate-hunter, battleship, treasure-trail | Not Started |
