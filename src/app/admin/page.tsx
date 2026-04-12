@@ -885,7 +885,7 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Diagonally Blueprint</h2>
                   <a
-                    href="/blueprint.html"
+                    href="/api/blueprint"
                     target="_blank"
                     rel="noopener"
                     className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
@@ -895,7 +895,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="rounded-xl border border-zinc-800 overflow-hidden" style={{ height: "calc(100vh - 180px)" }}>
                   <iframe
-                    src="/blueprint.html"
+                    src="/api/blueprint"
                     className="w-full h-full border-0"
                     title="Diagonally Blueprint"
                   />
