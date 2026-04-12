@@ -9,6 +9,7 @@ import { MathMomentOverlay } from "./math-moment-overlay"
 import { Send, ArrowLeft, MessageCircle, X } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import { sanitizeGameHtml } from "@/lib/html-sanitizer"
+import posthog from "posthog-js"
 
 interface WorkshopProps {
   initialHtml: string
@@ -283,7 +284,10 @@ export function Workshop({
                 : "Play your game and win at least once before submitting."}
             </p>
             <button
-              onClick={() => onSendForReview(html, currentGameId)}
+              onClick={() => {
+                posthog.capture("game_submitted_for_review", { game_id: currentGameId, standard_id: designDoc.standardId })
+                onSendForReview(html, currentGameId)
+              }}
               disabled={!hasWon}
               className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
               title={!hasWon ? "Win your own game first" : undefined}

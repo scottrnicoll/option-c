@@ -9,6 +9,7 @@ import {
   SPRITE_BACKGROUNDS,
   resolveSpriteUrl,
 } from "@/lib/sprite-library"
+import posthog from "posthog-js"
 
 // Ensure Firebase app is initialized (reuse existing)
 function getFirebaseStorage() {
@@ -61,6 +62,7 @@ export function ArtworkPicker({ onSelect, onSkip }: ArtworkPickerProps) {
       await uploadBytes(storageRef, file)
       const url = await getDownloadURL(storageRef)
       setter(url)
+      posthog.capture("artwork_uploaded", { type })
     } catch {
       setUploadError("Upload failed — please try again")
     } finally {
@@ -103,7 +105,7 @@ export function ArtworkPicker({ onSelect, onSkip }: ArtworkPickerProps) {
           url: resolveSpriteUrl("characters", s.id),
         }))}
         selected={selectedChar}
-        onSelect={setSelectedChar}
+        onSelect={(id) => { posthog.capture("artwork_selected", { type: "character", sprite_id: id }); setSelectedChar(id) }}
         thumbSize="char"
         uploading={uploading === "character"}
         onUploadClick={() => charFileRef.current?.click()}
@@ -126,7 +128,7 @@ export function ArtworkPicker({ onSelect, onSkip }: ArtworkPickerProps) {
           url: resolveSpriteUrl("items", s.id),
         }))}
         selected={selectedItem}
-        onSelect={setSelectedItem}
+        onSelect={(id) => { posthog.capture("artwork_selected", { type: "item", sprite_id: id }); setSelectedItem(id) }}
         thumbSize="char"
         uploading={uploading === "item"}
         onUploadClick={() => itemFileRef.current?.click()}
@@ -149,7 +151,7 @@ export function ArtworkPicker({ onSelect, onSkip }: ArtworkPickerProps) {
           url: resolveSpriteUrl("backgrounds", s.id),
         }))}
         selected={selectedBg}
-        onSelect={setSelectedBg}
+        onSelect={(id) => { posthog.capture("artwork_selected", { type: "background", sprite_id: id }); setSelectedBg(id) }}
         thumbSize="bg"
         uploading={uploading === "background"}
         onUploadClick={() => bgFileRef.current?.click()}

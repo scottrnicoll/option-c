@@ -6,6 +6,7 @@ import { MatrixRain } from "./matrix-rain"
 import { FunnyStickFigure } from "./funny-stick-figure"
 import { BuildWaitMiniGame } from "./build-wait-mini-game"
 import { useAuth } from "@/lib/auth"
+import posthog from "posthog-js"
 
 interface BuildScreenProps {
   designDoc: GameDesignDoc
@@ -135,11 +136,12 @@ export function BuildScreen({ designDoc, onComplete, preSelectedVibe, mechanicId
     } finally {
       // Make sure we leave the loading screen even if the API fails
       setProgress(1)
+      posthog.capture("game_built", { mechanic_id: mechanicId, standard_id: designDoc?.standardId, vibe: preSelectedVibe, source: "ai" })
       setTimeout(() => {
         setPhase("done")
       }, 600)
     }
-  }, [designDoc])
+  }, [designDoc, mechanicId, preSelectedVibe])
 
   // Auto-start generation if vibe was pre-selected from card builder
   useEffect(() => {
@@ -168,6 +170,7 @@ export function BuildScreen({ designDoc, onComplete, preSelectedVibe, mechanicId
               // Engine generated instantly!
               setGeneratedHtml(data.html)
               setProgress(1)
+              posthog.capture("game_built", { mechanic_id: mechanicId, standard_id: designDoc?.standardId, vibe: preSelectedVibe, source: "engine" })
               setTimeout(() => setPhase("done"), 600)
             } else {
               // No engine — fall back to AI generation

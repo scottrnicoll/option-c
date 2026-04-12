@@ -132,6 +132,7 @@ export function GamePlayer({ gameId, title, html, concept, onClose, isPendingRev
       }
       onWin?.()
     } else {
+      posthog.capture("game_lost", { game_id: gameId, standard_id: standardId, play_mode: playMode })
       onLose?.()
       // Only show the math-moment overlay if we're sure the player actually
       // lost. Buggy games sometimes post game_lose right after game_win;

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Volume2, VolumeX, Sparkles } from "lucide-react"
+import posthog from "posthog-js"
 
 type ReadingLevel = "simpler" | "default" | "challenge"
 
@@ -247,7 +248,10 @@ export function ConceptCard({ standard, onReady, readOnly }: ConceptCardProps) {
               return (
                 <button
                   key={m.id}
-                  onClick={() => setSelectedMechanic(isSelected ? null : m)}
+                  onClick={() => {
+                    if (!isSelected) posthog.capture("mechanic_selected", { mechanic_id: m.id, mechanic_title: m.title, standard_id: standard.id })
+                    setSelectedMechanic(isSelected ? null : m)
+                  }}
                   className={`w-full text-left rounded-xl p-3 transition-all border-2 flex gap-3 ${
                     isSelected
                       ? "bg-blue-500/10 border-blue-500/60"

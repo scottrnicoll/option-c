@@ -26,6 +26,7 @@ import { RulesPopover } from "@/components/rules-popover"
 import { useTokenConfig } from "@/lib/token-config"
 import { useSearchParams } from "next/navigation"
 import { Search, X, Gamepad2 } from "lucide-react"
+import posthog from "posthog-js"
 import { MECHANIC_ANIMATIONS } from "@/lib/mechanic-animations"
 import moonNamesData from "@/data/moon-names.json"
 const MOON_NAMES = moonNamesData as Record<string, string>
@@ -480,6 +481,7 @@ export function GraphPage({ data }: GraphPageProps) {
     if (!node) return
     setSelectedStandard(node)
     setPanelOpen(true)
+    posthog.capture("moon_opened", { standard_id: node.id, domain: node.domain, grade: node.grade })
     if (tutorialStep === 1) setTutorialStep(2)
 
     // Don't mark as in_progress just by opening — only when they

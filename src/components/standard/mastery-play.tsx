@@ -216,6 +216,7 @@ export async function recordOtherGameWin(
       },
       { merge: true }
     )
+    posthog.capture("standard_mastered", { standard_id: standardId })
     return { mastered: true, wins: 3 }
   } else {
     await setDoc(ref, { othersGameWins: newWins }, { merge: true })
