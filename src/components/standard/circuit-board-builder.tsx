@@ -9,6 +9,7 @@ import { SPRITE_CHARACTERS, SPRITE_ITEMS, SPRITE_BACKGROUNDS, CHARACTER_CATEGORI
 import { SpritePicker } from "@/components/sprite-picker"
 import { getGameOptions } from "@/lib/game-engines/game-option-registry"
 import { getRecommendedItems } from "@/lib/item-recommendations"
+import { ConsoleAnimation } from "@/components/game/console-animation"
 import type { GameDesignDoc } from "@/lib/game-types"
 
 // The circuit board game builder.
@@ -202,33 +203,16 @@ Math: ${effectiveStandardDesc}`
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
-      {/* Header with criteria lights */}
-      <div className="mb-4 shrink-0">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-white">Game Assembler</h2>
-          <span className="text-xs text-zinc-400">{filledCount}/4</span>
-        </div>
-        <div className="flex gap-3">
-          <CriteriaLight
-            lit={criteriaWellApplied}
-            label="Math Well Applied"
-            icon="🧠"
-          />
-          <CriteriaLight
-            lit={criteriaEssential}
-            label="Math Essential"
-            icon="💎"
-          />
-          <CriteriaLight
-            lit={criteriaPlayable}
-            label="Playable Game"
-            icon="🎮"
-          />
-        </div>
-      </div>
-
-      {/* Circuit board layout */}
-      <div className="flex-1 space-y-4 min-h-0">
+      <ConsoleAnimation
+        hasBackground={!!selectedBackground}
+        hasCharacter={!!selectedCharacter}
+        hasGameOption={!!selectedGameOption}
+        hasItem={!!selectedItem}
+        allFilled={!!allFilled}
+        onBuildStart={handleBuild}
+      >
+      {/* Circuit board layout inside console */}
+      <div className="space-y-4">
         {/* Math Role — static, already filled */}
         <div className="rounded-xl border border-zinc-700 bg-zinc-800/50 p-3">
           <div className="flex items-center gap-2 mb-1">
@@ -429,28 +413,11 @@ Math: ${effectiveStandardDesc}`
 
       </div>
 
-      {/* Build button */}
-      <div className="flex gap-2 mt-4 shrink-0">
-        <button onClick={onBack} className="px-4 py-3 rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-sm font-medium transition-colors">
-          ← Back
-        </button>
-        <button
-          onClick={handleBuild}
-          disabled={!allFilled || building}
-          className="flex-1 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
-        >
-          {building ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 className="size-4 animate-spin" />
-              Building...
-            </span>
-          ) : allFilled ? (
-            "Build my game →"
-          ) : (
-            `Select all components (${filledCount}/4)`
-          )}
-        </button>
-      </div>
+      </ConsoleAnimation>
+
+      <button onClick={onBack} className="mt-3 px-4 py-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+        ← Back
+      </button>
     </div>
   )
 }
