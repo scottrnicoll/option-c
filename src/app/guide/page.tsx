@@ -552,6 +552,10 @@ export default function GuideDashboard() {
                 {/* Progress grid — all planets and moons for this learner's grade */}
                 <h3 className="text-sm font-medium text-zinc-300">Skill Progress</h3>
                 <LearnerProgressGrid uid={selectedStudent.uid} grade={selectedStudent.grade} />
+
+                {/* Multiplication mastery */}
+                <h3 className="text-sm font-medium text-zinc-300">Multiplication Tables (2-12)</h3>
+                <MultiplicationMastery uid={selectedStudent.uid} />
               </div>
             )}
 
@@ -731,6 +735,81 @@ function GameList({ games, emptyMessage, onPlay }: { games: Game[]; emptyMessage
           ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+function MultiplicationMastery({ uid }: { uid: string }) {
+  const [data, setData] = useState<{ mastered: string[]; struggles: string[]; totalCorrect: number; totalAttempts: number } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getDoc(doc(db, "multiplicationProgress", uid))
+      .then((snap) => {
+        if (snap.exists()) setData(snap.data() as any)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [uid])
+
+  if (loading) return <p className="text-sm text-zinc-500">Loading...</p>
+  if (!data) return <p className="text-sm text-zinc-500">No multiplication practice data yet.</p>
+
+  const totalFacts = 121 // 11x11 (2-12)
+  const masteredCount = data.mastered?.length || 0
+  const struggleCount = data.struggles?.length || 0
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+      <div className="flex gap-6">
+        <div><p className="text-xs text-zinc-500">Mastered</p><p className="text-lg font-mono text-emerald-400">{masteredCount}/{totalFacts}</p></div>
+        <div><p className="text-xs text-zinc-500">Struggling</p><p className="text-lg font-mono text-amber-400">{struggleCount}</p></div>
+        <div><p className="text-xs text-zinc-500">Accuracy</p><p className="text-lg font-mono text-blue-400">{data.totalAttempts > 0 ? Math.round((data.totalCorrect / data.totalAttempts) * 100) : 0}%</p></div>
+      </div>
+      {struggleCount > 0 && (
+        <div>
+          <p className="text-xs text-zinc-500 mb-1">Struggling with:</p>
+          <div className="flex flex-wrap gap-1">
+            {data.struggles.map((s) => (
+              <span key={s} className="text-xs bg-amber-500/15 text-amber-300 px-2 py-0.5 rounded-full font-mono">{s.replace("x", " x ")}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* Mastery grid — 11x11 for tables 2-12 */}
+      <div>
+        <p className="text-xs text-zinc-500 mb-2">Mastery grid (2-12):</p>
+        <div className="grid gap-px" style={{ gridTemplateColumns: "auto repeat(11, 1fr)" }}>
+          <div className="text-[9px] text-zinc-600 p-1"></div>
+          {Array.from({ length: 11 }, (_, i) => (
+            <div key={i} className="text-[9px] text-zinc-500 text-center p-1 font-mono">{i + 2}</div>
+          ))}
+          {Array.from({ length: 11 }, (_, row) => (
+            <>
+              <div key={`r${row}`} className="text-[9px] text-zinc-500 p-1 font-mono text-right">{row + 2}</div>
+              {Array.from({ length: 11 }, (_, col) => {
+                const key = `${row + 2}x${col + 2}`
+                const isMastered = data.mastered?.includes(key)
+                const isStruggle = data.struggles?.includes(key)
+                return (
+                  <div
+                    key={key}
+                    className={`w-full aspect-square rounded-sm ${
+                      isMastered ? "bg-emerald-500/60" : isStruggle ? "bg-amber-500/40" : "bg-zinc-800/50"
+                    }`}
+                    title={`${row + 2} x ${col + 2} = ${(row + 2) * (col + 2)}${isMastered ? " (mastered)" : isStruggle ? " (struggling)" : ""}`}
+                  />
+                )
+              })}
+            </>
+          ))}
+        </div>
+        <div className="flex gap-3 mt-2 text-[10px] text-zinc-500">
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-500/60" /> Mastered</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-amber-500/40" /> Struggling</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-zinc-800/50" /> Not practiced</span>
+        </div>
+      </div>
     </div>
   )
 }

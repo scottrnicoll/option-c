@@ -13,7 +13,8 @@ import {
 import { db } from "@/lib/firebase"
 import { useAuth } from "@/lib/auth"
 import type { FeedbackDoc, FeedbackReply } from "@/lib/feedback-types"
-import { Send, MessageCircle, Archive, ArchiveRestore, Flag, Bug } from "lucide-react"
+import { Send, MessageCircle, Archive, ArchiveRestore, Flag, Bug, Award } from "lucide-react"
+import { increment } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 
 interface FeedbackInboxProps {
@@ -210,6 +211,53 @@ export function FeedbackInbox({ mode }: FeedbackInboxProps) {
     }
   }
 
+  // Award a Diagonal Idea prize to the feedback sender
+  const handleAwardPrize = async (item: FeedbackDoc, level: "spark" | "idea" | "vision") => {
+    if (!activeProfile || activeProfile.role !== "admin") return
+    setBusyId(item.id)
+    const labels = { spark: "Diagonal Spark", idea: "Diagonal Idea", vision: "Diagonal Vision" }
+    const medals = { spark: "🥉", idea: "🥈", vision: "🥇" }
+    try {
+      // Get token amounts from config
+      const configSnap = await getDocs(query(collection(db, "config")))
+      let amount = level === "spark" ? 1000 : level === "idea" ? 5000 : 10000
+      for (const d of configSnap.docs) {
+        if (d.id === "tokens") {
+          const data = d.data()
+          if (level === "spark" && typeof data.diagonalSpark === "number") amount = data.diagonalSpark
+          if (level === "idea" && typeof data.diagonalIdea === "number") amount = data.diagonalIdea
+          if (level === "vision" && typeof data.diagonalVision === "number") amount = data.diagonalVision
+        }
+      }
+
+      // Award tokens to sender
+      await updateDoc(doc(db, "users", item.fromUid), {
+        tokens: increment(amount),
+        lifetimeTokens: increment(amount),
+        [`prizes.${level}`]: increment(1),
+      })
+
+      // Send notification to sender
+      const feedbackRef = doc(collection(db, "feedback"))
+      await updateDoc(doc(db, "feedback", item.id), {
+        replies: arrayUnion({
+          fromUid: activeProfile.uid,
+          fromName: activeProfile.name,
+          fromRole: "admin",
+          text: `${medals[level]} You earned a ${labels[level]} prize! +${amount} tokens for your great idea!`,
+          createdAt: Date.now(),
+        } as FeedbackReply),
+        updatedAt: Date.now(),
+      })
+
+      await load()
+    } catch (err) {
+      console.warn("award prize failed:", err)
+    } finally {
+      setBusyId(null)
+    }
+  }
+
   if (!activeProfile) return null
 
   if (loading) {
@@ -373,6 +421,34 @@ export function FeedbackInbox({ mode }: FeedbackInboxProps) {
                       {item.archived ? <ArchiveRestore className="size-3.5" /> : <Archive className="size-3.5" />}
                       {item.archived ? "Unarchive" : "Archive"}
                     </button>
+                  )}
+                  {showFilters && isAdmin && item.type === "improvement" && (
+                    <div className="flex gap-1 ml-auto">
+                      <button
+                        onClick={() => handleAwardPrize(item, "spark")}
+                        disabled={busyId === item.id}
+                        className="flex items-center gap-1 bg-orange-900/30 hover:bg-orange-800/40 text-orange-300 text-xs font-medium rounded-md px-2.5 py-1.5 transition-colors border border-orange-700/30"
+                        title="Award Diagonal Spark (1,000 tokens)"
+                      >
+                        🥉 Spark
+                      </button>
+                      <button
+                        onClick={() => handleAwardPrize(item, "idea")}
+                        disabled={busyId === item.id}
+                        className="flex items-center gap-1 bg-zinc-600/30 hover:bg-zinc-500/40 text-zinc-200 text-xs font-medium rounded-md px-2.5 py-1.5 transition-colors border border-zinc-500/30"
+                        title="Award Diagonal Idea (5,000 tokens)"
+                      >
+                        🥈 Idea
+                      </button>
+                      <button
+                        onClick={() => handleAwardPrize(item, "vision")}
+                        disabled={busyId === item.id}
+                        className="flex items-center gap-1 bg-amber-600/30 hover:bg-amber-500/40 text-amber-200 text-xs font-medium rounded-md px-2.5 py-1.5 transition-colors border border-amber-500/30"
+                        title="Award Diagonal Vision (10,000 tokens)"
+                      >
+                        🥇 Vision
+                      </button>
+                    </div>
                   )}
                 </div>
               )}

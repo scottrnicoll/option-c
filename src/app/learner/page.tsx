@@ -290,6 +290,7 @@ export default function LearnerDashboard() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-white">Hey {activeProfile.name}</h1>
+            <PrizeBadges uid={activeProfile.uid} />
             <InfoButton title="My Stuff">
               <p><span className="text-zinc-200">My Stuff</span> is your personal dashboard.</p>
               <p>Track your progress: skills demonstrated, skills mastered, and tokens earned.</p>
@@ -613,6 +614,32 @@ function MoonRow({
         </div>
       </div>
       <div className="shrink-0">{action}</div>
+    </div>
+  )
+}
+
+function PrizeBadges({ uid }: { uid: string }) {
+  const [prizes, setPrizes] = useState<{ spark?: number; idea?: number; vision?: number } | null>(null)
+  useEffect(() => {
+    import("firebase/firestore").then(({ doc: docRef, getDoc }) => {
+      getDoc(docRef(db, "users", uid)).then((snap) => {
+        if (snap.exists()) {
+          const data = snap.data()
+          if (data.prizes) setPrizes(data.prizes)
+        }
+      }).catch(() => {})
+    })
+  }, [uid])
+
+  if (!prizes) return null
+  const { spark = 0, idea = 0, vision = 0 } = prizes
+  if (spark + idea + vision === 0) return null
+
+  return (
+    <div className="flex items-center gap-1">
+      {vision > 0 && <span title={`${vision}x Diagonal Vision`} className="text-sm">{"🥇".repeat(Math.min(vision, 5))}</span>}
+      {idea > 0 && <span title={`${idea}x Diagonal Idea`} className="text-sm">{"🥈".repeat(Math.min(idea, 5))}</span>}
+      {spark > 0 && <span title={`${spark}x Diagonal Spark`} className="text-sm">{"🥉".repeat(Math.min(spark, 5))}</span>}
     </div>
   )
 }
