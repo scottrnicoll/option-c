@@ -11,7 +11,7 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { designDoc, mechanicId, standardId, standardDescription, grade, cardChoices, sprites } = body
+  const { designDoc, mechanicId, standardId, standardDescription, grade, cardChoices, sprites, gameOption } = body
 
   if (!mechanicId || !hasEngine(mechanicId)) {
     return Response.json({ error: "No engine for this mechanic", hasEngine: false }, { status: 400 })
@@ -170,7 +170,7 @@ Return JSON array: [{"prompt":"...","target":N,"items":[...],"hint":"..."},...]`
     rounds,
   }
 
-  const html = generateWithEngine(mechanicId, themeConfig, mathParams)
+  const html = generateWithEngine(mechanicId, themeConfig, mathParams, gameOption)
   if (!html) {
     return Response.json({ error: "Engine generation failed" }, { status: 500 })
   }

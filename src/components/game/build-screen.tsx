@@ -162,6 +162,7 @@ export function BuildScreen({ designDoc, onComplete, preSelectedVibe, mechanicId
             grade: "6",
             cardChoices: (designDoc as any).cardChoices,
             sprites: (designDoc as any).sprites,
+            gameOption: (designDoc as any).gameOption,
           }),
         })
           .then(r => r.json())

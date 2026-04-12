@@ -6,6 +6,7 @@ import type { MechanicAnimation } from "@/lib/mechanic-animations"
 import { matchMechanics } from "@/lib/mechanic-animations"
 import { MECHANIC_OPTIONS_MAP } from "@/lib/mechanic-card-options"
 import { SPRITE_CHARACTERS, SPRITE_ITEMS, SPRITE_BACKGROUNDS } from "@/lib/sprite-library"
+import { getGameOptions } from "@/lib/game-engines/game-option-registry"
 import type { GameDesignDoc } from "@/lib/game-types"
 
 // The circuit board game builder.
@@ -30,32 +31,9 @@ interface GameOptionInfo {
   mechanicId: string
   mechanicTitle: string
   mechanicDescription: string
-  variantKey: "classic" | "variantB" | "variantC"
+  optionId: string           // game option ID from registry, e.g. "free-collect"
   optionName: string
   optionDescription: string
-}
-
-// Map game options to friendly names and descriptions
-const VARIANT_NAMES: Record<string, Record<string, { name: string; desc: string }>> = {
-  "resource-management": { classic: { name: "Free Collect", desc: "Click items to hit exact target sum" }, variantB: { name: "Conveyor Belt", desc: "Items scroll past — grab before they disappear" }, variantC: { name: "Split the Loot", desc: "Divide items into 2 bins, each with its own target" } },
-  "partitioning": { classic: { name: "Cut the Bar", desc: "Cut a bar into equal parts and shade the fraction" }, variantB: { name: "Pour the Liquid", desc: "Drag slider to pour exactly the right fraction" }, variantC: { name: "Share the Pizza", desc: "Give each plate equal pieces" } },
-  "balance-systems": { classic: { name: "Free Balance", desc: "Drag weights to make both sides equal" }, variantB: { name: "Mystery Side", desc: "One side is hidden — figure out its value" }, variantC: { name: "Chain Scales", desc: "Balance 3 connected scales in sequence" } },
-  "spatial-puzzles": { classic: { name: "Rotate to Match", desc: "Rotate the shape to match the target" }, variantB: { name: "Tangram Fill", desc: "Pick shapes that add up to the target area" }, variantC: { name: "Mirror Puzzle", desc: "Click where the mirror reflection goes" } },
-  "probability-systems": { classic: { name: "Find the Stat", desc: "Identify mode, median, or mean from data" }, variantB: { name: "Bet the Spinner", desc: "Bet on the most likely outcome" }, variantC: { name: "Build the Chart", desc: "Build a histogram matching given stats" } },
-  "path-optimization": { classic: { name: "Shortest Route", desc: "Pick the route with the smallest total" }, variantB: { name: "Map Builder", desc: "Draw a path through nodes under a limit" }, variantC: { name: "Delivery Run", desc: "Visit all stops minimizing total distance" } },
-  "construction-systems": { classic: { name: "Stack to Target", desc: "Stack blocks to match target height" }, variantB: { name: "Fill the Floor", desc: "Place tiles to cover area exactly" }, variantC: { name: "Box Packer", desc: "Fill a 3D box volume with blocks" } },
-  "motion-simulation": { classic: { name: "Launch to Target", desc: "Set speed to hit target distance" }, variantB: { name: "Speed Trap", desc: "Calculate speed from distance and time" }, variantC: { name: "Catch Up", desc: "Set speed to close a gap in time" } },
-  "constraint-puzzles": { classic: { name: "Elimination Grid", desc: "Use clues to eliminate wrong answers" }, variantB: { name: "20 Questions", desc: "Ask yes/no questions to find the number" }, variantC: { name: "Logic Chain", desc: "Each clue reveals the next" } },
-  "strategy-economy": { classic: { name: "Investment Sim", desc: "Pick multipliers to reach target" }, variantB: { name: "Population Boom", desc: "Grow without overshooting" }, variantC: { name: "Doubling Maze", desc: "Pick multipliers at each fork" } },
-  "measurement-challenges": { classic: { name: "Size Picker", desc: "Compare two items, pick bigger" }, variantB: { name: "Ruler Race", desc: "Measure objects and type the length" }, variantC: { name: "Unit Converter", desc: "Convert units to compare" } },
-  "scoring-ranking": { classic: { name: "Sorting Lane", desc: "Drag items into ascending order" }, variantB: { name: "Number Line Drop", desc: "Drop numbers onto correct position" }, variantC: { name: "Leaderboard Fix", desc: "Fix errors in a scoreboard" } },
-  "timing-rhythm": { classic: { name: "Sequence Builder", desc: "Find the next number in a pattern" }, variantB: { name: "Pattern Machine", desc: "Identify the rule generating a sequence" }, variantC: { name: "Broken Pattern", desc: "Find which number is wrong" } },
-  "scaling-resizing": { classic: { name: "Resize Tool", desc: "Resize to match target ratio" }, variantB: { name: "Recipe Scaler", desc: "Scale a recipe to different servings" }, variantC: { name: "Map Distance", desc: "Use map scale to find real distances" } },
-  "inventory-crafting": { classic: { name: "Recipe Mixer", desc: "Set amounts to match recipe" }, variantB: { name: "Potion Lab", desc: "Ingredients get multiplied in the cauldron" }, variantC: { name: "Assembly Line", desc: "Grab groups from a conveyor to fill orders" } },
-  "terrain-generation": { classic: { name: "Coordinate Hunter", desc: "Click (x,y) to find targets" }, variantB: { name: "Battleship", desc: "Call coordinates to find hidden items" }, variantC: { name: "Treasure Trail", desc: "Follow coordinate clues" } },
-  "bidding-auction": { classic: { name: "Auction House", desc: "Estimate value and bid within 20%" }, variantB: { name: "Price is Right", desc: "Guess without going over" }, variantC: { name: "Round It!", desc: "Round to the nearest 10 or 100" } },
-  "above-below-zero": { classic: { name: "Depth Navigator", desc: "Move to target on number line" }, variantB: { name: "Temperature Swing", desc: "Stay in the target zone" }, variantC: { name: "Elevator Operator", desc: "Pick up passengers at +/- floors" } },
-  "build-structure": { classic: { name: "Shape Matcher", desc: "Pick shapes to match blueprint" }, variantB: { name: "Free Build", desc: "Build with shapes matching target sides" }, variantC: { name: "Shape Decomposer", desc: "Break total area into basic shapes" } },
 }
 
 export function CircuitBoardBuilder({
@@ -76,16 +54,15 @@ export function CircuitBoardBuilder({
   const gameOptions: GameOptionInfo[] = useMemo(() => {
     const options: GameOptionInfo[] = []
     for (const m of mechanics) {
-      const variants = VARIANT_NAMES[m.id]
-      if (!variants) continue
-      for (const [key, info] of Object.entries(variants)) {
+      const regOptions = getGameOptions(m.id)
+      for (const opt of regOptions) {
         options.push({
           mechanicId: m.id,
           mechanicTitle: m.title,
           mechanicDescription: m.description,
-          variantKey: key as "classic" | "variantB" | "variantC",
-          optionName: info.name,
-          optionDescription: info.desc,
+          optionId: opt.id,
+          optionName: opt.name,
+          optionDescription: opt.description,
         })
       }
     }
@@ -97,17 +74,16 @@ export function CircuitBoardBuilder({
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null)
   const [selectedGameOption, setSelectedGameOption] = useState<GameOptionInfo | null>(null)
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
-  const [winCondition, setWinCondition] = useState("")
   const [building, setBuilding] = useState(false)
   const [expandedMechanic, setExpandedMechanic] = useState<string | null>(mechanics[0]?.id || null)
 
-  const allFilled = selectedBackground && selectedCharacter && selectedGameOption && selectedItem && winCondition.trim()
-  const filledCount = [selectedBackground, selectedCharacter, selectedGameOption, selectedItem, winCondition.trim()].filter(Boolean).length
+  const allFilled = selectedBackground && selectedCharacter && selectedGameOption && selectedItem
+  const filledCount = [selectedBackground, selectedCharacter, selectedGameOption, selectedItem].filter(Boolean).length
 
   // Game Criteria lights
   const criteriaWellApplied = !!selectedGameOption  // Math Well Applied: game option selected
-  const criteriaEssential = !!selectedGameOption && !!winCondition.trim()  // Math Essential: game option + win condition
-  const criteriaPlayable = !!selectedBackground && !!selectedCharacter && !!selectedGameOption && !!selectedItem && !!winCondition.trim()  // Playable: all slots filled
+  const criteriaEssential = !!selectedGameOption  // Math Essential: game option selected (win condition is always "complete 5 rounds")
+  const criteriaPlayable = !!selectedBackground && !!selectedCharacter && !!selectedGameOption && !!selectedItem  // Playable: all 4 slots filled
 
   const handleBuild = async () => {
     if (!allFilled || !selectedGameOption) return
@@ -118,7 +94,6 @@ Mechanic: ${selectedGameOption.mechanicTitle}
 Background: ${selectedBackground}
 Character: ${selectedCharacter}
 Item: ${selectedItem}
-Win: ${winCondition || "Complete all rounds"}
 Math: ${standardDescription}`
 
       const res = await fetch("/api/game/design-doc", {
@@ -136,14 +111,14 @@ Math: ${standardDescription}`
         theme: selectedBackground,
         character: selectedCharacter,
         action: selectedGameOption.optionDescription,
-        win: winCondition || "Complete all rounds",
+        win: "Complete all 5 rounds",
       }
       ;(designDoc as any).sprites = {
         characterSprite: selectedCharacter,
         itemSprite: selectedItem,
         backgroundImage: selectedBackground,
       }
-      ;(designDoc as any).gameVariant = selectedGameOption.variantKey
+      ;(designDoc as any).gameOption = selectedGameOption.optionId
 
       onBuildGame(designDoc, summary, "default", selectedGameOption.mechanicId)
     } catch {
@@ -159,7 +134,7 @@ Math: ${standardDescription}`
       <div className="mb-4 shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-white">Build Your Game</h2>
-          <span className="text-xs text-zinc-400">{filledCount}/5</span>
+          <span className="text-xs text-zinc-400">{filledCount}/4</span>
         </div>
         <div className="flex gap-3">
           <CriteriaLight
@@ -266,8 +241,8 @@ Math: ${standardDescription}`
           ) : (
             <div className="space-y-3">
               {mechanics.map((m) => {
-                const variants = VARIANT_NAMES[m.id]
-                if (!variants) return null
+                const regOptions = getGameOptions(m.id)
+                if (regOptions.length === 0) return null
                 const isExpanded = expandedMechanic === m.id
                 return (
                   <div key={m.id} className="rounded-lg border border-zinc-700 overflow-hidden">
@@ -285,14 +260,14 @@ Math: ${standardDescription}`
                     </button>
                     {isExpanded && (
                       <div className="p-2 space-y-1.5 bg-zinc-900/50">
-                        {Object.entries(variants).map(([key, info]) => {
-                          const isSelected = selectedGameOption?.mechanicId === m.id && selectedGameOption?.variantKey === key
+                        {regOptions.map((opt) => {
+                          const isSelected = selectedGameOption?.optionId === opt.id
                           return (
                             <button
-                              key={key}
+                              key={opt.id}
                               onClick={() => setSelectedGameOption({
                                 mechanicId: m.id, mechanicTitle: m.title, mechanicDescription: m.description,
-                                variantKey: key as any, optionName: info.name, optionDescription: info.desc,
+                                optionId: opt.id, optionName: opt.name, optionDescription: opt.description,
                               })}
                               className={`w-full text-left px-3 py-2.5 rounded-lg transition-all border-2 ${
                                 isSelected
@@ -300,8 +275,8 @@ Math: ${standardDescription}`
                                   : "border-transparent hover:bg-zinc-800"
                               }`}
                             >
-                              <span className={`text-sm font-semibold ${isSelected ? "text-emerald-300" : "text-white"}`}>{info.name}</span>
-                              <p className="text-xs text-zinc-400 mt-0.5">{info.desc}</p>
+                              <span className={`text-sm font-semibold ${isSelected ? "text-emerald-300" : "text-white"}`}>{opt.name}</span>
+                              <p className="text-xs text-zinc-400 mt-0.5">{opt.description}</p>
                             </button>
                           )
                         })}
@@ -345,21 +320,6 @@ Math: ${standardDescription}`
           </div>
         </SlotSection>
 
-        {/* Win Condition — required */}
-        <div className={`rounded-xl border-2 transition-all p-3 ${winCondition.trim() ? "border-emerald-500/40 bg-emerald-500/5" : "border-zinc-700 bg-zinc-900"}`}>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm">🏆</span>
-            <span className="text-xs text-zinc-400 uppercase tracking-wide font-semibold">Win Condition</span>
-            {winCondition.trim() && <span className="text-emerald-400 text-xs">✓</span>}
-          </div>
-          <input
-            type="text"
-            value={winCondition}
-            onChange={(e) => setWinCondition(e.target.value)}
-            placeholder="e.g. Complete 5 rounds before time runs out"
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500"
-          />
-        </div>
       </div>
 
       {/* Build button */}
@@ -380,7 +340,7 @@ Math: ${standardDescription}`
           ) : allFilled ? (
             "Build my game →"
           ) : (
-            `Select all components (${filledCount}/5)`
+            `Select all components (${filledCount}/4)`
           )}
         </button>
       </div>

@@ -1,6 +1,6 @@
 // Game engine registry — all 19 engines.
 
-import type { ThemeConfig, MathParams, GameEngine, GameVariant, RoundData } from "./engine-types"
+import type { ThemeConfig, MathParams, GameEngine, GameOption, RoundData } from "./engine-types"
 import { balanceEqualizeEngine } from "./balance-equalize"
 import { riseFallEngine } from "./rise-fall"
 import { scoreRankEngine } from "./score-rank"
@@ -51,16 +51,16 @@ export function generateWithEngine(
   mechanicId: string,
   config: ThemeConfig,
   mathParams: MathParams,
-  variant?: GameVariant
+  option?: GameOption
 ): string | null {
   const engine = ENGINE_REGISTRY[mechanicId]
   if (!engine) return null
-  return engine(config, mathParams, variant || "classic")
+  return engine(config, mathParams, option)
 }
 
 export function getAvailableEngines(): string[] {
   return Object.keys(ENGINE_REGISTRY)
 }
 
-export type { ThemeConfig, MathParams, GameEngine, RoundData }
+export type { ThemeConfig, MathParams, GameEngine, GameOption, RoundData }
 export { DEFAULT_PALETTE } from "./engine-types"
