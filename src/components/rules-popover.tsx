@@ -33,19 +33,18 @@ export function RulesPopover() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 bg-zinc-900/85 backdrop-blur-sm border border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600 rounded-lg px-3 py-2 text-xs text-zinc-300 hover:text-white transition-colors font-medium"
+        className="p-1.5 rounded-md text-zinc-500 hover:text-zinc-300 transition-colors"
         title="How to Play"
         aria-label="How to Play"
       >
-        <HelpCircle className="size-3.5" />
-        How to Play
+        <HelpCircle className="size-4" />
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/70 flex items-start justify-center p-4 pt-16 overflow-y-auto">
           <div
             ref={ref}
-            className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl"
+            className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
               <h2 className="text-lg font-bold text-white">How Diagonally works</h2>
