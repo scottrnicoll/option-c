@@ -202,6 +202,21 @@ function heroShake(scene, hero) {
   scene.tweens.add({ targets: hero, x: ox - 8, duration: 60, yoyo: true, repeat: 3, ease: 'Sine.easeInOut', onComplete: () => { hero.x = ox; } });
 }
 
+// ─── Shared: Get round data from AI_ROUNDS (required) ────────────────────────
+// ALL math content comes from AI_ROUNDS. Engines must NOT generate their own math.
+function getRound(roundIndex) {
+  if (!AI_ROUNDS || !AI_ROUNDS[roundIndex]) {
+    return { prompt: 'Solve this!', target: 10, items: [10, 5, 8, 3, 12, 7], hint: 'Think carefully!' };
+  }
+  const r = AI_ROUNDS[roundIndex];
+  return {
+    prompt: r.prompt || 'Solve this!',
+    target: typeof r.target === 'number' ? r.target : 10,
+    items: Array.isArray(r.items) ? r.items : [10, 5, 8, 3, 12, 7],
+    hint: r.hint || null
+  };
+}
+
 // ─── State ───────────────────────────────────────────────────────────────────
 let gameScore = 0;
 let gameStarted = false;
