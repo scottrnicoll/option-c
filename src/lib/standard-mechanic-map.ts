@@ -81,14 +81,60 @@ export const DOMAIN_MECHANIC_MAP: Record<string, string[]> = {
   "MP": ["constraint-puzzles", "balance-systems"],
 }
 
-// Get allowed mechanics for a standard based on its domain code.
-// Falls back to keyword matching if domain not in the map.
-export function getAllowedMechanics(domainCode: string): string[] | null {
-  // Try exact match first (e.g. "A-REI")
+// Keyword refinement within a domain: if the standard description
+// contains specific words, narrow the mechanics further.
+// This ensures "volume" standards get Box Packer, not Ruler Race.
+const KEYWORD_OVERRIDES: Array<{ keywords: string[]; mechanics: string[] }> = [
+  // Volume / cubic
+  { keywords: ["volume", "cubic", "cube", "packed"], mechanics: ["construction-systems"] },
+  // Area / square units
+  { keywords: ["area", "square unit", "tile", "rectangle", "rectangular"], mechanics: ["construction-systems"] },
+  // Perimeter
+  { keywords: ["perimeter"], mechanics: ["construction-systems", "measurement-challenges"] },
+  // Length / ruler / measure
+  { keywords: ["length", "ruler", "measure the length", "inch", "centimeter"], mechanics: ["measurement-challenges"] },
+  // Time / clock
+  { keywords: ["time", "clock", "hour", "minute"], mechanics: ["measurement-challenges"] },
+  // Money
+  { keywords: ["money", "coin", "dollar", "cent"], mechanics: ["bidding-auction"] },
+  // Data / graphs / plots
+  { keywords: ["data", "line plot", "bar graph", "histogram", "graph", "chart"], mechanics: ["probability-systems"] },
+  // Fractions on number line
+  { keywords: ["number line", "fraction", "numerator", "denominator"], mechanics: ["partitioning"] },
+  // Negative numbers
+  { keywords: ["negative", "integer", "absolute value", "below zero"], mechanics: ["above-below-zero"] },
+  // Equations / solve / variable
+  { keywords: ["equation", "solve", "variable", "unknown"], mechanics: ["balance-systems"] },
+  // Ratio / proportion / percent / scale
+  { keywords: ["ratio", "proportion", "percent", "scale", "unit rate"], mechanics: ["scaling-resizing"] },
+  // Pattern / sequence / rule
+  { keywords: ["pattern", "sequence", "rule", "repeating"], mechanics: ["timing-rhythm"] },
+  // Coordinate / ordered pair / plot point
+  { keywords: ["coordinate", "ordered pair", "x-axis", "y-axis", "plot"], mechanics: ["terrain-generation"] },
+  // Shapes / angle / rotate / reflect
+  { keywords: ["shape", "angle", "rotate", "reflect", "triangle", "polygon", "congruent", "symmetry"], mechanics: ["spatial-puzzles"] },
+  // Exponent / power / growth
+  { keywords: ["exponent", "power", "growth", "compound", "square root"], mechanics: ["strategy-economy"] },
+  // Probability / chance / likely / outcome
+  { keywords: ["probability", "chance", "likely", "outcome", "event", "sample"], mechanics: ["probability-systems"] },
+]
+
+// Get allowed mechanics for a standard based on its domain code AND description.
+// Uses keyword overrides to narrow within a domain.
+export function getAllowedMechanics(domainCode: string, description?: string): string[] | null {
+  // FIRST: check keyword overrides if we have a description
+  if (description) {
+    const desc = description.toLowerCase()
+    for (const override of KEYWORD_OVERRIDES) {
+      if (override.keywords.some(kw => desc.includes(kw))) {
+        return override.mechanics
+      }
+    }
+  }
+
+  // THEN: try domain-level mapping
   if (DOMAIN_MECHANIC_MAP[domainCode]) return DOMAIN_MECHANIC_MAP[domainCode]
-  // Try prefix match for compound codes (e.g. "G" matches "G-CO")
-  // But we want the MORE specific match, so only fall back to base if no specific exists
   const base = domainCode.split("-")[0]
   if (DOMAIN_MECHANIC_MAP[base]) return DOMAIN_MECHANIC_MAP[base]
-  return null // No mapping — fall back to keyword matching
+  return null
 }

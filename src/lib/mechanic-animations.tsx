@@ -1197,7 +1197,7 @@ export const MECHANIC_ANIMATIONS: MechanicAnimation[] = [
 // as substrings since they already disambiguate themselves.
 export function matchMechanics(description: string, domainCode: string): MechanicAnimation[] {
   // FIRST: try hardcoded domain → mechanic mapping (most reliable)
-  const allowed = getAllowedMechanics(domainCode)
+  const allowed = getAllowedMechanics(domainCode, description)
   if (allowed && allowed.length > 0) {
     const result = allowed
       .map(id => MECHANIC_ANIMATIONS.find(m => m.id === id))
