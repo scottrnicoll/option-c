@@ -7,7 +7,8 @@ import { matchMechanics } from "@/lib/mechanic-animations"
 import { MECHANIC_OPTIONS_MAP } from "@/lib/mechanic-card-options"
 import { SPRITE_CHARACTERS, SPRITE_ITEMS, SPRITE_BACKGROUNDS, CHARACTER_CATEGORIES, BACKGROUND_CATEGORIES, ITEM_CATEGORIES } from "@/lib/sprite-library"
 import { SpritePicker } from "@/components/sprite-picker"
-import { getGameOptions } from "@/lib/game-engines/game-option-registry"
+import { getGameOptions, getOptionDef } from "@/lib/game-engines/game-option-registry"
+import { getGameOptionsForStandard } from "@/lib/standard-game-options"
 import { getRecommendedItems } from "@/lib/item-recommendations"
 import { ConsoleAnimation } from "@/components/game/console-animation"
 import type { GameDesignDoc } from "@/lib/game-types"
@@ -56,13 +57,32 @@ export function CircuitBoardBuilder({
 }: CircuitBoardBuilderProps) {
   const isEureka = mode === "eureka"
 
-  // Get matching mechanics and their game options (moon mode only)
+  // Get matching mechanics (used for math role display)
   const mechanics = useMemo(
     () => isEureka ? [] : matchMechanics(standardDescription, standardDomainCode),
     [standardDescription, standardDomainCode, isEureka]
   )
 
+  // Get game options — per-standard hardcoded mapping (most accurate)
   const gameOptions: GameOptionInfo[] = useMemo(() => {
+    if (isEureka) return []
+    // Try per-standard mapping first (466 moons individually mapped)
+    const standardOptions = standardId ? getGameOptionsForStandard(standardId) : null
+    if (standardOptions && standardOptions.length > 0) {
+      return standardOptions.map(optId => {
+        const opt = getOptionDef(optId)
+        if (!opt) return null
+        return {
+          mechanicId: opt.mechanicId,
+          mechanicTitle: "",
+          mechanicDescription: "",
+          optionId: opt.id,
+          optionName: opt.name,
+          optionDescription: opt.description,
+        }
+      }).filter(Boolean) as GameOptionInfo[]
+    }
+    // Fallback: mechanic-based matching
     const options: GameOptionInfo[] = []
     for (const m of mechanics) {
       const regOptions = getGameOptions(m.id)
@@ -78,7 +98,7 @@ export function CircuitBoardBuilder({
       }
     }
     return options
-  }, [mechanics])
+  }, [isEureka, standardId, mechanics])
 
   // Selected components
   const [selectedBackground, setSelectedBackground] = useState<string | null>(null)
