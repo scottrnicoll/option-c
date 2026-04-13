@@ -123,20 +123,20 @@ class ResizeToolScene extends Phaser.Scene {
   startRound() {
     if (this.roundGroup) this.roundGroup.clear(true, true);
     this.roundGroup = this.add.group();
-    const data = generateResizeRound(this.round);
+    const data = getRound(this.round);
     this.targetSize = data.target;
-    this.currentSize = data.original;
+    this.currentSize = data.items[0] || 4;
     this.promptLbl.setText(data.prompt);
     this._redrawDots();
     const W = this.W, H = this.H;
     // Original shape
     const origSize = Math.min(40, W * 0.08);
     this.roundGroup.add(this.add.rectangle(W * 0.25, H * 0.4, origSize, origSize, hexToNum(COL_SECONDARY), 0.5).setStrokeStyle(2, hexToNum(COL_TEXT), 0.5).setDepth(5));
-    this.roundGroup.add(this.add.text(W * 0.25, H * 0.4 + origSize / 2 + 15, 'Original: ' + data.original, {
+    this.roundGroup.add(this.add.text(W * 0.25, H * 0.4 + origSize / 2 + 15, 'Original: ' + data.items[0], {
       fontSize: '13px', color: COL_TEXT, fontFamily: "'Lexend', system-ui"
     }).setOrigin(0.5).setDepth(6));
     // Target shape (ghost)
-    const targetPx = origSize * data.scaleFactor;
+    const targetPx = origSize * (data.target / (data.items[0] || 1));
     this.roundGroup.add(this.add.rectangle(W * 0.65, H * 0.4, targetPx, targetPx, 0x000000, 0).setStrokeStyle(2, hexToNum(COL_ACCENT), 0.4).setDepth(5));
     this.roundGroup.add(this.add.text(W * 0.65, H * 0.4 + targetPx / 2 + 15, 'Target: ?', {
       fontSize: '13px', color: COL_ACCENT, fontFamily: "'Lexend', system-ui"
@@ -150,21 +150,21 @@ class ResizeToolScene extends Phaser.Scene {
     const sliderLeft = (W - sliderW) / 2;
     this.roundGroup.add(this.add.rectangle(W / 2, sliderY, sliderW, 4, hexToNum(COL_SECONDARY), 0.5).setDepth(6));
     // Size label
-    this.sizeLbl = this.add.text(W / 2, sliderY - 25, String(data.original), {
+    this.sizeLbl = this.add.text(W / 2, sliderY - 25, String(data.items[0]), {
       fontSize: '22px', color: COL_PRIMARY, fontFamily: "'Space Grotesk', sans-serif", fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(7);
     this.roundGroup.add(this.sizeLbl);
     // Handle
     const handle = this.add.circle(sliderLeft, sliderY, 14, hexToNum(COL_ACCENT))
       .setInteractive({ draggable: true, useHandCursor: true }).setDepth(8);
-    const maxSliderVal = data.original * 6;
+    const maxSliderVal = data.items[0] * 6;
     handle.on('drag', (pointer, dragX) => {
       const x = Math.max(sliderLeft, Math.min(sliderLeft + sliderW, dragX));
       handle.x = x;
       const frac = (x - sliderLeft) / sliderW;
-      this.currentSize = Math.round(data.original + frac * (maxSliderVal - data.original));
+      this.currentSize = Math.round(data.items[0] + frac * (maxSliderVal - data.items[0]));
       this.sizeLbl.setText(String(this.currentSize));
-      const scale = this.currentSize / data.original;
+      const scale = this.currentSize / data.items[0];
       this.playerRect.setSize(origSize * scale, origSize * scale);
     });
     this.roundGroup.add(handle);

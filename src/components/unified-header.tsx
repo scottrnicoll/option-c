@@ -24,10 +24,16 @@ export function UnifiedHeader() {
   const { activeProfile, impersonating } = useAuth()
   const pathname = usePathname()
 
-  // Don't show on guide/admin pages or if no profile
   if (!activeProfile) return null
-  if (activeProfile.role === "guide" || activeProfile.role === "admin") return null
+
+  // Guide/Admin pages use their own built-in headers
   if (pathname.startsWith("/guide") || pathname.startsWith("/admin")) return null
+
+  // Hide for non-learner roles on learner pages
+  if (activeProfile.role === "guide" || activeProfile.role === "admin") {
+    // Show header if guide is impersonating a learner
+    if (!impersonating) return null
+  }
 
   const isExplore = pathname === "/"
   const isBuild = pathname === "/build"

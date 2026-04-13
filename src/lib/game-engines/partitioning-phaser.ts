@@ -241,10 +241,10 @@ class PourTheLiquidScene extends Phaser.Scene {
   startRound() {
     if (this.pourGroup) this.pourGroup.clear(true, true);
     this.pourGroup = this.add.group();
-    const data = generatePourRound(this.round);
-    this.targetFrac = data.numerator / data.denominator;
-    this.targetNumer = data.numerator;
-    this.targetDenom = data.denominator;
+    const data = getRound(this.round);
+    this.targetNumer = data.target;
+    this.targetDenom = data.items[0] || 4;
+    this.targetFrac = this.targetNumer / this.targetDenom;
     this.currentFrac = 0;
     this._redrawDots();
     this._drawGlass();
@@ -380,10 +380,10 @@ class ShareThePizzaScene extends Phaser.Scene {
   startRound() {
     if (this.pizzaGroup) this.pizzaGroup.clear(true, true);
     this.pizzaGroup = this.add.group();
-    const data = generatePizzaRound(this.round);
-    this.totalSlices = data.totalSlices;
-    this.numPeople = data.people;
-    this.perPerson = data.perPerson;
+    const data = getRound(this.round);
+    this.totalSlices = data.target;
+    this.numPeople = data.items[0] || 2;
+    this.perPerson = Math.floor(data.target / (data.items[0] || 2));
     this.plateCounts = new Array(this.numPeople).fill(0);
     this.remainingSlices = data.totalSlices;
     this._redrawDots();
