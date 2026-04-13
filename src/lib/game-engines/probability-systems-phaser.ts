@@ -119,14 +119,14 @@ function generateChartRound(round) {
 class FindTheStatScene extends Phaser.Scene {
   constructor() { super('FindTheStatScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'♥',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateStatRound(this.round);this.target=data.target;this._rd();
+    const data=getRound(this.round);this.target=data.target;data.numbers=data.items;data.statType=data.prompt.toLowerCase().indexOf('mode')>=0?'mode':data.prompt.toLowerCase().indexOf('median')>=0?'median':'mean';this._rd();
     const W=this.W,H=this.H;
     // Show prompt
     this.rg.add(this.add.text(W/2,H*0.1,data.prompt,{fontSize:'22px',color:COL_ACCENT,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6));
@@ -170,14 +170,18 @@ class FindTheStatScene extends Phaser.Scene {
 class BetTheSpinnerScene extends Phaser.Scene {
   constructor() { super('BetTheSpinnerScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'♥',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateSpinnerRound(this.round);this.correctName=data.correctName;this._rd();
+    const data=getRound(this.round);
+    // Build spinner data: fall back to generator for visual display
+    const fallback=generateSpinnerRound(this.round);
+    data.sections=fallback.sections;
+    this.correctName=fallback.correctName;this._rd();
     const W=this.W,H=this.H;
     // Prompt
     this.rg.add(this.add.text(W/2,H*0.06,'Which color is MOST LIKELY?',{fontSize:'18px',color:COL_ACCENT,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6));
@@ -237,14 +241,22 @@ class BetTheSpinnerScene extends Phaser.Scene {
 class BuildTheChartScene extends Phaser.Scene {
   constructor() { super('BuildTheChartScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'♥',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateChartRound(this.round);this.target=data.hidden;this.inputVal='';this._rd();
+    const data=getRound(this.round);this.target=data.target;
+    // Build chart data from getRound
+    data.values=data.items.slice();data.hidden=data.target;
+    const hideIdx=data.values.indexOf(data.target);
+    data.hideIdx=hideIdx>=0?hideIdx:0;
+    data.shown=data.values.map(function(v,i){return i===data.hideIdx?'?':String(v);});
+    const sum=data.values.reduce(function(a,b){return a+b;},0);
+    data.mean=Math.round(sum/data.values.length);
+    data.prompt=data.prompt||('Mean = '+data.mean+'. Find the missing value.');this.inputVal='';this._rd();
     const W=this.W,H=this.H;
     // Prompt
     this.rg.add(this.add.text(W/2,H*0.08,data.prompt,{fontSize:'18px',color:COL_ACCENT,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6));

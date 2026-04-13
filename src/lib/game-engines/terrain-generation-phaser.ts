@@ -105,15 +105,15 @@ function generateTreasureTrailRound(round) {
 class CoordinateHunterScene extends Phaser.Scene {
   constructor() { super('CoordinateHunterScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateCoordinateHunterRound(this.round);
-    this.targetX=data.targetX;this.targetY=data.targetY;
+    const data=getRound(this.round);
+    this.targetX=data.target;this.targetY=data.items[0]||0;
     this._rd();
 
     const W=this.W,H=this.H;
@@ -221,14 +221,21 @@ class CoordinateHunterScene extends Phaser.Scene {
 class BattleshipScene extends Phaser.Scene {
   constructor() { super('BattleshipScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateBattleshipRound(this.round);
+    const data=getRound(this.round);
+    // Build ships from items: pairs of [x,y] coords
+    const shipList = [];
+    for (let i = 0; i < data.items.length; i += 2) {
+      shipList.push({ x: data.items[i], y: data.items[i + 1] || 0 });
+    }
+    if (shipList.length === 0) shipList.push({ x: data.target, y: 0 });
+    data.ships = shipList;
     this.ships=data.ships.map(function(s){ return {x:s.x,y:s.y,found:false}; });
     this.hitsRemaining=this.ships.length;
     this._rd();
@@ -335,14 +342,21 @@ class BattleshipScene extends Phaser.Scene {
 class TreasureTrailScene extends Phaser.Scene {
   constructor() { super('TreasureTrailScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateTreasureTrailRound(this.round);
+    const data=getRound(this.round);
+    // Build clues from items: pairs of [x,y] coords
+    const clueList = [];
+    for (let i = 0; i < data.items.length; i += 2) {
+      clueList.push({ x: data.items[i], y: data.items[i + 1] || 0 });
+    }
+    if (clueList.length === 0) clueList.push({ x: data.target, y: 0 });
+    data.clues = clueList;
     this.clues=data.clues;
     this.currentClue=0;
     this._rd();

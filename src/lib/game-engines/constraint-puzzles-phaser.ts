@@ -78,14 +78,24 @@ function generateLogicChainRound(round) {
 class EliminationGridScene extends Phaser.Scene {
   constructor() { super('EliminationGridScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateEliminationRound(this.round);this.answer=data.answer;this.clueIdx=0;this.clues=data.clues;this._rd();
+    const data=getRound(this.round);this.answer=data.target;this.clueIdx=0;
+    // Build elimination data: items = number pool, target = answer
+    data.nums = data.items.slice();
+    // Build clues from the answer
+    const answer = data.target;
+    const clues = [];
+    if (answer % 2 === 0) clues.push({text: 'It is even', test: function(n){return n%2===0;}});
+    else clues.push({text: 'It is odd', test: function(n){return n%2!==0;}});
+    if (answer > 10) clues.push({text: 'It is greater than 10', test: function(n){return n>10;}});
+    else clues.push({text: 'It is 10 or less', test: function(n){return n<=10;}});
+    this.clues=clues;this._rd();
     const W=this.W,H=this.H;
     this.rg.add(this.add.text(W/2,H*0.06,'Find the number! Use clues to eliminate.',{fontSize:'13px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui"}).setOrigin(0.5).setDepth(6));
     // Clue display
@@ -136,14 +146,27 @@ class EliminationGridScene extends Phaser.Scene {
 class TwentyQuestionsScene extends Phaser.Scene {
   constructor() { super('TwentyQuestionsScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateTwentyQRound(this.round);this.hidden=data.hidden;this.questionsAsked=0;this._rd();
+    const data=getRound(this.round);this.hidden=data.target;
+    // Derive questions from target
+    const max = Math.max(...data.items, data.target) + 5;
+    data.max = max;
+    const hidden = data.target;
+    const mid = Math.floor(max / 2);
+    data.questions = [
+      {text: 'Is it greater than ' + mid + '?', answer: hidden > mid},
+      {text: 'Is it even?', answer: hidden % 2 === 0},
+      {text: 'Is it greater than ' + Math.floor(max/4) + '?', answer: hidden > Math.floor(max/4)},
+      {text: 'Is it less than ' + Math.floor(max*3/4) + '?', answer: hidden < Math.floor(max*3/4)},
+      {text: 'Is it a multiple of 5?', answer: hidden % 5 === 0},
+      {text: 'Is it a multiple of 3?', answer: hidden % 3 === 0},
+    ];this.questionsAsked=0;this._rd();
     const W=this.W,H=this.H;
     this.rg.add(this.add.text(W/2,H*0.06,'Hidden number: 1 to '+data.max,{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6));
     this.rg.add(this.add.text(W/2,H*0.13,'Ask questions, then guess!',{fontSize:'11px',color:COL_TEXT,fontFamily:"'Lexend', system-ui",alpha:0.5}).setOrigin(0.5).setDepth(6));
@@ -209,14 +232,23 @@ class TwentyQuestionsScene extends Phaser.Scene {
 class LogicChainScene extends Phaser.Scene {
   constructor() { super('LogicChainScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateLogicChainRound(this.round);this.answer=data.answer;this.chain=data.chain;this.chainIdx=0;this._rd();
+    const data=getRound(this.round);this.answer=data.target;
+    // Build logic chain clues from target
+    const ans = data.target;
+    const chain = [];
+    if (ans % 2 === 0) chain.push({clue: 'The number is even.', narrowed: 'Even numbers only.'});
+    else chain.push({clue: 'The number is odd.', narrowed: 'Odd numbers only.'});
+    const decade = Math.floor(ans / 10) * 10;
+    chain.push({clue: 'It is between ' + decade + ' and ' + (decade + 10) + '.', narrowed: 'Range: ' + decade + '-' + (decade+10)});
+    chain.push({clue: 'The ones digit is ' + (ans % 10) + '.', narrowed: 'Final digit revealed!'});
+    this.chain=chain;this.chainIdx=0;this._rd();
     const W=this.W,H=this.H;
     this.rg.add(this.add.text(W/2,H*0.06,'Follow the clue chain!',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6));
     // Show clues as they unlock

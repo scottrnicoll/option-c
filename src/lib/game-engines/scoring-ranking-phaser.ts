@@ -112,7 +112,7 @@ class SortingLaneScene extends Phaser.Scene {
   _buildBackground() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _buildUI() {
@@ -284,7 +284,7 @@ class NumberLineDropScene extends Phaser.Scene {
   _buildBackground() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _buildUI() {
@@ -441,7 +441,7 @@ class LeaderboardFixScene extends Phaser.Scene {
   _buildBackground() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _buildUI() {

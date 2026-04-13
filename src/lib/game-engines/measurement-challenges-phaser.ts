@@ -82,7 +82,7 @@ class SizePickerScene extends Phaser.Scene {
   _buildBackground() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _buildUI() {
@@ -99,8 +99,12 @@ class SizePickerScene extends Phaser.Scene {
   startRound() {
     if (this.roundGroup) this.roundGroup.clear(true, true);
     this.roundGroup = this.add.group();
-    const data = generateSizeRound(this.round);
-    this.correctAnswer = data.askBigger !== false ? data.bigger : (data.bigger === 'A' ? 'B' : 'A');
+    const data = getRound(this.round);
+    data.valueA = data.items[0] || 10;
+    data.valueB = data.items[1] || 5;
+    data.unit = 'cm';
+    data.bigger = data.valueA > data.valueB ? 'A' : 'B';
+    this.correctAnswer = data.bigger;
     this.promptLbl.setText(data.prompt);
     this._redrawDots();
     const W = this.W, H = this.H;
@@ -151,7 +155,7 @@ class RulerRaceScene extends Phaser.Scene {
     this._buildBackground(); this._buildUI(); this.hero = addCharacter(this, this.W * 0.85, this.H * 0.35, 0.4); this.startRound();
   }
 
-  _buildBackground() { const bg = this.add.image(this.W / 2, this.H / 2, 'bg'); bg.setScale(Math.max(this.W / bg.width, this.H / bg.height)); this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48); }
+  _buildBackground() { const bg = this.add.image(this.W / 2, this.H / 2, 'bg'); bg.setScale(Math.max(this.W / bg.width, this.H / bg.height)); this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65); }
   _buildUI() { const W = this.W, pad = 14; this.scoreLbl = this.add.text(W - pad, pad, 'Score: 0', { fontSize: '16px', color: COL_ACCENT, fontFamily: "'Lexend', system-ui", fontStyle: 'bold' }).setOrigin(1, 0).setDepth(10); this.heartsGroup = this.add.group(); this._redrawHearts(); this.dotGroup = this.add.group(); this._redrawDots(); }
   _redrawHearts() { this.heartsGroup.clear(true, true); for (let i = 0; i < this.lives; i++) { this.heartsGroup.add(this.add.text(14 + i * 22, 14, '♥', { fontSize: '18px', color: COL_DANGER }).setDepth(10)); } }
   _redrawDots() { this.dotGroup.clear(true, true); for (let i = 0; i < TOTAL_ROUNDS; i++) { const col = i < this.round ? COL_ACCENT : (i === this.round ? COL_PRIMARY : '#555555'); this.dotGroup.add(this.add.circle(this.W / 2 - 40 + i * 20, this.H - 16, 5, hexToNum(col)).setDepth(10)); } }
@@ -159,8 +163,10 @@ class RulerRaceScene extends Phaser.Scene {
   startRound() {
     if (this.roundGroup) this.roundGroup.clear(true, true);
     this.roundGroup = this.add.group();
-    const data = generateRulerRound(this.round);
-    this.correctLength = data.length;
+    const data = getRound(this.round);
+    this.correctLength = data.target;
+    data.length = data.target;
+    data.unit = this.round < 3 ? 'cm' : 'mm';
     this._redrawDots();
     const W = this.W, H = this.H;
     // Object to measure
@@ -224,7 +230,7 @@ class UnitConverterScene extends Phaser.Scene {
     this._buildBackground(); this._buildUI(); this.hero = addCharacter(this, this.W * 0.85, this.H * 0.35, 0.4); this.startRound();
   }
 
-  _buildBackground() { const bg = this.add.image(this.W / 2, this.H / 2, 'bg'); bg.setScale(Math.max(this.W / bg.width, this.H / bg.height)); this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48); }
+  _buildBackground() { const bg = this.add.image(this.W / 2, this.H / 2, 'bg'); bg.setScale(Math.max(this.W / bg.width, this.H / bg.height)); this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65); }
   _buildUI() { const W = this.W, pad = 14; this.scoreLbl = this.add.text(W - pad, pad, 'Score: 0', { fontSize: '16px', color: COL_ACCENT, fontFamily: "'Lexend', system-ui", fontStyle: 'bold' }).setOrigin(1, 0).setDepth(10); this.heartsGroup = this.add.group(); this._redrawHearts(); this.dotGroup = this.add.group(); this._redrawDots(); }
   _redrawHearts() { this.heartsGroup.clear(true, true); for (let i = 0; i < this.lives; i++) { this.heartsGroup.add(this.add.text(14 + i * 22, 14, '♥', { fontSize: '18px', color: COL_DANGER }).setDepth(10)); } }
   _redrawDots() { this.dotGroup.clear(true, true); for (let i = 0; i < TOTAL_ROUNDS; i++) { const col = i < this.round ? COL_ACCENT : (i === this.round ? COL_PRIMARY : '#555555'); this.dotGroup.add(this.add.circle(this.W / 2 - 40 + i * 20, this.H - 16, 5, hexToNum(col)).setDepth(10)); } }
@@ -232,8 +238,13 @@ class UnitConverterScene extends Phaser.Scene {
   startRound() {
     if (this.roundGroup) this.roundGroup.clear(true, true);
     this.roundGroup = this.add.group();
-    const data = generateConvertRound(this.round);
-    this.correctAnswer = data.answer;
+    const data = getRound(this.round);
+    this.correctAnswer = data.target;
+    data.value = data.items[0] || 100;
+    data.fromUnit = data.items[1] || 'cm';
+    data.toUnit = data.items[2] || 'm';
+    data.factor = data.items[3] || 100;
+    data.answer = data.target;
     this._redrawDots();
     const W = this.W, H = this.H;
     // Conversion display

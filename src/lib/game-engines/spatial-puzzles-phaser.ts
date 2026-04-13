@@ -119,14 +119,14 @@ function generateMirrorRound(round) {
 class RotateToMatchScene extends Phaser.Scene {
   constructor() { super('RotateToMatchScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateRotateRound(this.round);this.targetAngle=data.targetAngle;this.currentAngle=0;this.shapeIdx=data.shapeIdx;this._rd();
+    const data=getRound(this.round);this.targetAngle=data.target||90;this.currentAngle=0;this.shapeIdx=data.items[0]||0;this._rd();
     const W=this.W,H=this.H;
     const shapeSize=Math.min(W,H)*0.12;
 
@@ -192,14 +192,14 @@ class RotateToMatchScene extends Phaser.Scene {
 class TangramFillScene extends Phaser.Scene {
   constructor() { super('TangramFillScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateTangramRound(this.round);this.target=data.target;this.pieces=data.pieces;this.currentTotal=0;this.selectedPieces=[];this._rd();
+    const data=getRound(this.round);this.target=data.target;this.pieces=data.items;this.currentTotal=0;this.selectedPieces=[];this._rd();
     const W=this.W,H=this.H;
 
     // Title
@@ -301,14 +301,14 @@ class TangramFillScene extends Phaser.Scene {
 class MirrorPuzzleScene extends Phaser.Scene {
   constructor() { super('MirrorPuzzleScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateMirrorRound(this.round);this.dotOffsetX=data.dotX;this.dotOffsetY=data.dotY;this.tolerance=data.tolerance;this.shapeIdx=data.shapeIdx;this.placed=false;this._rd();
+    const data=getRound(this.round);this.dotOffsetX=data.items[0]||-40;this.dotOffsetY=data.items[1]||0;this.tolerance=data.target||22;this.shapeIdx=data.items[2]||0;this.placed=false;this._rd();
     const W=this.W,H=this.H;
     var mirrorX=W/2;
     var areaTop=H*0.15,areaBot=H*0.75;

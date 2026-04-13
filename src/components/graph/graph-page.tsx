@@ -513,12 +513,9 @@ export function GraphPage({ data }: GraphPageProps) {
   // Mini-map: click planet
   const handleMiniMapClick = useCallback((planetId: string) => {
     posthog.capture("galaxy_minimap_used", { planet_id: planetId })
-    if (viewMode === "galaxy") {
-      setCurrentPlanetId(planetId)
-    } else {
-      setCurrentPlanetId(planetId)
-    }
-  }, [viewMode])
+    setCurrentPlanetId(planetId)
+    setViewMode("planet")
+  }, [])
 
   // Back to galaxy button
   const handleBackToGalaxy = useCallback(() => {

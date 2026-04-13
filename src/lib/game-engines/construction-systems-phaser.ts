@@ -144,7 +144,7 @@ class StackToTargetScene extends Phaser.Scene {
   _bg() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _ui() {
@@ -217,9 +217,10 @@ class StackToTargetScene extends Phaser.Scene {
     this.heightLbl.setText('Height: 0');
     this.towerGroup.clear(true, true);
 
-    const data = generateStackRound(this.round);
+    const data = getRound(this.round);
     this.targetHeight = data.target;
-    this.promptLbl.setText(data.prompt || 'Stack blocks to height ' + data.target + '!');
+    this.promptLbl.setText(data.prompt);
+    data.blocks = data.items;
 
     // Position target line
     const pixelsPerUnit = Math.min(8, (this.towerBaseY - 80) / data.target);
@@ -333,7 +334,7 @@ class FillTheFloorScene extends Phaser.Scene {
   _bg() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _ui() {
@@ -379,11 +380,11 @@ class FillTheFloorScene extends Phaser.Scene {
     this.gridGroup = this.add.group();
     this.tileStates = [];
 
-    const data = generateFloorRound(this.round);
-    this.targetArea = data.targetArea;
-    this.gridCols = data.gridCols;
-    this.gridRows = data.gridRows;
-    this.promptLbl.setText(data.prompt || 'Fill exactly ' + data.targetArea + ' square units!');
+    const data = getRound(this.round);
+    this.targetArea = data.target;
+    this.gridCols = data.items[0] || 6;
+    this.gridRows = data.items[1] || 4;
+    this.promptLbl.setText(data.prompt);
     this.countLbl.setText('Filled: 0 / ' + data.targetArea);
 
     this._rd();
@@ -490,7 +491,7 @@ class BoxPackerScene extends Phaser.Scene {
   _bg() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _ui() {
@@ -574,12 +575,12 @@ class BoxPackerScene extends Phaser.Scene {
     if (this.boxGroup) this.boxGroup.clear(true, true);
     this.boxGroup = this.add.group();
 
-    const data = generateBoxRound(this.round);
-    this.targetVolume = data.volume;
-    this.boxLength = data.length;
-    this.boxWidth = data.width;
-    this.boxHeight = data.height;
-    this.promptLbl.setText(data.prompt || 'What is the volume of this box?');
+    const data = getRound(this.round);
+    this.targetVolume = data.target;
+    this.boxLength = data.items[0] || 3;
+    this.boxWidth = data.items[1] || 2;
+    this.boxHeight = data.items[2] || 2;
+    this.promptLbl.setText(data.prompt);
 
     this._rd();
     this._draw3DBox();

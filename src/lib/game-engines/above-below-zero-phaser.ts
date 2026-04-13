@@ -61,7 +61,7 @@ function generateElevatorRound(round) {
 class DepthNavigatorScene extends Phaser.Scene {
   constructor() { super('DepthNavigatorScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this.position=0;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'♥',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
@@ -69,7 +69,7 @@ class DepthNavigatorScene extends Phaser.Scene {
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
     this.position=0;
-    const data=generateDepthRound(this.round);this.target=data.target;this._rd();
+    const data=getRound(this.round);this.target=data.target;this._rd();
     const W=this.W,H=this.H;
     // Number line (vertical)
     const lineX=W*0.2,lineTop=H*0.15,lineBot=H*0.85;
@@ -129,17 +129,18 @@ class DepthNavigatorScene extends Phaser.Scene {
 class TemperatureSwingScene extends Phaser.Scene {
   constructor() { super('TemperatureSwingScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'♥',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateTempRound(this.round);this.targetMin=data.targetMin;this.targetMax=data.targetMax;this.temp=data.startTemp;this.movesLeft=data.changes;this._rd();
+    const data=getRound(this.round);
+    this.targetMin=data.items[0]||0;this.targetMax=data.items[1]||10;this.temp=data.items[2]||0;this.movesLeft=data.target||3;this._rd();
     const W=this.W,H=this.H;
-    this.rg.add(this.add.text(W/2,H*0.1,'Keep temperature between '+data.targetMin+'° and '+data.targetMax+'°',{fontSize:'13px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui"}).setOrigin(0.5).setDepth(6));
-    this.rg.add(this.add.text(W/2,H*0.18,data.changes+' changes to survive',{fontSize:'12px',color:COL_TEXT,fontFamily:"'Lexend', system-ui",alpha:0.5}).setOrigin(0.5).setDepth(6));
+    this.rg.add(this.add.text(W/2,H*0.1,data.prompt||('Keep temperature between '+this.targetMin+'° and '+this.targetMax+'°'),{fontSize:'13px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui"}).setOrigin(0.5).setDepth(6));
+    this.rg.add(this.add.text(W/2,H*0.18,this.movesLeft+' changes to survive',{fontSize:'12px',color:COL_TEXT,fontFamily:"'Lexend', system-ui",alpha:0.5}).setOrigin(0.5).setDepth(6));
     // Thermometer
     this.tempLbl=this.add.text(W/2,H*0.35,this.temp+'°',{fontSize:'48px',color:COL_PRIMARY,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6);
     this.rg.add(this.tempLbl);
@@ -182,14 +183,14 @@ class TemperatureSwingScene extends Phaser.Scene {
 class ElevatorOperatorScene extends Phaser.Scene {
   constructor() { super('ElevatorOperatorScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'♥',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateElevatorRound(this.round);this.pickups=[...data.pickups];this.currentFloor=0;this.currentPickup=0;this._rd();
+    const data=getRound(this.round);this.pickups=data.items.slice();this.currentFloor=0;this.currentPickup=0;this._rd();
     const W=this.W,H=this.H;
     this.rg.add(this.add.text(W/2,H*0.08,'Pick up passengers at each floor!',{fontSize:'13px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui"}).setOrigin(0.5).setDepth(6));
     // Current floor

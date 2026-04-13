@@ -88,7 +88,7 @@ class ResizeToolScene extends Phaser.Scene {
   _buildBackground() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _buildUI() {
@@ -220,7 +220,7 @@ class RecipeScalerScene extends Phaser.Scene {
   _buildBackground() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _buildUI() {
@@ -252,23 +252,31 @@ class RecipeScalerScene extends Phaser.Scene {
   startRound() {
     if (this.roundGroup) this.roundGroup.clear(true, true);
     this.roundGroup = this.add.group();
-    const data = generateRecipeScaleRound(this.round);
-    this.recipeData = data;
-    this.playerAmounts = data.ingredients.map(() => 0);
+    const data = getRound(this.round);
+    // Build recipe scale data from getRound: target is target servings, items are base amounts
+    const baseServings = 4;
+    const targetServings = data.target;
+    const ingredients = data.items.map((base, i) => {
+      const names = [ITEM_NAME, 'Sugar', 'Flour', 'Butter', 'Eggs'];
+      return { name: names[i % names.length], base, scaled: base * targetServings / baseServings };
+    });
+    const recipeData = { baseServings, targetServings, ingredients };
+    this.recipeData = recipeData;
+    this.playerAmounts = recipeData.ingredients.map(() => 0);
     this._redrawDots();
     const W = this.W, H = this.H;
     // Header
-    this.roundGroup.add(this.add.text(W / 2, 40, 'Recipe for ' + data.baseServings + ' servings → Scale to ' + data.targetServings, {
+    this.roundGroup.add(this.add.text(W / 2, 40, 'Recipe for ' + recipeData.baseServings + ' servings → Scale to ' + recipeData.targetServings, {
       fontSize: '15px', color: COL_ACCENT, fontFamily: "'Space Grotesk', sans-serif", fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(6));
     // Ingredients
     this.playerLbls = [];
     const startY = H * 0.2;
     const rowH = 55;
-    data.ingredients.forEach((ing, i) => {
+    recipeData.ingredients.forEach((ing, i) => {
       const y = startY + i * rowH;
       // Original amount
-      this.roundGroup.add(this.add.text(W * 0.1, y, ing.name + ': ' + ing.base + ' (for ' + data.baseServings + ')', {
+      this.roundGroup.add(this.add.text(W * 0.1, y, ing.name + ': ' + ing.base + ' (for ' + recipeData.baseServings + ')', {
         fontSize: '13px', color: COL_TEXT, fontFamily: "'Lexend', system-ui"
       }).setOrigin(0, 0.5).setDepth(6));
       // Player input
@@ -347,7 +355,7 @@ class MapDistanceScene extends Phaser.Scene {
   _buildBackground() {
     const bg = this.add.image(this.W / 2, this.H / 2, 'bg');
     bg.setScale(Math.max(this.W / bg.width, this.H / bg.height));
-    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.48);
+    this.add.rectangle(this.W / 2, this.H / 2, this.W, this.H, 0x000000, 0.65);
   }
 
   _buildUI() {
@@ -379,8 +387,13 @@ class MapDistanceScene extends Phaser.Scene {
   startRound() {
     if (this.roundGroup) this.roundGroup.clear(true, true);
     this.roundGroup = this.add.group();
-    const data = generateMapRound(this.round);
-    this.correctDist = data.realDist;
+    const data = getRound(this.round);
+    this.correctDist = data.target;
+    // Derive map params from getRound data
+    data.scale = data.items[0] || 5;
+    data.mapDist = Math.round(data.target / data.scale);
+    data.realDist = data.target;
+    data.unit = 'km';
     this._redrawDots();
     const W = this.W, H = this.H;
     // Map visual

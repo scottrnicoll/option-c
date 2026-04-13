@@ -63,14 +63,14 @@ function generateDoublingRound(round) {
 class InvestmentSimScene extends Phaser.Scene {
   constructor() { super('InvestmentSimScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateInvestmentRound(this.round);this.target=data.target;this.currentVal=data.start;this._rd();
+    const data=getRound(this.round);this.target=data.target;this.currentVal=data.items[0]||2;this._rd();
     const W=this.W,H=this.H;
     this.rg.add(this.add.text(W/2,H*0.08,'Reach target: '+this.target,{fontSize:'18px',color:COL_ACCENT,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6));
     this.valueLbl=this.add.text(W/2,H*0.28,String(this.currentVal),{fontSize:'52px',color:COL_PRIMARY,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6);
@@ -94,7 +94,7 @@ class InvestmentSimScene extends Phaser.Scene {
     const resetBtn = this.add.rectangle(W/2, H*0.65, 100, 36, hexToNum(COL_DANGER), 0.3).setInteractive({useHandCursor:true}).setDepth(7);
     this.rg.add(resetBtn);
     this.rg.add(this.add.text(W/2, H*0.65, 'Reset', {fontSize:'14px',color:COL_DANGER,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(0.5).setDepth(8));
-    resetBtn.on('pointerdown', () => { this.currentVal = data.start; this.valueLbl.setText(String(this.currentVal)); });
+    resetBtn.on('pointerdown', () => { this.currentVal = data.items[0]||2; this.valueLbl.setText(String(this.currentVal)); });
     // Lock in button
     const lock = this.add.rectangle(W/2, H*0.78, 120, 40, hexToNum(COL_PRIMARY), 1).setInteractive({useHandCursor:true}).setDepth(10);
     this.rg.add(lock);
@@ -130,16 +130,17 @@ class InvestmentSimScene extends Phaser.Scene {
 class PopulationBoomScene extends Phaser.Scene {
   constructor() { super('PopulationBoomScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generatePopulationRound(this.round);this.pop=data.start;this.targetMin=data.targetMin;this.targetMax=data.targetMax;this.cap=data.cap;this.turnsLeft=data.turns;this._rd();
+    const data=getRound(this.round);
+    this.pop=data.items[0]||10;this.targetMin=data.target;this.targetMax=data.target+Math.floor(data.target*0.1);this.cap=data.target+Math.floor(data.target*0.3);this.turnsLeft=data.items[1]||3;this._rd();
     const W=this.W,H=this.H;
-    this.rg.add(this.add.text(W/2,H*0.06,'Target: '+data.targetMin+' - '+data.targetMax+' (cap: '+data.cap+')',{fontSize:'13px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui"}).setOrigin(0.5).setDepth(6));
+    this.rg.add(this.add.text(W/2,H*0.06,data.prompt||('Target: '+this.targetMin+' - '+this.targetMax+' (cap: '+this.cap+')'),{fontSize:'13px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui"}).setOrigin(0.5).setDepth(6));
     this.popLbl=this.add.text(W/2,H*0.25,String(this.pop),{fontSize:'48px',color:COL_PRIMARY,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6);
     this.rg.add(this.popLbl);
     this.rg.add(this.add.text(W/2,H*0.16,'Population',{fontSize:'12px',color:COL_TEXT,fontFamily:"'Lexend', system-ui",alpha:0.5}).setOrigin(0.5).setDepth(6));
@@ -185,14 +186,14 @@ class PopulationBoomScene extends Phaser.Scene {
 class DoublingMazeScene extends Phaser.Scene {
   constructor() { super('DoublingMazeScene'); }
   create() { this.W=this.scale.width;this.H=this.scale.height;this.round=0;this.lives=MAX_LIVES;this._bg();this._ui();this.startRound(); }
-  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.48); }
+  _bg() { const bg=this.add.image(this.W/2,this.H/2,'bg');bg.setScale(Math.max(this.W/bg.width,this.H/bg.height));this.add.rectangle(this.W/2,this.H/2,this.W,this.H,0x000000,0.65); }
   _ui() { this.scoreLbl=this.add.text(this.W-14,14,'Score: 0',{fontSize:'16px',color:COL_ACCENT,fontFamily:"'Lexend', system-ui",fontStyle:'bold'}).setOrigin(1,0).setDepth(10);this.hg=this.add.group();this._rh();this.dg=this.add.group();this._rd(); }
   _rh() { this.hg.clear(true,true);for(let i=0;i<this.lives;i++)this.hg.add(this.add.text(14+i*22,14,'\\u2665',{fontSize:'18px',color:COL_DANGER}).setDepth(10)); }
   _rd() { this.dg.clear(true,true);for(let i=0;i<TOTAL_ROUNDS;i++){const c=i<this.round?COL_ACCENT:i===this.round?COL_PRIMARY:'#555555';this.dg.add(this.add.circle(this.W/2-40+i*20,this.H-16,5,hexToNum(c)).setDepth(10));} }
 
   startRound() {
     if(this.rg)this.rg.clear(true,true);this.rg=this.add.group();
-    const data=generateDoublingRound(this.round);this.target=data.target;this.currentVal=data.start;this.forksLeft=data.forks;this.pathTaken=[];this._rd();
+    const data=getRound(this.round);this.target=data.target;this.currentVal=data.items[0]||2;this.forksLeft=data.items[1]||3;data.start=data.items[0]||2;this.pathTaken=[];this._rd();
     const W=this.W,H=this.H;
     this.rg.add(this.add.text(W/2,H*0.06,'Target: '+this.target,{fontSize:'18px',color:COL_ACCENT,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6));
     this.valueLbl=this.add.text(W/2,H*0.22,String(this.currentVal),{fontSize:'48px',color:COL_PRIMARY,fontFamily:"'Space Grotesk', sans-serif",fontStyle:'bold'}).setOrigin(0.5).setDepth(6);
