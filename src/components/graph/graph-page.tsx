@@ -987,19 +987,7 @@ export function GraphPage({ data }: GraphPageProps) {
         </button>
       )}
 
-      {/* Galaxy settings — top right (stats, rules, user menu moved to unified header) */}
-      {viewMode === "galaxy" && (
-        <div className={`absolute ${impersonating ? "top-24" : "top-14"} right-4 z-10`}>
-          <GalaxySettingsPopover
-            colorMode={colorMode}
-            onColorModeChange={setColorMode}
-            gradeFilter={gradeFilter}
-            onGradeFilterChange={setGradeFilter}
-            showGradeFilter={!!studentData?.grade}
-            showOtherGradeSwatch={!!studentData?.grade && gradeFilter === "all"}
-          />
-        </div>
-      )}
+      {/* Galaxy settings — hidden for now, unified header handles everything */}
 
       {/* Galaxy search — hidden, unified header handles search */}
       {viewMode === "galaxy" && false && (
