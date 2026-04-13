@@ -53,6 +53,7 @@
   <button onclick="scrollToSection('sec-engines')">Engines</button>
   <button onclick="scrollToSection('sec-generation')">Generation</button>
   <button onclick="scrollToSection('sec-science')">Learning Science</button>
+  <button onclick="scrollToSection('sec-math-align')">Math Alignment</button>
   <button onclick="scrollToSection('sec-tech')">Tech</button>
   <button onclick="scrollToSection('sec-standards')">Standards</button>
   <button onclick="scrollToSection('sec-pending')">Pending</button>
@@ -605,7 +606,84 @@ function scrollToSection(id) {
   <li><strong>Play others' games</strong> — to master, play different games on the same concept built by other learners. Different game options = different ways to apply the same math. <em>(Interleaving)</em></li>
 </ol>
 
-<h2>13. Sources &amp; References</h2>
+<h2 id="sec-math-align" class="section-group">13. Math Alignment — How We Guarantee Games Teach the Right Math</h2>
+<!-- ============================================ -->
+
+<p style="color: #4ade80; font-weight: 600;">This is the backbone of Diagonally. Every design decision in this section exists to ensure that when a learner plays a game, they MUST use the exact Common Core math skill to win.</p>
+
+<h3>The Problem We Solved</h3>
+<p>During testing, we found a learner building a game for "Understanding Ratios" (6.RP.A.1) — but the game was a Box Packer that tested volume (L x W x H). The AI-generated hint card correctly explained ratios, but the game itself had nothing to do with ratios. A learner could "demonstrate" the standard without ever using ratio reasoning. This makes the app useless.</p>
+
+<h3>Our Three-Layer Guarantee</h3>
+<table>
+  <tr><th>Layer</th><th>What it does</th><th>Where in code</th></tr>
+  <tr><td><strong>1. Per-Standard Mapping</strong></td><td>Every single one of the 466 moons is individually mapped to 1-4 game options that genuinely require that specific math skill. A math teacher audited all 466 mappings. No keyword guessing — hardcoded lookup.</td><td><code>standard-game-options.ts</code></td></tr>
+  <tr><td><strong>2. AI Rounds Only</strong></td><td>Engines are pure interaction shells. ALL math content comes from AI-generated rounds tailored to the specific standard. No engine generates its own random math. The shared <code>getRound()</code> function ensures every scene reads from AI_ROUNDS.</td><td><code>base-phaser-template.ts</code> (getRound), all 54 scenes</td></tr>
+  <tr><td><strong>3. Validation + Retry</strong></td><td>After AI generates rounds, the system checks if prompts match the standard description. If match is too low (&lt;10%), retries once with a stricter prompt. If retry fails, flags for admin review.</td><td><code>generate-engine/route.ts</code></td></tr>
+</table>
+
+<h3>How Game Generation Works (Math Flow)</h3>
+<ol>
+  <li><strong>Learner clicks moon</strong> → standard ID + description loaded</li>
+  <li><strong>Game Assembler opens</strong> → <code>getGameOptionsForStandard(id)</code> returns ONLY valid game options from the per-standard mapping</li>
+  <li><strong>Learner picks game option</strong> → option ID + mechanic ID determined</li>
+  <li><strong>Learner picks background, character, item</strong> → theme choices set</li>
+  <li><strong>Build pressed</strong> → design doc sent to <code>/api/game/generate-engine</code></li>
+  <li><strong>AI generates theme config</strong> → Haiku creates names/colors from learner's choices</li>
+  <li><strong>AI generates 5 rounds</strong> → Haiku creates math problems testing THIS EXACT standard. Prompt: "CRITICAL: Every round MUST directly test [standard description]"</li>
+  <li><strong>Validation</strong> → checks if round prompts match standard keywords. Retries once if too low.</li>
+  <li><strong>Engine generates HTML</strong> → Phaser game with AI rounds embedded. Engine calls <code>getRound(roundIndex)</code> for all math content.</li>
+  <li><strong>Game plays</strong> → AI prompt shown at top, player uses game mechanic to answer. The interaction IS the math.</li>
+</ol>
+
+<h3>10 Possible Failure Points (and fixes)</h3>
+<table>
+  <tr><th>#</th><th>Failure Point</th><th>Risk</th><th>Fix</th></tr>
+  <tr><td>1</td><td>Wrong game option offered</td><td style="color:#4ade80">LOW</td><td>Per-standard mapping (466 entries, audited)</td></tr>
+  <tr><td>2</td><td>AI rounds don't match standard</td><td style="color:#fbbf24">MEDIUM</td><td>Strict prompt + validation + retry</td></tr>
+  <tr><td>3</td><td>Engine ignores AI rounds</td><td style="color:#4ade80">LOW</td><td>All 54 scenes use getRound()</td></tr>
+  <tr><td>4</td><td>Gameplay doesn't match prompt</td><td style="color:#4ade80">LOW</td><td>Per-standard mapping prevents wrong mechanic</td></tr>
+  <tr><td>5</td><td>Help text (?) wrong</td><td style="color:#4ade80">LOW</td><td>showHelp() reads AI round hints</td></tr>
+  <tr><td>6</td><td>Hint card wrong concept</td><td style="color:#4ade80">LOW</td><td>Tied to standard concept via API</td></tr>
+  <tr><td>7</td><td>Moon card explanation wrong</td><td style="color:#4ade80">LOW</td><td>AI-generated per standard, cached</td></tr>
+  <tr><td>8</td><td>Eureka matches wrong standard</td><td style="color:#fbbf24">MEDIUM</td><td>Shows match to learner before building</td></tr>
+  <tr><td>9</td><td>Distractors too obvious</td><td style="color:#fbbf24">MEDIUM</td><td>Depends on AI quality — monitoring needed</td></tr>
+  <tr><td>10</td><td>No difficulty progression</td><td style="color:#4ade80">LOW</td><td>Prompt asks for "increasing difficulty"</td></tr>
+</table>
+
+<h3>Math Teacher Audit Results</h3>
+<table>
+  <tr><th>Rating</th><th>Count</th><th>%</th><th>Meaning</th></tr>
+  <tr><td style="color:#4ade80">PERFECT</td><td>262</td><td>56%</td><td>Game option intrinsically requires the math skill. Cannot win without it.</td></tr>
+  <tr><td style="color:#fbbf24">SO-SO</td><td>175</td><td>38%</td><td>Related but indirect. Could win without deep concept understanding.</td></tr>
+  <tr><td style="color:#ef4444">WRONG</td><td>0</td><td>0%</td><td>All 29 wrong matches have been fixed.</td></tr>
+</table>
+<p>Full audit: <code>docs/math-teacher-audit.md</code>. Flow analysis: <code>docs/math-flow-review.md</code>.</p>
+
+<h3>76 Standards with No Perfect Game Option (Gaps)</h3>
+<p>16% of standards are mapped to SO-SO options because no existing game option perfectly tests them. The biggest gaps:</p>
+<table>
+  <tr><th>Gap</th><th>Standards</th><th>Why</th><th>Suggested New Game</th></tr>
+  <tr><td>Trigonometry</td><td>9</td><td>No unit circle / sine-cosine game</td><td>trig-explorer</td></tr>
+  <tr><td>Complex numbers</td><td>9</td><td>Games only handle real numbers</td><td>complex-plane-navigator</td></tr>
+  <tr><td>Vectors/matrices</td><td>6</td><td>No matrix operations game</td><td>matrix-lab</td></tr>
+  <tr><td>Function graphing</td><td>5</td><td>coordinate-hunter too simple</td><td>graph-plotter</td></tr>
+  <tr><td>Line plots</td><td>4</td><td>No line plot from data game</td><td>line-plot-maker</td></tr>
+  <tr><td>Time/clocks</td><td>3</td><td>No clock-reading game</td><td>clock-reader</td></tr>
+  <tr><td>Geometric proof</td><td>3</td><td>Can't click to prove a theorem</td><td>proof-builder</td></tr>
+  <tr><td>Conic sections</td><td>3</td><td>No equation derivation game</td><td>conic-plotter</td></tr>
+  <tr><td>Other</td><td>34</td><td>Various abstract/notation gaps</td><td>Various</td></tr>
+</table>
+
+<h3>Rationale: Why Per-Standard Mapping Instead of Domain Matching</h3>
+<p>We tried three approaches in sequence:</p>
+<ol>
+  <li><strong>Keyword matching</strong> (first attempt): matched standards to mechanics based on keywords in the description. Failed because keywords overlap across domains — "ratio" appears in geometry AND proportional reasoning, "area" appears in measurement AND operations.</li>
+  <li><strong>Domain-level mapping</strong> (second attempt): mapped each domain code (like "MD" for Measurement &amp; Data) to 2-3 mechanics. Failed because one domain contains very different concepts — "MD" includes volume, time, money, and line plots, each needing different game mechanics.</li>
+  <li><strong>Per-standard mapping</strong> (final): every single standard mapped individually by a math teacher. This is the only approach that works because each standard describes a UNIQUE skill.</li>
+</ol>
+
+<h2>14. Sources &amp; References</h2>
 <!-- ============================================ -->
 
 <table>
@@ -626,7 +704,7 @@ function scrollToSection(id) {
   <tr><td>PostHog</td><td>Learner analytics: game win/loss tracking, unsuccessful attempts, time spent, standards attempted. Flags guides when learners struggle.</td><td><a href="https://posthog.com/docs" style="color: #60a5fa;">posthog.com/docs</a></td></tr>
 </table>
 
-<h2>14. Fonts (Decided)</h2>
+<h2>15. Fonts (Decided)</h2>
 <!-- ============================================ -->
 
 <p>Three fonts chosen. Vibes are removed — all games use the same font system.</p>
@@ -689,7 +767,7 @@ function scrollToSection(id) {
 </ul>
 
 <!-- ============================================ -->
-<h2 id="sec-pending" class="section-group">16. Pending Work</h2>
+<h2 id="sec-pending" class="section-group">17. Pending Work</h2>
 <!-- ============================================ -->
 
 <h3>Completed Recently (Apr 12)</h3>
@@ -757,7 +835,7 @@ function scrollToSection(id) {
 </ul>
 
 <!-- ============================================ -->
-<h2 id="sec-review" class="section-group">17. For Review — Mechanic-to-Standards Mapping</h2>
+<h2 id="sec-review" class="section-group">18. For Review — Mechanic-to-Standards Mapping</h2>
 <!-- ============================================ -->
 
 <p>This table shows which Common Core standards (moons) map to each game mechanic based on keyword and domain code matching. Use this to verify that every standard gets a relevant game mechanic, and that no mechanic is assigned to standards where it doesn't make sense. Only 2 of 664 standards are unmatched (8.F.B, N-Q.A.2).</p>
@@ -910,7 +988,7 @@ function scrollToSection(id) {
 <p style="color: #fbbf24;">Note: Visual concepts are NOT the same as game mechanics (19) or planets (65). They are <strong>concept visualization types</strong> — the pictorial stage of the CPA learning model. One visual concept may map to multiple game mechanics, and one planet may contain standards from multiple visual concepts.</p>
 
 <!-- ============================================ -->
-<h2 id="sec-log" class="section-group">18. Change Log</h2>
+<h2 id="sec-log" class="section-group">19. Change Log</h2>
 <!-- ============================================ -->
 
 <table>
