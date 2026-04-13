@@ -22,8 +22,8 @@ export const DOMAIN_MECHANIC_MAP: Record<string, string[]> = {
   // Number & Operations — Fractions
   "NF": ["partitioning", "scaling-resizing", "inventory-crafting"],
 
-  // Measurement & Data
-  "MD": ["construction-systems", "measurement-challenges", "probability-systems"],
+  // Measurement & Data (measurement standards get build/measure; data standards handled by keywords)
+  "MD": ["construction-systems", "measurement-challenges"],
 
   // Geometry (K-8)
   "G": ["spatial-puzzles", "construction-systems", "build-structure"],
