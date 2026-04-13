@@ -131,26 +131,56 @@ function LearnerStats() {
 
 function SearchToggle() {
   const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState("")
+  const [results, setResults] = useState<Array<{ id: string; description: string; grade: string; domainCode: string }>>([])
+
+  useEffect(() => {
+    if (!query.trim()) { setResults([]); return }
+    const q = query.trim().toLowerCase()
+    const dupeParents = buildDuplicateParentSet((standardsData as any).nodes.map((n: any) => n.id))
+    const matches = (standardsData as any).nodes
+      .filter((n: any) => {
+        if (!isValidMoon(n.id, dupeParents)) return false
+        return n.id.toLowerCase().includes(q) ||
+          n.description.toLowerCase().includes(q) ||
+          n.domain.toLowerCase().includes(q)
+      })
+      .slice(0, 8)
+      .map((n: any) => ({ id: n.id, description: n.description, grade: n.grade, domainCode: n.domainCode }))
+    setResults(matches)
+  }, [query])
 
   if (open) {
     return (
-      <div className="flex items-center gap-1">
+      <div className="relative">
         <input
           autoFocus
           type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
           placeholder="Search moons..."
-          className="w-40 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500"
-          onBlur={() => setOpen(false)}
+          className="w-48 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500"
           onKeyDown={(e) => {
-            if (e.key === "Escape") setOpen(false)
-            if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
-              const q = (e.target as HTMLInputElement).value.trim()
-              // Navigate to galaxy with search query — will fly to the moon
-              window.location.href = `/?search=${encodeURIComponent(q)}`
-              setOpen(false)
-            }
+            if (e.key === "Escape") { setOpen(false); setQuery(""); setResults([]) }
           }}
         />
+        {results.length > 0 && (
+          <div className="absolute top-8 right-0 w-72 bg-zinc-900/95 backdrop-blur-sm border border-zinc-700 rounded-lg overflow-hidden max-h-64 overflow-y-auto z-50 shadow-xl">
+            {results.map((r) => (
+              <button
+                key={r.id}
+                onClick={() => {
+                  setOpen(false); setQuery(""); setResults([])
+                  window.location.href = `/?moon=${encodeURIComponent(r.id)}`
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-zinc-800 transition-colors border-b border-zinc-800/50 last:border-0"
+              >
+                <p className="text-sm text-white truncate">{r.description}</p>
+                <p className="text-[10px] text-zinc-500">{r.id} · Grade {r.grade}</p>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
